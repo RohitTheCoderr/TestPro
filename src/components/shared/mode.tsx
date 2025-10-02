@@ -15,9 +15,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="mt-4 rounded bg-secondary px-4 py-2 text-secondary-foreground dark:text-white"
+      className="mt-4 bg-gray-600 dark:bg-white rounded-full p-1 text-secondary-foreground"
     >
-      {dark ? "☀️ Light Mode" : "🌙 Dark Mode"}
+      {dark ? "☀️" : "🌙"}
     </button>
   );
 }

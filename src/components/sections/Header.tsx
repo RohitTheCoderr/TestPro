@@ -5,8 +5,8 @@ import ThemeToggle from "../shared/mode";
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center px-8 py-4 shadow bg-white">
-      <div className="text-blue-600 flex justify-center gap-2 items-center">
+    <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-lg shadow-black bg-white dark:bg-gray-700 dark:text-white">
+      <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
         <div className="">
           <svg
             className="h-8 w-8"
@@ -28,26 +28,26 @@ const Header = () => {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-blue-600">TestPro</h1>
+        <h1 className="text-2xl font-bold text-primary dark:text-accent">TestPro</h1>
       </div>
-      <nav className="space-x-6">
-        <Link href="/" className="text-black hover:text-blue-500">
+      <nav className="space-x-6 text-black dark:text-white">
+        <Link href="/" className="hover:text-primary ">
           Home
         </Link>
-        <Link href="/tests" className="text-black hover:text-blue-500">
+        <Link href="/tests" className="hover:text-primary">
           Tests
         </Link>
-        <Link href="/pricing" className="text-black hover:text-blue-500">
+        <Link href="/pricing" className="hover:text-primary ">
           Pricing
         </Link>
         <Link
           href="/auth"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-primary text-white px-4 py-[5px] rounded-[3px] hover:bg-accent transition"
         >
           Login
         </Link>
 
-        <div><ThemeToggle/></div>
+        <ThemeToggle/>
       </nav>
     </header>
   );

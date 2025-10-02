@@ -26,7 +26,7 @@ const TestCard: React.FC<TestCardProps> = ({
       <div className="mt-6 flex gap-4">
         <Link
           href={`/tests/${category}/${examType}`}
-          className="w-full text-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-accent hover:text-accent-foreground text-sm transition"
+          className="w-full text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent hover:text-accent-foreground text-sm transition"
         >
           {buttonLabel}
         </Link>

@@ -21,23 +21,19 @@ export default function HomePage() {
             <Button className="bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
               Start Free Test
             </Button>
-            <Button className="bg-gray-200 text-black ">
-             Explore Tests
-            </Button>
-            
+            <Button className="bg-gray-200 text-black ">Explore Tests</Button>
           </div>
         </div>
 
         {/* Right Illustration */}
-        <div className="relative w-[400px] md:w-[500px] h-[400px] md:h-[500px] mt-10 md:mt-0">
-  <Image
-    src="/studetimg.jpg"
-    alt="Mock Test Illustration"
-    fill
-    className="object-cover rounded-xl shadow-lg"
-  />
-</div>
-
+        <div className="relative w-[400px] md:w-[600px] h-[300px] md:h-[400px] mt-10 md:mt-0">
+          <Image
+            src="/studetimg.jpg"
+            alt="Mock Test Illustration"
+            fill
+            className="object-cover rounded-xl shadow-lg"
+          />
+        </div>
       </section>
 
       {/* Categories Section */}

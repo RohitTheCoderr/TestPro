@@ -73,14 +73,6 @@ export default function Login() {
         </h2>
 
         {/* Email */}
-        {/* <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        /> */}
-
         <input
           type="text"
           placeholder="Email or Mobile"

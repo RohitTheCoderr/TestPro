@@ -26,7 +26,7 @@ const TestCard: React.FC<TestCardProps> = ({
       <div className="mt-4 flex gap-4">
         <Link
           href={`/tests/${category.toLowerCase()}/`}
-          className="px-4 py-2 text-sm rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="px-4 py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           {buttonLabel}
         </Link>
@@ -89,7 +89,7 @@ export default function TestsPage() {
     <main className="min-h-screen bg-background py-12 px-6">
       {/* Hero Section */}
       <div className="max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-foreground">Practice Tests</h1>
+        <h1 className="text-4xl font-bold text-accent dark:text-white">Practice Tests</h1>
         <p className="mt-3 text-lg text-muted-foreground">
           Improve your skills by taking practice tests designed for students and
           job seekers. Choose from various categories and track your progress.
@@ -134,18 +134,22 @@ export default function TestsPage() {
 
       {/* CTA Section */}
       <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-10 max-w-5xl mx-auto shadow-lg">
-        <h2 className="text-3xl font-bold text-primary-foreground">
+        {/* <section className="mt-20 text-center bg-gradient-to-r from-blue-300 to-blue-400 rounded-2xl p-10 max-w-5xl mx-auto shadow-lg"> */}
+        <h2 className="text-3xl font-bold text-white">
           Ready to challenge yourself?
         </h2>
         <p className="mt-2 text-lg text-primary-foreground/90">
           Start your first free test today and climb up the leaderboard.
         </p>
         <div className="mt-6 flex justify-center gap-4">
-          <Button size="lg" className="bg-background text-foreground hover:bg-muted">
+          <Button
+            size="lg"
+            className="bg-background text-foreground hover:bg-muted"
+          >
             Start Free Test
           </Button>
           <Button
-           variant= "outline"
+            variant="outline"
             size="lg"
             className="bg-primary-foreground text-secondary hover:bg-background hover:text-foreground"
           >
