@@ -6,18 +6,56 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Login() {
-//  const router = useRouter(); // This is now from 'next/navigation'
-  const [email, setEmail] = useState("");
+  //  const router = useRouter(); // This is now from 'next/navigation'
+  const [contact, setContact] = useState(""); // email or mobile
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(""); // Clear previous error
-    setLoading(false);
+
+    if (!password) {
+      alert("please provide Passwords");
+      return;
+    }
+    if (!contact) {
+      alert("please provide Email or mobile");
+      return;
+    }
+
+    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
+    const bodyData = isEmail
+      ? { email: contact, password } // send email
+      : { mobile: `+91${contact}`, password }; // send mobile
+
+    try {
+      const res = await fetch("http://localhost:8000/api/user/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+      console.log("login data", data);
+
+      if (res.ok) {
+        alert("login successful");
+        localStorage.setItem("token", data.data.token);
+
+        console.log("Login successful", data.data);
+        // redirect or reset form
+      } else {
+        alert(data.message || "OTP verification failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,17 +67,26 @@ export default function Login() {
       >
         {/* Heading */}
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
-         Log In to <span className="text-blue-600 dark:text-blue-400">TestPro</span>
+          Log In to{" "}
+          <span className="text-blue-600 dark:text-blue-400">TestPro</span>
         </h2>
 
         {/* Email */}
-        <input
+        {/* <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        />
+        /> */}
+
+        <input
+          type="text"
+          placeholder="Email or Mobile"
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+       />
 
         {/* Password */}
         <input

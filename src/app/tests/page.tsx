@@ -1,8 +1,6 @@
 "use client";
 import * as React from "react";
 import { Button } from "@/components/ui/button"; // adjust import path if needed
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 // 📌 Reusable Card Component
@@ -11,7 +9,6 @@ type TestCardProps = {
   description: string;
   buttonLabel: string;
   category: string;
-  // onClick?: () => void;
 };
 
 const TestCard: React.FC<TestCardProps> = ({
@@ -19,19 +16,17 @@ const TestCard: React.FC<TestCardProps> = ({
   description,
   buttonLabel,
   category,
-  // onClick,
 }) => {
   return (
-    <div className="rounded-2xl border border-gray-200 shadow-md p-6 flex flex-col justify-between bg-white">
+    <div className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200">
       <div>
-        <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-        <p className="mt-2 text-sm text-gray-600">{description}</p>
+        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </div>
       <div className="mt-4 flex gap-4">
-        {/* <Button size="lg" onClick={onClick}></Button> */}
         <Link
-          href={`/tests/${category}/`}
-          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 text-sm"
+          href={`/tests/${category.toLowerCase()}/`}
+          className="px-4 py-2 text-sm rounded-lg font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           {buttonLabel}
         </Link>
@@ -42,7 +37,6 @@ const TestCard: React.FC<TestCardProps> = ({
 
 // 📌 Tests Page
 export default function TestsPage() {
-
   const tests = [
     {
       title: "Aptitude Test",
@@ -64,76 +58,101 @@ export default function TestsPage() {
     },
   ];
 
-  const testscategory = [
+  const categories = [
     {
       title: "SSC",
       description:
-        "Sharpen your logical thinking and problem-solving skills with real exam patterns.",
+        "Practice mock tests designed for Staff Selection Commission exams.",
       buttonLabel: "Start Free Test",
     },
     {
       title: "Railway",
       description:
-        "Evaluate your coding, data structures, and algorithm knowledge.",
+        "Boost your chances in Railway exams with subject-specific practice.",
       buttonLabel: "Take Test",
     },
     {
       title: "Banking",
       description:
-        "Prepare for real-world interviews with timed mock interview sessions.",
+        "Get ready for IBPS, SBI PO, and other banking competitive exams.",
       buttonLabel: "Try Now",
+    },
+    {
+      title: "Defence",
+      description:
+        "Ace NDA, CDS, and other defence entrance tests with curated mocks.",
+      buttonLabel: "Start Now",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-6">
+    <main className="min-h-screen bg-background py-12 px-6">
+      {/* Hero Section */}
       <div className="max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-gray-900">Practice Tests</h1>
-        <p className="mt-3 text-lg text-gray-600">
+        <h1 className="text-4xl font-bold text-foreground">Practice Tests</h1>
+        <p className="mt-3 text-lg text-muted-foreground">
           Improve your skills by taking practice tests designed for students and
-          job seekers.
+          job seekers. Choose from various categories and track your progress.
         </p>
       </div>
 
-      {/* Test Cards Grid */}
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {tests.map((test, idx) => (
-          <TestCard
-            key={idx}
-            title={test.title}
-            description={test.description}
-            buttonLabel={test.buttonLabel}
-            category={test.title}
-            // onClick={() => alert(`${test.title} started!`)} // you can link instead
-          />
-        ))}
-      </div>
+      {/* Popular Tests */}
+      <section className="max-w-6xl mx-auto mt-12">
+        <h2 className="text-2xl font-semibold text-foreground mb-6">
+          Popular Tests
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {tests.map((test, idx) => (
+            <TestCard
+              key={idx}
+              title={test.title}
+              description={test.description}
+              buttonLabel={test.buttonLabel}
+              category={test.title}
+            />
+          ))}
+        </div>
+      </section>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {testscategory.map((test, idx) => (
-          <TestCard
-            key={idx}
-            title={test.title}
-            description={test.description}
-            buttonLabel={test.buttonLabel}
-            category={test.title}
-            // onClick={() => alert(`${test.title} started!`)} // you can link instead
-          />
-        ))}
-      </div>
+      {/* Categories */}
+      <section className="max-w-6xl mx-auto mt-16">
+        <h2 className="text-2xl font-semibold text-foreground mb-6">
+          Explore by Category
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {categories.map((cat, idx) => (
+            <TestCard
+              key={idx}
+              title={cat.title}
+              description={cat.description}
+              buttonLabel={cat.buttonLabel}
+              category={cat.title}
+            />
+          ))}
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="mt-16 text-center">
-        <h2 className="text-2xl font-semibold text-gray-800">
+      <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-10 max-w-5xl mx-auto shadow-lg">
+        <h2 className="text-3xl font-bold text-primary-foreground">
           Ready to challenge yourself?
         </h2>
-        <div className="mt-4 flex justify-center gap-4">
-          <Button size="lg">Start Free Test</Button>
-          <Button variant="outline" size="lg">
+        <p className="mt-2 text-lg text-primary-foreground/90">
+          Start your first free test today and climb up the leaderboard.
+        </p>
+        <div className="mt-6 flex justify-center gap-4">
+          <Button size="lg" className="bg-background text-foreground hover:bg-muted">
+            Start Free Test
+          </Button>
+          <Button
+           variant= "outline"
+            size="lg"
+            className="bg-primary-foreground text-secondary hover:bg-background hover:text-foreground"
+          >
             Explore More Tests
           </Button>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

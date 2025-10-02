@@ -8,7 +8,7 @@ export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="flex items-center justify-center h-[80vh] dark:bg-transparent">
+    <div className="flex items-center justify-center h-[80vh] bg-background text-foreground">
       <div className="relative flex w-[400px] md:w-[800px] h-[500px] overflow-hidden rounded-2xl dark:bg-gray-800 dark:border dark:border-gray-400 shadow-xl transition-colors duration-300">
         {/* Animated Form Container for small devices*/}
         <AnimatePresence mode="wait">

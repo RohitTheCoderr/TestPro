@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button"; // adjust import path if needed
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 // 📌 Reusable Card Component
@@ -10,7 +8,6 @@ type TestCardProps = {
   buttonLabel: string;
   category: string;
   examType: string;
-  // onClick?: () => void;
 };
 
 const TestCard: React.FC<TestCardProps> = ({
@@ -19,20 +16,18 @@ const TestCard: React.FC<TestCardProps> = ({
   buttonLabel,
   category,
   examType,
-  // onClick,
 }) => {
   return (
-    <div className="rounded-2xl border border-gray-200 shadow-md p-6 flex flex-col justify-between bg-white">
+    <div className="rounded-2xl border border-border shadow-sm p-6 flex flex-col justify-between bg-card hover:shadow-md transition">
       <div>
-        {/* <h3 className="text-xl font-semibold text-gray-900">{title}</h3> */}
-        <h3 className="text-xl font-semibold text-gray-900">{examType}</h3>
-        <p className="mt-2 text-sm text-gray-600">{description}</p>
+        <h3 className="text-xl font-semibold text-foreground">{examType}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </div>
-      <div className="mt-4 flex gap-4">
-        {/* <Button size="lg" onClick={onClick}></Button> */}
+
+      <div className="mt-6 flex gap-4">
         <Link
           href={`/tests/${category}/${examType}`}
-          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 text-sm"
+          className="w-full text-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-accent hover:text-accent-foreground text-sm transition"
         >
           {buttonLabel}
         </Link>
@@ -41,58 +36,54 @@ const TestCard: React.FC<TestCardProps> = ({
   );
 };
 
-
-
 interface PageProps {
-  params: Promise<{ category: string; }>;
+  params: Promise<{ category: string }>;
 }
 
 // 📌 Tests Page
-export default async function TestsPage({  params,}: PageProps) {
+export default async function TestsPage({ params }: PageProps) {
   const { category } = await params;
 
-   // Example fetch from backend
-  // const res = await fetch(`${process.env.API_URL}/tests/${category}/${examType}`);
-  // const tests = await res.json();
-
-  const examType = [
+  // Dummy exam types (replace with API)
+  const examTypes = [
     {
-      category: category,
-      examType: `${category =="SSC" ? "MTS": "NTPC" }`,
+      category,
+      examType: category === "SSC" ? "MTS" : "NTPC",
       description:
         "Sharpen your logical thinking and problem-solving skills with real exam patterns.",
       buttonLabel: "Start Test",
     },
     {
-      category: category,
-      examType: `${category =="SSC" ? "CHSL": "GROUP-D" }`,
+      category,
+      examType: category === "SSC" ? "CHSL" : "GROUP-D",
       description:
-        "Evaluate your coding, data structures, and algorithm knowledge.",
+        "Evaluate your accuracy, reasoning, and comprehension with curated mock tests.",
       buttonLabel: "Take Test",
     },
     {
-      category: category,
-      examType:`${category =="SSC" ? "GCL": "TTE" }`,
+      category,
+      examType: category === "SSC" ? "CGL" : "TTE",
       description:
-        "Prepare for real-world interviews with timed mock interview sessions.",
+        "Prepare for competitive exams with detailed solutions and performance tracking.",
       buttonLabel: "Try Now",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-6">
+    <main className="min-h-screen bg-background py-12 px-6">
+      {/* Header */}
       <div className="max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-gray-900">select your Tests</h1>
-        <p className="mt-3 text-lg text-gray-600">
-          Improve your skills by taking practice tests designed for students and
-          job seekers.
+        <h1 className="text-4xl font-bold text-foreground">
+          Select Your {category} Tests
+        </h1>
+        <p className="mt-3 text-lg text-muted-foreground">
+          Improve your skills by taking practice tests designed for students and job seekers.
         </p>
       </div>
 
       {/* Test Cards Grid */}
-
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {examType.map((test, idx) => (
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+        {examTypes.map((test, idx) => (
           <TestCard
             key={idx}
             title={test.category}
@@ -100,17 +91,19 @@ export default async function TestsPage({  params,}: PageProps) {
             buttonLabel={test.buttonLabel}
             category={test.category}
             examType={test.examType}
-            // onClick={() => alert(`${test.category} started!`)} // you can link instead
           />
         ))}
       </div>
 
       {/* CTA Section */}
-      <div className="mt-16 text-center">
-        <h2 className="text-2xl font-semibold text-gray-800">
+      <div className="mt-16 text-center max-w-4xl mx-auto">
+        <h2 className="text-2xl font-semibold text-foreground">
           Ready to challenge yourself?
         </h2>
-        <div className="mt-4 flex justify-center gap-4">
+        <p className="mt-2 text-muted-foreground">
+          Start with a free test or explore more paid mock tests for in-depth practice.
+        </p>
+        <div className="mt-6 flex justify-center gap-4">
           <Button size="lg">Start Free Test</Button>
           <Button variant="outline" size="lg">
             Explore More Tests
