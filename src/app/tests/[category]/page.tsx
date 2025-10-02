@@ -11,7 +11,6 @@ type TestCardProps = {
 };
 
 const TestCard: React.FC<TestCardProps> = ({
-  title,
   description,
   buttonLabel,
   category,

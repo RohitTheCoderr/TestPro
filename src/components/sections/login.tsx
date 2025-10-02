@@ -1,9 +1,9 @@
 // File: pages/login.tsx
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 // import { supabase } from "../lib/supabaseClient";
-import Link from "next/link";
+// import Link from "next/link";
 
 export default function Login() {
   //  const router = useRouter(); // This is now from 'next/navigation'

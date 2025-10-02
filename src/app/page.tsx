@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -28,13 +29,15 @@ export default function HomePage() {
         </div>
 
         {/* Right Illustration */}
-        <div className="mt-10 md:mt-0">
-          <img
-            src="/studetimg.jpg"
-            alt="Mock Test Illustration"
-            className="w-[400px] md:w-[500px] rounded-xl shadow-lg"
-          />
-        </div>
+        <div className="relative w-[400px] md:w-[500px] h-[400px] md:h-[500px] mt-10 md:mt-0">
+  <Image
+    src="/studetimg.jpg"
+    alt="Mock Test Illustration"
+    fill
+    className="object-cover rounded-xl shadow-lg"
+  />
+</div>
+
       </section>
 
       {/* Categories Section */}
