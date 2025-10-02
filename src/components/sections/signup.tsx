@@ -33,7 +33,7 @@ export default function SignUp() {
       : { mobile: `+91${contact}` }; // send only mobile
 
     try {
-      const res = await fetch("http://localhost:8000/api/user/auth/send_opt", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/send_opt`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
@@ -73,7 +73,7 @@ export default function SignUp() {
       : { mobile: `+91${contact}`, otp, otpID, password }; // send mobile
 
     try {
-      const res = await fetch("http://localhost:8000/api/user/auth/register", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyData),
