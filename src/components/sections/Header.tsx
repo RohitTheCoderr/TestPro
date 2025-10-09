@@ -5,7 +5,7 @@ import ThemeToggle from "../shared/mode";
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-lg shadow-black bg-white dark:bg-gray-700 dark:text-white">
+    <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-md shadow-black bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
         <div className="">
           <svg

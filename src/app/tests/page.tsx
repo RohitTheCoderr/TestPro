@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"; // adjust import path if needed
 import Link from "next/link";
 
@@ -37,6 +38,9 @@ const TestCard: React.FC<TestCardProps> = ({
 
 // 📌 Tests Page
 export default function TestsPage() {
+
+  const [categoriess, setCategoriess]=useState([])
+
   const tests = [
     {
       title: "Aptitude Test",
@@ -85,11 +89,37 @@ export default function TestsPage() {
     },
   ];
 
+  useEffect(() => {
+    category();
+  }, []);
+
+  const category = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          // body: JSON.stringify(""),
+        }
+      );
+
+      const category = await response.json();
+      
+      console.log("cat", category?.data?.categories);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+
   return (
     <main className="min-h-screen bg-background py-12 px-6">
       {/* Hero Section */}
       <div className="max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-accent dark:text-white">Practice Tests</h1>
+        <h1 className="text-4xl font-bold text-accent dark:text-white">
+          Practice Tests
+        </h1>
         <p className="mt-3 text-lg text-muted-foreground">
           Improve your skills by taking practice tests designed for students and
           job seekers. Choose from various categories and track your progress.
