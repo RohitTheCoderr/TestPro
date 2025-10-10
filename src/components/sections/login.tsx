@@ -1,9 +1,9 @@
 // File: pages/login.tsx
 "use client";
+import { setAuthToken } from "@/lib/redux/slices/authSlice";
+import { AppDispatch } from "@/lib/redux/store";
 import { useState } from "react";
-// import { useRouter } from "next/navigation";
-// import { supabase } from "../lib/supabaseClient";
-// import Link from "next/link";
+import { useDispatch } from "react-redux";
 
 export default function Login() {
   //  const router = useRouter(); // This is now from 'next/navigation'
@@ -11,6 +11,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,21 +35,21 @@ export default function Login() {
 
     try {
       // const res = await fetch("http://localhost:8000/api/user/auth/login", {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData),
+        }
+      );
 
       const data = await res.json();
       console.log("login data", data);
 
       if (res.ok) {
-        alert("login successful");
-        localStorage.setItem("token", data.data.token);
-
-        console.log("Login successful", data.data);
-        // redirect or reset form
+        dispatch(setAuthToken(data?.data?.token));
+        localStorage.setItem("authToken", data?.data?.token);
       } else {
         alert(data.message || "OTP verification failed");
       }
@@ -79,7 +81,7 @@ export default function Login() {
           value={contact}
           onChange={(e) => setContact(e.target.value)}
           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-       />
+        />
 
         {/* Password */}
         <input

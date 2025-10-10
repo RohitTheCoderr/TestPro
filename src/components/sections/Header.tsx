@@ -2,8 +2,18 @@
 
 import Link from "next/link";
 import ThemeToggle from "../shared/mode";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/redux/store";
+import { logout } from "@/lib/redux/slices/authSlice";
 
 const Header = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const token = useSelector((state: RootState) => state.auth.token);
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("authToken");
+  };
+
   return (
     <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-md shadow-black bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
@@ -28,7 +38,9 @@ const Header = () => {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-primary dark:text-accent">TestPro</h1>
+        <h1 className="text-2xl font-bold text-primary dark:text-accent">
+          TestPro
+        </h1>
       </div>
       <nav className="space-x-6 text-black dark:text-white">
         <Link href="/" className="hover:text-primary ">
@@ -40,14 +52,23 @@ const Header = () => {
         <Link href="/pricing" className="hover:text-primary ">
           Pricing
         </Link>
-        <Link
-          href="/auth"
-          className="bg-primary text-white px-4 py-[5px] rounded-[3px] hover:bg-accent transition"
-        >
-          Login
-        </Link>
+        {!token ? (
+          <Link
+            href="/auth"
+            className="bg-primary text-white px-4 py-[5px] rounded-[3px] hover:bg-accent transition"
+          >
+            Login
+          </Link>
+        ) : (
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-[5px] rounded-[3px] hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        )}
 
-        <ThemeToggle/>
+        <ThemeToggle />
       </nav>
     </header>
   );

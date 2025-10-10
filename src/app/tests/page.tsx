@@ -3,6 +3,10 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"; // adjust import path if needed
 import Link from "next/link";
+import { AppDispatch, RootState } from "@/lib/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setCategories } from "@/lib/redux/slices/categorySlice";
+import { apiClient } from "@/lib/API/apiClient";
 
 // 📌 Reusable Card Component
 type TestCardProps = {
@@ -38,8 +42,8 @@ const TestCard: React.FC<TestCardProps> = ({
 
 // 📌 Tests Page
 export default function TestsPage() {
-
-  const [categoriess, setCategoriess]=useState([])
+  // const [categoriess, setCategoriess]=useState([])
+  const dispatch = useDispatch<AppDispatch>();
 
   const tests = [
     {
@@ -89,6 +93,7 @@ export default function TestsPage() {
     },
   ];
 
+
   useEffect(() => {
     category();
   }, []);
@@ -105,13 +110,32 @@ export default function TestsPage() {
       );
 
       const category = await response.json();
-      
-      console.log("cat", category?.data?.categories);
+
+      console.log("cat custom", category?.data?.categories);
     } catch (error) {
       console.log("error", error);
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await apiClient.get("/category");
+        console.log("data", data);
+        
+        dispatch(setCategories(data?.data?.categories));
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
+
+  const categoriesss = useSelector(
+    (state: RootState) => state.category.categories
+  );
+  console.log("cat",categoriesss);
 
   return (
     <main className="min-h-screen bg-background py-12 px-6">
