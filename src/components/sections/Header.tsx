@@ -15,9 +15,9 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-md shadow-black bg-white dark:bg-gray-700 dark:text-white">
+    <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-md bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
-        <div className="">
+        <Link href="/" className="cursor-pointer flex gap-2">
           <svg
             className="h-8 w-8"
             fill="none"
@@ -37,10 +37,10 @@ const Header = () => {
               fillRule="evenodd"
             />
           </svg>
-        </div>
-        <h1 className="text-2xl font-bold text-primary dark:text-accent">
-          TestPro
-        </h1>
+          <h1 className="text-2xl font-bold text-primary dark:text-accent">
+            TestPro
+          </h1>
+        </Link>
       </div>
       <nav className="space-x-6 text-black dark:text-white">
         <Link href="/" className="hover:text-primary ">

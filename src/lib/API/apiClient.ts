@@ -2,6 +2,7 @@ import axiosInstance from "./axiosInstance";
 export const apiClient = {
   get: async (url: string, params?: any) => {
     const res = await axiosInstance.get(url, { params });
+    
     return res.data;
   },
 

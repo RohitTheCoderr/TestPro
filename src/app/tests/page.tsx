@@ -1,141 +1,86 @@
 "use client";
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button"; // adjust import path if needed
+import { Button } from "@/components/ui/button"; // adjust path
 import Link from "next/link";
-import { AppDispatch, RootState } from "@/lib/redux/store";
-import { useDispatch, useSelector } from "react-redux";
-import { setCategories } from "@/lib/redux/slices/categorySlice";
-import { apiClient } from "@/lib/API/apiClient";
+import { RootState } from "@/lib/redux/store";
+import { useSelector } from "react-redux";
+// import { useFetchExams } from "@/lib/customhooks/useFetchExams";
 
 // 📌 Reusable Card Component
-type TestCardProps = {
-  title: string;
-  description: string;
-  buttonLabel: string;
-  category: string;
+type CategoryCardProps = {
+  name: string;
+  slug?: string ;
+  _id?: string;
+  categoryDetails: {
+    details: string;
+  };
 };
 
-const TestCard: React.FC<TestCardProps> = ({
-  title,
-  description,
-  buttonLabel,
-  category,
+const CategoryCard: React.FC<CategoryCardProps> = ({
+  name,
+  slug ,
+  categoryDetails,
+  _id,
 }) => {
   return (
     <div className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200">
       <div>
-        <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+        <h3 className="text-xl font-semibold text-foreground">{name}</h3>
+        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+          {categoryDetails.details}
+        </p>
       </div>
-      <div className="mt-4 flex gap-4">
-        <Link
-          href={`/tests/${category.toLowerCase()}/`}
-          className="px-4 py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-        >
-          {buttonLabel}
-        </Link>
-      </div>
+      {_id && (
+        <div className="mt-4 flex gap-4">
+          <Link
+            href={`/tests/${slug}/`}
+            className="px-4 py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            Explore category
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
 
 // 📌 Tests Page
 export default function TestsPage() {
-  // const [categoriess, setCategoriess]=useState([])
-  const dispatch = useDispatch<AppDispatch>();
-
   const tests = [
     {
-      title: "Aptitude Test",
-      description:
-        "Sharpen your logical thinking and problem-solving skills with real exam patterns.",
-      buttonLabel: "Start Free Test",
+      name: "Aptitude Test",
+      categoryDetails: {
+        details:
+          "Sharpen your logical thinking and problem-solving skills with real exam patterns.",
+      },
     },
     {
-      title: "Technical Test",
-      description:
-        "Evaluate your coding, data structures, and algorithm knowledge.",
-      buttonLabel: "Take Test",
+      name: "Technical Test",
+      categoryDetails: {
+        details:
+          "Evaluate your coding, data structures, and algorithm knowledge.",
+      },
     },
     {
-      title: "Mock Interview",
-      description:
-        "Prepare for real-world interviews with timed mock interview sessions.",
-      buttonLabel: "Try Now",
+      name: "Mock Interview",
+      categoryDetails: {
+        details:
+          "Prepare for real-world interviews with timed mock interview sessions.",
+      },
     },
   ];
-
-  const categories = [
-    {
-      title: "SSC",
-      description:
-        "Practice mock tests designed for Staff Selection Commission exams.",
-      buttonLabel: "Start Free Test",
-    },
-    {
-      title: "Railway",
-      description:
-        "Boost your chances in Railway exams with subject-specific practice.",
-      buttonLabel: "Take Test",
-    },
-    {
-      title: "Banking",
-      description:
-        "Get ready for IBPS, SBI PO, and other banking competitive exams.",
-      buttonLabel: "Try Now",
-    },
-    {
-      title: "Defence",
-      description:
-        "Ace NDA, CDS, and other defence entrance tests with curated mocks.",
-      buttonLabel: "Start Now",
-    },
-  ];
-
-
-  useEffect(() => {
-    category();
-  }, []);
-
-  const category = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/category/`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          // body: JSON.stringify(""),
-        }
-      );
-
-      const category = await response.json();
-
-      console.log("cat custom", category?.data?.categories);
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await apiClient.get("/category");
-        console.log("data", data);
-        
-        dispatch(setCategories(data?.data?.categories));
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
 
   const categoriesss = useSelector(
     (state: RootState) => state.category.categories
   );
-  console.log("cat",categoriesss);
+
+  console.log("categories", categoriesss);
+
+    // const { exams, loading, error, refetch } = useFetchExams(params.category);
+
+  // if (loading) return <p>Loading exams...</p>;
+  // if (error) return <p className="text-red-500">{error}</p>;
+  
 
   return (
     <main className="min-h-screen bg-background py-12 px-6">
@@ -157,12 +102,10 @@ export default function TestsPage() {
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tests.map((test, idx) => (
-            <TestCard
+            <CategoryCard
               key={idx}
-              title={test.title}
-              description={test.description}
-              buttonLabel={test.buttonLabel}
-              category={test.title}
+              name={test.name}
+              categoryDetails={test.categoryDetails}
             />
           ))}
         </div>
@@ -174,13 +117,13 @@ export default function TestsPage() {
           Explore by Category
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {categories.map((cat, idx) => (
-            <TestCard
-              key={idx}
-              title={cat.title}
-              description={cat.description}
-              buttonLabel={cat.buttonLabel}
-              category={cat.title}
+          {categoriesss.map((cat) => (
+            <CategoryCard
+              key={cat._id}
+              name={cat.name}
+              slug={cat.slug}
+              _id={cat._id}
+              categoryDetails={{ details: cat.categoryDetails.details }}
             />
           ))}
         </div>
@@ -188,7 +131,6 @@ export default function TestsPage() {
 
       {/* CTA Section */}
       <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-10 max-w-5xl mx-auto shadow-lg">
-        {/* <section className="mt-20 text-center bg-gradient-to-r from-blue-300 to-blue-400 rounded-2xl p-10 max-w-5xl mx-auto shadow-lg"> */}
         <h2 className="text-3xl font-bold text-white">
           Ready to challenge yourself?
         </h2>

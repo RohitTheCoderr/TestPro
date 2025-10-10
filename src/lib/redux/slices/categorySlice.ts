@@ -1,7 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  categoryDetails?: any;
+  __v?: number;
+}
+
 interface CategoryState {
-  categories: string[];
+  categories: Category[];
 }
 
 const initialState: CategoryState = {

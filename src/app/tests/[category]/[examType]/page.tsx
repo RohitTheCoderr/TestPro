@@ -17,7 +17,7 @@ export default async function ExamTypeTests({ params }: PageProps) {
   ];
 
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto min-h-screen bg-background text-foreground">
+    <div className="p-6 md:p-10  mx-auto min-h-screen bg-background text-foreground">
       {/* Header */}
       <h1 className="text-2xl md:text-3xl font-bold mb-6 capitalize">
         {category} → {examType} Tests
