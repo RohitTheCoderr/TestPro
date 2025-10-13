@@ -15,7 +15,6 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const data = await apiClient.get("/category");
-        console.log("data", data);
         dispatch(setCategories(data?.data?.categories));
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -25,6 +24,7 @@ export default function HomePage() {
     fetchData();
   }, [dispatch]);
 
+  
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Hero Section */}

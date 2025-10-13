@@ -27,17 +27,12 @@ function CategoriesSection() {
 
   const fetchExamData = async () => {
     try {
-      console.log("cate", categoryname);
-
       const result = await apiClient.get(`/category/${categoryname}/exams`);
       setExamdata(result?.data?.exams);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
-
-  console.log("examdata", examdata);
-  console.log("categoryname", categoryname);
 
   return (
     <section id="#category" className="px-8 md:px-16 py-12  bg-background">

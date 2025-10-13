@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 type CategoryCardProps = {
   name: string;
   slug?: string ;
-  _id?: string;
+  categoryID?: string;
   categoryDetails: {
     details: string;
   };
@@ -20,7 +20,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   name,
   slug ,
   categoryDetails,
-  _id,
+  categoryID,
 }) => {
   return (
     <div className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200">
@@ -30,13 +30,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           {categoryDetails.details}
         </p>
       </div>
-      {_id && (
+      {categoryID && (
         <div className="mt-4 flex gap-4">
           <Link
             href={`/tests/${slug}/`}
-            className="px-4 py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
-            Explore category
+            Explore  category
           </Link>
         </div>
       )}
@@ -72,9 +72,7 @@ export default function TestsPage() {
 
   const categoriesss = useSelector(
     (state: RootState) => state.category.categories
-  );
-
-  console.log("categories", categoriesss);
+  ) ;
 
     // const { exams, loading, error, refetch } = useFetchExams(params.category);
 
@@ -119,10 +117,10 @@ export default function TestsPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categoriesss.map((cat) => (
             <CategoryCard
-              key={cat._id}
+              key={cat.categoryID}
               name={cat.name}
               slug={cat.slug}
-              _id={cat._id}
+              categoryID={cat.categoryID}
               categoryDetails={{ details: cat.categoryDetails.details }}
             />
           ))}

@@ -1,18 +1,21 @@
 // app/tests/[id]/attempt/page.tsx
 "use client";
-import { useParams } from "next/navigation";
+import { RootState } from "@/lib/redux/store";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function AttemptPage() {
-  const { id } = useParams(); // ✅ `id` comes from folder name [id]
   const [selected, setSelected] = useState<string | null>(null);
+
+  
+const testID = useSelector((state: RootState) => state.test.testID);
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto bg-background text-foreground min-h-screen">
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3 sticky top-0 bg-background border-b py-4 z-10">
         <h1 className="text-xl font-bold">
-          Attempting Test <span className="text-primary">(ID: {id})</span>
+          Attempting Test <span className="text-primary">(ID: {testID})</span>
         </h1>
         <span className="font-mono text-red-500 text-lg bg-muted px-3 py-1 rounded-lg shadow-sm">
           Time Left: 59:30

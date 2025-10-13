@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 
 interface Category {
-  _id: string;
+  categoryID: string;
   name: string;
   slug: string;
   categoryDetails?: any;
@@ -21,7 +21,7 @@ const categorySlice = createSlice({
   name: 'category',
   initialState,
   reducers: {
-    setCategories: (state, action: PayloadAction<string[]>) => {
+    setCategories: (state, action: PayloadAction<Category[]>) => {
       state.categories = action.payload;
     },
   },
