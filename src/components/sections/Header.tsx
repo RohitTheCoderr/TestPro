@@ -5,12 +5,14 @@ import ThemeToggle from "../shared/mode";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { persistor } from "@/lib/redux/store";
+// import { logout } from "@/lib/redux/slices/authSlice";
 
 const Header = () => {
   const token = useSelector((state: RootState) => state.auth.token);
+  // const dispatch = useDispatch();
   const handleLogout = () => {
     // dispatch(logout());
-    // localStorage.removeItem("authToken");
+    localStorage.removeItem("authToken");
     persistor.purge(); // for clear all data from persits and redux
   };
 

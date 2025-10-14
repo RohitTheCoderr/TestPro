@@ -2,9 +2,16 @@
 "use client";
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  // add other fields as needed
+}
+
 interface AuthState {
   token: string | null;
-  user: any | null;
+  user: User | null;
 }
 
 const initialState: AuthState = {
@@ -19,7 +26,7 @@ const authSlice = createSlice({
     setAuthToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
     },
-    setUser: (state, action: PayloadAction<any>) => {
+    setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
     logout: (state) => {

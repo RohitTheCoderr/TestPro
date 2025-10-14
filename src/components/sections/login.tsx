@@ -51,7 +51,6 @@ const router=useRouter()
       if (res.ok) {
         dispatch(setAuthToken(data?.data?.token));
         localStorage.setItem("authToken", data?.data?.token);
-
         router.push("/")
       } else {
         alert(data.message || "OTP verification failed");

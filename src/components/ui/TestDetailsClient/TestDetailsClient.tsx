@@ -26,10 +26,6 @@ type ExamDetails = {
   };
 };
 
-interface ExamState {
-  currentExam: ExamDetails | null;
-}
-
 export default function TestDetailsClient({
   category,
   examType,
@@ -46,8 +42,8 @@ export default function TestDetailsClient({
 
   useEffect(() => {
     if (!token) {
-      console.log("please login/Register before starting Test");
-      // router.push("/auth");
+      alert("please login/Register before starting Test");
+      router.push("/auth");
     }
     if (!currentExam) router.push(`/tests/${category}`);
   }, [token, currentExam, category, router]);

@@ -89,9 +89,9 @@ const router=useRouter()
       });
 
       const data = await res.json();
-      console.log("registration data",data);
       if (res.ok) {
         dispatch(setAuthToken(data?.data?.token));
+        localStorage.setItem("authToken", data?.data?.token);
         alert("Registration successful");
         // redirect or reset form
         router.push("/")

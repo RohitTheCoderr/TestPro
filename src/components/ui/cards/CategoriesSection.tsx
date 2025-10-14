@@ -30,8 +30,7 @@ function CategoriesSection() {
       const result = await apiClient.get(`/category/${categoryname}/exams`);
       setExamdata(result?.data?.exams);
     } catch (error: any) {
-      console.error("Error fetching categories:", error);
-     
+      console.error("Error fetching Exams:", error);
     }
   };
 

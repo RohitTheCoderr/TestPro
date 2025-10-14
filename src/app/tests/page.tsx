@@ -11,7 +11,7 @@ type CategoryCardProps = {
   name: string;
   slug?: string ;
   categoryID?: string;
-  categoryDetails: {
+   categoryDetails?: {
     details: string;
   };
 };
@@ -27,7 +27,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       <div>
         <h3 className="text-xl font-semibold text-foreground">{name}</h3>
         <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-          {categoryDetails.details}
+          {categoryDetails?.details}
         </p>
       </div>
       {categoryID && (
@@ -121,8 +121,8 @@ export default function TestsPage() {
               name={cat.name}
               slug={cat.slug}
               categoryID={cat.categoryID}
-              categoryDetails={{ details: cat.categoryDetails.details }}
-            />
+              categoryDetails={cat.categoryDetails ? { details: cat.categoryDetails.details } : undefined}
+ />
           ))}
         </div>
       </section>

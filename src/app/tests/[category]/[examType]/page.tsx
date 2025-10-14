@@ -26,6 +26,15 @@ type ExamDetails = {
   };
 };
 
+interface Exam {
+  title: string;
+  type: string;
+  duration: number;
+  price: number;
+  testID: string;
+  examID: string;
+}
+
 type TestCardProps = {
   examName: string;
   title: string;
@@ -35,7 +44,7 @@ type TestCardProps = {
   price: number;
   examID: string;
   categoryName: string;
-  onSelect: any;
+  onSelect: (id: string) => void;
 };
 
 const Testcard: React.FC<TestCardProps> = ({
@@ -104,7 +113,7 @@ export default function ExamTypeTests({
     const fetchAllExams = async () => {
       try {
         const res = await apiClient.get(`/user/tests/${currentExam?.ExamID}`);
-        const exams: TestCardProps[] = res.tests.map((exam: any) => ({
+        const exams: TestCardProps[] = res.tests.map((exam:Exam) => ({
           title: exam.title,
           type: exam.type,
           duration: exam.duration,
@@ -121,7 +130,7 @@ export default function ExamTypeTests({
     };
 
     fetchAllExams();
-  }, [examType]);
+  }, [currentExam?.ExamID,currentExam?.name,category, examType]);
 
   return (
     <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">

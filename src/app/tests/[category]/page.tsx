@@ -12,6 +12,27 @@ type ExamDetails = {
   details: string[];
 };
 
+
+interface Examtype {
+  name: string;
+  slug: string;
+  ExamID: string;
+  categoryID: string;
+  examDetails?: {
+    details: string[];
+  };
+}
+interface Examtype {
+  name: string;
+  slug: string;
+  ExamID: string;
+  categoryID: string;
+  examDetails?: {
+    details: string[];
+  };
+}
+
+
 type TestCardProps = {
   categoryID: string;
   categoryName: string;
@@ -20,6 +41,7 @@ type TestCardProps = {
   examDetails: ExamDetails;
   ExamID: string;
   onSelect: any;
+  // onSelect: (id: string) => void;
 };
 
 const TestCard: React.FC<TestCardProps> = ({
@@ -76,7 +98,7 @@ export default function TestsPage({
       try {
         const res = await apiClient.get(`/category/${category}/exams`);
         const categoryName = res.data.category.name;
-        const exams: TestCardProps[] = res.data.exams.map((exam: any) => ({
+        const exams: TestCardProps[] = res.data.exams.map((exam: Examtype) => ({
           name: exam.name,
           slug: exam.slug,
           ExamID: exam.ExamID,

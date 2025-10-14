@@ -3,21 +3,25 @@ import { Button } from "@/components/ui/button";
 import CategoriesSection from "@/components/ui/cards/CategoriesSection";
 import { apiClient } from "@/lib/API/apiClient";
 import { setCategories } from "@/lib/redux/slices/categorySlice";
-import { AppDispatch } from "@/lib/redux/store";
+import { AppDispatch, RootState } from "@/lib/redux/store";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const [error, setError] = useState<string | null>(null);
+
+  const token = useSelector((state: RootState) => state.auth.token) || null;
+console.log("token home", token);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await apiClient.get("/category");
         dispatch(setCategories(data?.data?.categories));
       } catch (error: any) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching categories rohiti:", error);
         alert(error.message);
         setError(error.message);
       }

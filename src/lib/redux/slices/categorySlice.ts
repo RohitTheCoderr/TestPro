@@ -1,11 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+interface CategoryDetails {
+  details: string;
+  // otherdetails: string;
+}
 
 interface Category {
   categoryID: string;
   name: string;
   slug: string;
-  categoryDetails?: any;
+  categoryDetails?: CategoryDetails;
   __v?: number;
 }
 

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { clearCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 import { clearCurrentTest } from "@/lib/redux/slices/testSlice";
-
+import Image from "next/image";
 interface Question {
   question: string;
   options: string[];
@@ -62,7 +62,7 @@ export default function AttemptPage() {
       }
     };
     if (testID) fetchTest();
-  }, [testID]);
+  }, [currentExamdetails?.ExamID, testID]);
 
   // ✅ Countdown Timer
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function AttemptPage() {
     if (timeLeft === 0 && testData) {
       handleSubmit(true); // true = auto submit
     }
-  }, [timeLeft]);
+  }, [testData, timeLeft]);
 
   // ✅ Format time
   const formatTime = (seconds: number) => {
@@ -173,7 +173,7 @@ export default function AttemptPage() {
               : "bg-muted text-red-500"
           }`}
         >
-        Time Left: {formatTime(timeLeft)}
+          Time Left: {formatTime(timeLeft)}
         </span>
       </header>
 
@@ -258,15 +258,17 @@ export default function AttemptPage() {
             Q{currentQuestionIndex + 1}. {currentQuestion?.question}
           </h2>
 
-          {currentQuestion?.image && (
-            <div className="w-full flex justify-center items-center mb-4">
-              <img
+          <div className="w-full flex justify-center items-center mb-4">
+            {currentQuestion?.image && (
+              <Image
                 src={currentQuestion.image}
                 alt="question"
+                width={500}
+                height={300}
                 className="max-h-64 object-contain rounded-md shadow-sm"
               />
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="space-y-3">
             {currentQuestion?.options.map((opt, i) => {
@@ -323,7 +325,7 @@ export default function AttemptPage() {
       {/* Footer Submit */}
       <footer className="mt-10 flex justify-end">
         <button
-          onClick={()=>handleSubmit(false)}
+          onClick={() => handleSubmit(false)}
           className="px-6 py-3 bg-red-600 text-white font-semibold rounded-xl shadow-md hover:bg-red-700 transition-colors"
         >
           Submit Test
