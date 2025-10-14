@@ -1,9 +1,29 @@
 import axiosInstance from "./axiosInstance";
 export const apiClient = {
   get: async (url: string, params?: any) => {
-    const res = await axiosInstance.get(url, { params });
+    try {
+      const res = await axiosInstance.get(url, { params });
+      return res.data;
+      
+    } catch (error:any) {
+      if (error.message === "Network Error") {
+        throw new Error("Network error: Please check your internet connection.");
     
-    return res.data;
+      }
+     else if (error.response) {
+         // Server responded with error
+        throw new Error(
+          error.response.data?.message ||
+            `Request failed with status ${error.response.status}`
+        );
+      } else {
+         // Other errors (timeout, etc.)
+         console.log("eeeeee", error);
+         
+        throw new Error("An unexpected error occurred. Please try again.");
+     
+      }
+    }
   },
 
   post: async (url: string, data?: any) => {
@@ -13,6 +33,7 @@ export const apiClient = {
 
   put: async (url: string, data?: any) => {
     const res = await axiosInstance.put(url, data);
+   
     return res.data;
   },
 

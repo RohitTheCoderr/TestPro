@@ -3,28 +3,29 @@ import { Button } from "@/components/ui/button";
 import CategoriesSection from "@/components/ui/cards/CategoriesSection";
 import { apiClient } from "@/lib/API/apiClient";
 import { setCategories } from "@/lib/redux/slices/categorySlice";
-import { AppDispatch, RootState } from "@/lib/redux/store";
+import { AppDispatch } from "@/lib/redux/store";
 import Image from "next/image";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 export default function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
-
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await apiClient.get("/category");
         dispatch(setCategories(data?.data?.categories));
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching categories:", error);
+        alert(error.message);
+        setError(error.message);
       }
     };
 
     fetchData();
   }, [dispatch]);
 
-  
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Hero Section */}
@@ -40,10 +41,18 @@ export default function HomePage() {
             tests. Track your performance and get detailed analysis.
           </p>
           <div className="mt-6 space-x-4">
-            <Button href="/tests" className="bg-primary w-[10rem] text-lg hover:bg-accent text-white ">
+            <Button
+              href="/tests"
+              className="bg-primary w-[10rem] text-lg hover:bg-accent text-white "
+            >
               Start Free Test
             </Button>
-            <Button href={"#category"} className="bg-gray-100 w-[10rem] text-lg border border-primary text-black hover:text-white ">Explore Tests</Button>
+            <Button
+              href={"#category"}
+              className="bg-gray-100 w-[10rem] text-lg border border-primary text-black hover:text-white "
+            >
+              Explore Tests
+            </Button>
           </div>
         </div>
 
@@ -59,7 +68,13 @@ export default function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <CategoriesSection />
+      {error ? (
+        <div className="text-red-600 text-center my-6 p-3 rounded">
+          ⚠️ {error}
+        </div>
+      ) : (
+        <CategoriesSection />
+      )}
     </div>
   );
 }

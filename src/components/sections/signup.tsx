@@ -1,5 +1,9 @@
 "use client";
+import { setAuthToken } from "@/lib/redux/slices/authSlice";
+import { AppDispatch } from "@/lib/redux/store";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function SignUp() {
   const [contact, setContact] = useState(""); // email or mobile
@@ -9,6 +13,11 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
+
+  const dispatch = useDispatch<AppDispatch>();
+//  const navigate=useNavigate()
+const router=useRouter()
+
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
@@ -81,10 +90,11 @@ export default function SignUp() {
 
       const data = await res.json();
       console.log("registration data",data);
-      
       if (res.ok) {
+        dispatch(setAuthToken(data?.data?.token));
         alert("Registration successful");
         // redirect or reset form
+        router.push("/")
       } else {
         alert(data.message || "OTP verification failed");
       }

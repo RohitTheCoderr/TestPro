@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 function CategoriesSection() {
-
   interface Exam {
     name: string;
     slug: string;
@@ -14,10 +13,11 @@ function CategoriesSection() {
     // add other fields if they exist
   }
   const [examdata, setExamdata] = useState<Exam[]>([]);
-
+  
   const [categoryname, setCategoryname] = useState("ssc");
 
-  const categoriesss = useSelector((state: RootState) => state.category.categories) || [];
+  const categoriesss =
+    useSelector((state: RootState) => state.category.categories) || [];
 
   useEffect(() => {
     if (categoryname) {
@@ -29,8 +29,9 @@ function CategoriesSection() {
     try {
       const result = await apiClient.get(`/category/${categoryname}/exams`);
       setExamdata(result?.data?.exams);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching categories:", error);
+     
     }
   };
 
@@ -40,7 +41,7 @@ function CategoriesSection() {
       <div className="flex overflow-x-scroll no-scrollbar gap-6 p-4 bg-muted rounded-full">
         {categoriesss.map((cat, index) => (
           <div
-            key={cat._id || index}
+            key={cat.categoryID || index}
             className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-auto text-center hover:shadow-lg hover:border-primary group transition ${
               categoryname == cat.slug ? "bg-primary shadow-lg text-white" : ""
             }`}
@@ -60,26 +61,26 @@ function CategoriesSection() {
       </div>
       <div>
         <div>
-          <div className="  grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 ">
-            {examdata.length !== 0 ? (
-              examdata.map((exam, index) => (
-                <Link
-                  key={index}
-                  href={`/tests/${categoryname}/${exam.slug}`}
-                  className="rounded-2xl shadow-sm flex justify-between group cursor-pointer items-center border border-border p-4 bg-card hover:shadow-md transition"
-                >
-                  <div className=" w-[80%] text-xl text-center font-semibold group-hover:text-primary text-foreground">
-                    {exam?.name}
-                  </div>
-                  <div>➡️</div>
-                </Link>
-              ))
-            ) : (
-              <p className="text-primary text-center font-bold text-lg">
-                NO Exam Avaiable Now
-              </p>
-            )}
-          </div>
+            <div className="  grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 ">
+              {examdata.length !== 0 ? (
+                examdata.map((exam, index) => (
+                  <Link
+                    key={index}
+                    href={`/tests/${categoryname}/${exam.slug}`}
+                    className="rounded-2xl shadow-sm flex justify-between group cursor-pointer items-center border border-border p-4 bg-card hover:shadow-md transition"
+                  >
+                    <div className=" w-[80%] text-xl text-center font-semibold group-hover:text-primary text-foreground">
+                      {exam?.name}
+                    </div>
+                    <div>➡️</div>
+                  </Link>
+                ))
+              ) : (
+                <p className="text-primary text-center font-bold text-lg">
+                  NO Exam Avaiable Now
+                </p>
+              )}
+            </div>
         </div>
       </div>
     </section>

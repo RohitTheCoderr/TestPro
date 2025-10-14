@@ -2,6 +2,7 @@
 "use client";
 import { setAuthToken } from "@/lib/redux/slices/authSlice";
 import { AppDispatch } from "@/lib/redux/store";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -13,7 +14,7 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
-
+const router=useRouter()
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -50,6 +51,8 @@ export default function Login() {
       if (res.ok) {
         dispatch(setAuthToken(data?.data?.token));
         localStorage.setItem("authToken", data?.data?.token);
+
+        router.push("/")
       } else {
         alert(data.message || "OTP verification failed");
       }
