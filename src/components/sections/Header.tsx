@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import ThemeToggle from "../shared/mode";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/redux/store";
-import { logout } from "@/lib/redux/slices/authSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 import { persistor } from "@/lib/redux/store";
 
 const Header = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token);
   const handleLogout = () => {
     // dispatch(logout());

@@ -147,7 +147,9 @@ export default function AttemptPage() {
     );
     const totalAnswered = Object.keys(selectedAnswers).length;
     alert(
-      `Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
+      auto
+        ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
+        : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
     );
     console.log("answer", selectedAnswers);
     console.log("markedForReview", markedForReview);

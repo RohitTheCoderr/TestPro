@@ -42,7 +42,7 @@ export default function TestDetailsClient({
 
   const token = useSelector((state: RootState) => state.auth.token) || "";
 
-  const{ExamID, categoryID,categoryName,name,slug, examDetails,}={...currentExam}
+  const{name, examDetails,}={...currentExam}
 
   useEffect(() => {
     if (!token) {

@@ -3,14 +3,13 @@
 import { apiClient } from "@/lib/API/apiClient";
 import Link from "next/link";
 import React, { use, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { setCurrentTest } from "@/lib/redux/slices/testSlice";
 
-interface PageProps {
-  params: { category: string; examType: string };
-}
+// interface PageProps {
+//   params: { category: string; examType: string };
+// }
 
 type ExamDetails = {
   ExamID: string;
@@ -46,7 +45,7 @@ const Testcard: React.FC<TestCardProps> = ({
   duration,
   price,
   testID,
-  examID,
+  // examID,
   categoryName,
   onSelect,
 }) => (

@@ -3,7 +3,7 @@ import { setAuthToken } from "@/lib/redux/slices/authSlice";
 import { AppDispatch } from "@/lib/redux/store";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export default function SignUp() {
   const [contact, setContact] = useState(""); // email or mobile
