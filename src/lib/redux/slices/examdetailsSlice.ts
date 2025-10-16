@@ -2,9 +2,9 @@
 import { Exams } from "@/Interfaces";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface ExamDetails {
-  details: string[];
-}
+// interface ExamDetails {
+//   details: string[];
+// }
 
 // export interface Exam {
 //   ExamID: string;

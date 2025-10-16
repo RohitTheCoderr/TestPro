@@ -21,7 +21,7 @@ function CategoriesSection() {
     if (categoryname) {
       fetchExamData();
     }
-  }, [categoryname]);
+  }, [categoryname, ]);
 
   const fetchExamData = async () => {
     try {

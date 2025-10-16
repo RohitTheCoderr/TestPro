@@ -8,7 +8,7 @@ import { persistor } from "@/lib/redux/store";
 import { logout } from "@/lib/redux/slices/authSlice";
 import Image from "next/image";
 const Header = () => {
-  let token = useSelector((state: RootState) => state.auth.token);
+  const token = useSelector((state: RootState) => state.auth.token);
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logout());

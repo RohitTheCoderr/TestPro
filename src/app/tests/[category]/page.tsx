@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/API/apiClient";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
@@ -98,7 +97,7 @@ export default function TestsPage({
           `/category/${decodedCategory}/exams`
         );
         const categoryName = res.data.category.name;
-        const exams: ExamCardProps[] = res.data.exams.map((exam: any) => ({
+        const exams: ExamCardProps[] = res.data.exams.map((exam: Exams) => ({
           name: exam.name,
           slug: exam.slug,
           ExamID: exam.ExamID,

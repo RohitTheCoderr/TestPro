@@ -28,16 +28,16 @@ import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 //   };
 // };
 
-interface Exam {
-  title: string;
-  type: string;
-  duration: number;
-  price: number;
-  testID: string;
-  examID: string;
-  examName: string;
-  categoryName: string;
-}
+// interface Exam {
+//   title: string;
+//   type: string;
+//   duration: number;
+//   price: number;
+//   testID: string;
+//   examID: string;
+//   examName: string;
+//   categoryName: string;
+// }
 
 
 
