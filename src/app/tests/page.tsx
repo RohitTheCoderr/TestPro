@@ -4,21 +4,11 @@ import { Button } from "@/components/ui/button"; // adjust path
 import Link from "next/link";
 import { RootState } from "@/lib/redux/store";
 import { useSelector } from "react-redux";
-// import { useFetchExams } from "@/lib/customhooks/useFetchExams";
+import { Category } from "@/Interfaces";
 
-// 📌 Reusable Card Component
-type CategoryCardProps = {
-  name: string;
-  slug?: string ;
-  categoryID?: string;
-   categoryDetails?: {
-    details: string;
-  };
-};
-
-const CategoryCard: React.FC<CategoryCardProps> = ({
+const CategoryCard: React.FC<Category> = ({
   name,
-  slug ,
+  slug,
   categoryDetails,
   categoryID,
 }) => {
@@ -36,7 +26,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             href={`/tests/${slug}/`}
             className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
-            Explore  category
+            Explore category
           </Link>
         </div>
       )}
@@ -72,13 +62,12 @@ export default function TestsPage() {
 
   const categoriesss = useSelector(
     (state: RootState) => state.category.categories
-  ) ;
+  );
 
-    // const { exams, loading, error, refetch } = useFetchExams(params.category);
+  // const { exams, loading, error, refetch } = useFetchExams(params.category);
 
   // if (loading) return <p>Loading exams...</p>;
   // if (error) return <p className="text-red-500">{error}</p>;
-  
 
   return (
     <main className="min-h-screen bg-background py-12 px-6">
@@ -100,11 +89,32 @@ export default function TestsPage() {
         </h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tests.map((test, idx) => (
-            <CategoryCard
+            <div
               key={idx}
-              name={test.name}
-              categoryDetails={test.categoryDetails}
-            />
+              className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200"
+            >
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">
+                  {test?.name}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                  {test?.categoryDetails?.details}
+                </p>
+              </div>
+              <div className="mt-4 flex gap-4">
+                <Link
+                  href={`/tests`}
+                  className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Explore category
+                </Link>
+              </div>
+            </div>
+            // <CategoryCard
+            //   key={idx}
+            //   name={test.name}
+            //   categoryDetails={test.categoryDetails}
+            // />
           ))}
         </div>
       </section>
@@ -114,16 +124,24 @@ export default function TestsPage() {
         <h2 className="text-2xl font-semibold text-foreground mb-6">
           Explore by Category
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {categoriesss.map((cat) => (
-            <CategoryCard
-              key={cat.categoryID}
-              name={cat.name}
-              slug={cat.slug}
-              categoryID={cat.categoryID}
-              categoryDetails={cat.categoryDetails ? { details: cat.categoryDetails.details } : undefined}
- />
-          ))}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {Array.isArray(categoriesss) && categoriesss.length > 0 ? (
+            categoriesss.map((cat) => (
+              <CategoryCard
+                key={cat.categoryID}
+                name={cat.name}
+                slug={cat.slug}
+                categoryID={cat.categoryID}
+                categoryDetails={
+                  cat?.categoryDetails
+                    ? { details: cat?.categoryDetails?.details }
+                    : undefined
+                }
+              />
+            ))
+          ) : (
+            <p>No categories found</p>
+          )}
         </div>
       </section>
 

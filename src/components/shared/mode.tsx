@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-
+import { MdModeNight } from "react-icons/md";
+import { MdLightMode } from "react-icons/md";
 export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
 
@@ -15,9 +16,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="mt-4 bg-gray-600 dark:bg-white rounded-full p-1 text-secondary-foreground"
+      className="mt-4 rounded-full p-1 text-secondary-foreground bg-gray-300 p-2 group"
     >
-      {dark ? "☀️" : "🌙"}
+      {dark ? <MdLightMode className="group-hover:scale-150"/> : <MdModeNight className="group-hover:scale-150"/>}
     </button>
   );
 }

@@ -1,35 +1,40 @@
 "use client";
 import { apiClient } from "@/lib/API/apiClient";
 import { RootState } from "@/lib/redux/store";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { clearCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 import { clearCurrentTest } from "@/lib/redux/slices/testSlice";
 import Image from "next/image";
-interface Question {
-  question: string;
-  options: string[];
-  answer: string;
-  image: string;
-  questionID: string;
-}
+import { SingleTestsResponse } from "@/Interfaces";
+import { Test } from "@/Interfaces/TestInterfaces";
 
-interface Subject {
-  id: string;
-  name: string;
-  questions: Question[];
-}
 
-interface TestData {
-  testID: string;
-  title: string;
-  duration: number;
-  subjects: Subject[];
-}
+// interface Question {
+//   question: string;
+//   options: string[];
+//   answer: string;
+//   image: string;
+//   questionID: string;
+// }
+
+// interface Subject {
+//   id: string;
+//   name: string;
+//   questions: Question[];
+// }
+
+// interface TestData {
+//   testID: string;
+//   title: string;
+//   duration: number;
+//   subjects: Subject[];
+// }
 
 export default function AttemptPage() {
-  const [testData, setTestData] = useState<TestData | null>(null);
+  // const [testData, setTestData] = useState<TestData | null>(null);
+  const [testData, setTestData] = useState<Test | null>(null);
   const [currentSubjectIndex, setCurrentSubjectIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<
@@ -49,10 +54,12 @@ export default function AttemptPage() {
   useEffect(() => {
     const fetchTest = async () => {
       try {
-        const res = await apiClient.get(
+        const res = await apiClient.get<SingleTestsResponse>(
           `/user/tests/${currentExamdetails?.ExamID}/${testID}`
         );
         const test = res?.test;
+        console.log("geee", test);
+        
         setTestData(test);
 
         // ✅ Initialize timeLeft based on duration in minutes → seconds
@@ -76,11 +83,11 @@ export default function AttemptPage() {
   }, [timeLeft]);
 
   // ✅ Auto Submit when time hits 0
-  useEffect(() => {
-    if (timeLeft === 0 && testData) {
-      handleSubmit(true); // true = auto submit
-    }
-  }, [testData, timeLeft]);
+  // useEffect(() => {
+  //   if (timeLeft === 0 && testData) {
+  //     handleSubmit(true); // true = auto submit
+  //   }
+  // }, [testData, timeLeft,]);
 
   // ✅ Format time
   const formatTime = (seconds: number) => {
@@ -89,9 +96,8 @@ export default function AttemptPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  if (!testData) return <p className="p-6 text-center">Loading test...</p>;
-
-  const subjects = testData.subjects;
+ 
+  const subjects = testData?.subjects ?? [];
   const currentSubject = subjects[currentSubjectIndex];
   const currentQuestion = currentSubject?.questions[currentQuestionIndex];
 
@@ -140,23 +146,52 @@ export default function AttemptPage() {
   };
 
   // ✅ Submit Test
-  const handleSubmit = (auto = false) => {
-    const total = subjects.reduce(
-      (acc, subj) => acc + subj.questions.length,
-      0
-    );
-    const totalAnswered = Object.keys(selectedAnswers).length;
-    alert(
-      auto
-        ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
-        : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
-    );
-    console.log("answer", selectedAnswers);
-    console.log("markedForReview", markedForReview);
-    dispatch(clearCurrentExam());
-    dispatch(clearCurrentTest());
-    router.push("/thankyou");
-  };
+  // const handleSubmit = (auto = false) => {
+  //   const total = subjects.reduce(
+  //     (acc, subj) => acc + subj.questions.length,
+  //     0
+  //   );
+  //   const totalAnswered = Object.keys(selectedAnswers).length;
+  //   alert(
+  //     auto
+  //       ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
+  //       : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
+  //   );
+  //   console.log("answer", selectedAnswers);
+  //   console.log("markedForReview", markedForReview);
+  //   dispatch(clearCurrentExam());
+  //   dispatch(clearCurrentTest());
+  //   router.push("/thankyou");
+  // };
+
+
+const handleSubmit = useCallback((auto = false) => {
+  const total = subjects.reduce(
+    (acc, subj) => acc + subj.questions.length,
+    0
+  );
+  const totalAnswered = Object.keys(selectedAnswers).length;
+  alert(
+    auto
+      ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
+      : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
+  );
+  console.log("answer", selectedAnswers);
+  console.log("markedForReview", markedForReview);
+  dispatch(clearCurrentExam());
+  dispatch(clearCurrentTest());
+  router.push("/thankyou");
+},[subjects, selectedAnswers, markedForReview, dispatch, router])
+
+
+useEffect(() => {
+  if (timeLeft === 0 && testData) {
+    handleSubmit(true); // auto submit
+  }
+}, [timeLeft, testData, handleSubmit]); // now handleSubmit included
+
+ if (!testData) return <p className="p-6 text-center">Loading test...</p>;
+
 
   return (
     <div className="p-4 md:p-6 w-full mx-auto bg-background text-foreground min-h-screen">
@@ -246,7 +281,7 @@ export default function AttemptPage() {
               Marked
             </p>
             <p className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-muted inline-block"></span>
+              <span className="w-4 h-4 rounded-full bg-muted dark:bg-slate-700 border-[1px] dark:border-white inline-block"></span>
               Not Visited
             </p>
           </div>

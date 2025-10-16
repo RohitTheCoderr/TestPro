@@ -6,25 +6,27 @@ import React, { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { setCurrentTest } from "@/lib/redux/slices/testSlice";
+import { Exams, TestsResponse } from "@/Interfaces";
+import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 
 // interface PageProps {
 //   params: { category: string; examType: string };
 // }
 
-type ExamDetails = {
-  ExamID: string;
-  categoryID: string;
-  categoryName: string;
-  name: string;
-  slug: string;
-  examDetails: {
-    details: string[];
-    negativeMark: number;
-    permark: number;
-    totalQuestion: number;
-    totalmarks: number;
-  };
-};
+// type ExamDetails = {
+//   ExamID: string;
+//   categoryID: string;
+//   categoryName: string;
+//   name: string;
+//   slug: string;
+//   examDetails: {
+//     details: string[];
+//     negativeMark: number;
+//     permark: number;
+//     totalQuestion: number;
+//     totalmarks: number;
+//   };
+// };
 
 interface Exam {
   title: string;
@@ -33,19 +35,12 @@ interface Exam {
   price: number;
   testID: string;
   examID: string;
+  examName: string;
+  categoryName: string;
 }
 
-type TestCardProps = {
-  examName: string;
-  title: string;
-  type: string;
-  testID: string;
-  duration: number;
-  price: number;
-  examID: string;
-  categoryName: string;
-  onSelect: (id: string) => void;
-};
+
+
 
 const Testcard: React.FC<TestCardProps> = ({
   examName,
@@ -83,7 +78,7 @@ const Testcard: React.FC<TestCardProps> = ({
     {/* Button */}
     <Link
       href={`/tests/${categoryName}/${examName}/${title}`}
-      onClick={() => onSelect(testID)}
+      onClick={() => onSelect?.(testID)}
       className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-accent hover:text-accent-foreground transition w-full text-center"
     >
       View Details
@@ -102,7 +97,7 @@ export default function ExamTypeTests({
 
   const currentExam = useSelector(
     (state: RootState) => state.exam.currentExam
-  ) as ExamDetails | null;
+  ) as Exams | null;
 
   const dispatch = useDispatch();
   const handleTestSelect = (testID: string) => {
@@ -112,12 +107,12 @@ export default function ExamTypeTests({
   useEffect(() => {
     const fetchAllExams = async () => {
       try {
-        const res = await apiClient.get(`/user/tests/${currentExam?.ExamID}`);
-        const exams: TestCardProps[] = res.tests.map((exam:Exam) => ({
+        const res = await apiClient.get<TestsResponse>(`/user/tests/${currentExam?.ExamID}`);
+        const exams: TestCardProps[] = res.tests.map((exam:Test) => ({
           title: exam.title,
           type: exam.type,
-          duration: exam.duration,
-          price: exam.price,
+          duration: Number(exam.duration),
+          price: exam.price !== undefined ? Number(exam.price) : undefined,
           testID: exam.testID,
           examID: exam.examID,
           categoryName: category,

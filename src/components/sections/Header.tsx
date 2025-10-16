@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import ThemeToggle from "../shared/mode";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { persistor } from "@/lib/redux/store";
-// import { logout } from "@/lib/redux/slices/authSlice";
-
+import { logout } from "@/lib/redux/slices/authSlice";
+import Image from "next/image";
 const Header = () => {
-  const token = useSelector((state: RootState) => state.auth.token);
-  // const dispatch = useDispatch();
+  let token = useSelector((state: RootState) => state.auth.token);
+  const dispatch = useDispatch();
   const handleLogout = () => {
-    // dispatch(logout());
+    dispatch(logout());
+    alert("logout");
     localStorage.removeItem("authToken");
     persistor.purge(); // for clear all data from persits and redux
   };
@@ -19,7 +20,7 @@ const Header = () => {
   return (
     <header className="flex justify-between items-center px-8 md:px-16 py-4 shadow-md bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
-        <Link href="/" className="cursor-pointer flex gap-2">
+        {/* <Link href="/" className="cursor-pointer flex gap-2">
           <svg
             className="h-8 w-8"
             fill="none"
@@ -42,6 +43,19 @@ const Header = () => {
           <h1 className="text-2xl font-bold text-primary dark:text-accent">
             TestPro
           </h1>
+        </Link> */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white"
+        >
+          <Image
+            src="/logo.png"
+            alt="TestPro Logo"
+            width={64} // 16 * 4 = 64px (equivalent to h-16)
+            height={64} // 16 * 4 = 64px (equivalent to w-16)
+            priority // optional: preloads logo for faster first render
+          />
+          {/* <span>TestPro</span> */}
         </Link>
       </div>
       <nav className="space-x-6 text-black dark:text-white">

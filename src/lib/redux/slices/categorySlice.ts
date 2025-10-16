@@ -1,17 +1,18 @@
+import { Category } from '@/Interfaces';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface CategoryDetails {
-  details: string;
-  // otherdetails: string;
-}
+// interface CategoryDetails {
+//   details: string;
+//   // otherdetails: string;
+// }
 
-interface Category {
-  categoryID: string;
-  name: string;
-  slug: string;
-  categoryDetails?: CategoryDetails;
-  __v?: number;
-}
+// interface Category {
+//   categoryID: string;
+//   name: string;
+//   slug: string;
+//   categoryDetails?: CategoryDetails;
+//   __v?: number;
+// }
 
 interface CategoryState {
   categories: Category[];
