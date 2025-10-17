@@ -58,10 +58,7 @@ export default function AttemptPage() {
           `/user/tests/${currentExamdetails?.ExamID}/${testID}`
         );
         const test = res?.test;
-        console.log("geee", test);
-        
         setTestData(test);
-
         // ✅ Initialize timeLeft based on duration in minutes → seconds
         if (test?.duration) setTimeLeft(test.duration * 60);
       } catch (error) {
@@ -183,7 +180,7 @@ const handleSubmit = useCallback((auto = false) => {
   router.push("/thankyou");
 },[subjects, selectedAnswers, markedForReview, dispatch, router])
 
-
+// auto submit
 useEffect(() => {
   if (timeLeft === 0 && testData) {
     handleSubmit(true); // auto submit

@@ -171,7 +171,7 @@ export default function TestsPage({
             You can explore other categories or check back later for updates.
           </p>
           <button
-            onClick={() => router.push("/category")}
+            onClick={() => router.push("/tests")}
             className="mt-4 px-8 py-3 rounded-lg bg-primary text-white font-semibold shadow-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300"
           >
             Explore Other Categories
@@ -180,7 +180,7 @@ export default function TestsPage({
       )}
 
       {/* Optional CTA Section */}
-      <div className="mt-20 text-center max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg">
+      <div className="mt-20 text-center max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl max-sm:p-5 p-8 shadow-lg">
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
           Ready to challenge yourself?
         </h2>

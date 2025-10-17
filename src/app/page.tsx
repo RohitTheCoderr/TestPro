@@ -74,16 +74,16 @@ export default function HomePage() {
             Prepare for SSC, Banking, UPSC, and more with real exam-like mock
             tests. Track your performance and get detailed analysis.
           </p>
-          <div className="mt-6 space-x-4">
+          <div className="mt-6 sm:space-x-4">
             <Button
               href="/tests"
-              className="bg-primary w-[10rem] text-lg hover:bg-accent text-white "
+              className="bg-primary w-full sm:w-[10rem] text-lg hover:bg-accent text-white "
             >
               Start Free Test
             </Button>
             <Button
               href={"#category"}
-              className="bg-gray-100 w-[10rem] text-lg border border-primary text-black hover:text-white "
+              className="bg-gray-100 w-full sm:w-[10rem] max-sm:mt-4 text-lg border border-primary text-black hover:text-white "
             >
               Explore Tests
             </Button>
@@ -91,7 +91,7 @@ export default function HomePage() {
         </div>
 
         {/* Right Illustration */}
-        <div className="relative w-[400px] md:w-[530px] h-[400px] mt-10 md:mt-0">
+        <div className="relative w-[300px] sm:w-[400px] md:w-[530px] h-[300px] sm:h-[400px] mt-10 md:mt-0">
           <Image
             // src="/hero1.png"
             src="/herocartoon.png"
@@ -169,7 +169,7 @@ export default function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16  ">
+      <section className="py-16 px-8 md:px-16 ">
         <div className="text-center max-w-3xl mx-auto ">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
             Our Mock Test Categories

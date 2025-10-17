@@ -87,7 +87,7 @@ export default function TestsPage() {
         <h2 className="text-2xl font-semibold text-foreground mb-6">
           Popular Tests
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tests.map((test, idx) => (
             <div
               key={idx}
@@ -124,7 +124,7 @@ export default function TestsPage() {
         <h2 className="text-2xl font-semibold text-foreground mb-6">
           Explore by Category
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {Array.isArray(categoriesss) && categoriesss.length > 0 ? (
             categoriesss.map((cat) => (
               <CategoryCard
@@ -140,30 +140,30 @@ export default function TestsPage() {
               />
             ))
           ) : (
-            <p>No categories found</p>
+            <p className="text-black dark:text-red-500">No categories found</p>
           )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-10 max-w-5xl mx-auto shadow-lg">
+      <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-5 sm:p-10 max-w-5xl mx-auto shadow-lg">
         <h2 className="text-3xl font-bold text-white">
           Ready to challenge yourself?
         </h2>
-        <p className="mt-2 text-lg text-primary-foreground/90">
+        <p className="mt-2 text-lg text-primary-foreground/90 text-gray-300">
           Start your first free test today and climb up the leaderboard.
         </p>
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-6 flex max-sm:flex-col justify-center gap-4">
           <Button
             size="lg"
-            className="bg-background text-foreground hover:bg-muted"
+            className="bg-background max-sm:w-full text-foreground hover:bg-muted"
           >
             Start Free Test
           </Button>
           <Button
             variant="outline"
             size="lg"
-            className="bg-primary-foreground text-secondary hover:bg-background hover:text-foreground"
+            className="bg-primary-foreground max-sm:w-full text-secondary hover:bg-background hover:text-foreground"
           >
             Explore More Tests
           </Button>

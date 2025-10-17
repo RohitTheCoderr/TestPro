@@ -33,6 +33,7 @@ export default function RootLayout({
         <Providers>
           {/* <GlobalLoader /> */}
           <Header />
+          <div className=" max-sm:hidden sm:h-[6rem] w-full"></div>
           {children}
           <Footer />
         </Providers>
