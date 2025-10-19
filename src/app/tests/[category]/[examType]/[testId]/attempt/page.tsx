@@ -10,27 +10,16 @@ import Image from "next/image";
 import { SingleTestsResponse } from "@/Interfaces";
 import { Test } from "@/Interfaces/TestInterfaces";
 
+interface Answer {
+  subjectId: string;
+  questionId: string;
+  selectedOptionIndex: number;
+}
 
-// interface Question {
-//   question: string;
-//   options: string[];
-//   answer: string;
-//   image: string;
-//   questionID: string;
-// }
-
-// interface Subject {
-//   id: string;
-//   name: string;
-//   questions: Question[];
-// }
-
-// interface TestData {
-//   testID: string;
-//   title: string;
-//   duration: number;
-//   subjects: Subject[];
-// }
+interface PostData {
+  testID: string;
+  answers: Answer[];
+}
 
 export default function AttemptPage() {
   // const [testData, setTestData] = useState<TestData | null>(null);
@@ -79,13 +68,6 @@ export default function AttemptPage() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // ✅ Auto Submit when time hits 0
-  // useEffect(() => {
-  //   if (timeLeft === 0 && testData) {
-  //     handleSubmit(true); // true = auto submit
-  //   }
-  // }, [testData, timeLeft,]);
-
   // ✅ Format time
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -93,7 +75,6 @@ export default function AttemptPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
- 
   const subjects = testData?.subjects ?? [];
   const currentSubject = subjects[currentSubjectIndex];
   const currentQuestion = currentSubject?.questions[currentQuestionIndex];
@@ -142,53 +123,166 @@ export default function AttemptPage() {
     }
   };
 
-  // ✅ Submit Test
-  // const handleSubmit = (auto = false) => {
-  //   const total = subjects.reduce(
-  //     (acc, subj) => acc + subj.questions.length,
-  //     0
-  //   );
-  //   const totalAnswered = Object.keys(selectedAnswers).length;
-  //   alert(
-  //     auto
-  //       ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
-  //       : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
-  //   );
-  //   console.log("answer", selectedAnswers);
-  //   console.log("markedForReview", markedForReview);
-  //   dispatch(clearCurrentExam());
-  //   dispatch(clearCurrentTest());
-  //   router.push("/thankyou");
-  // };
+  // const handleSubmit = useCallback(
 
+  //   (auto = false) => {
+  //     try {
+  //       // const total = subjects.reduce(
+  //       //   (acc, subj) => acc + subj.questions.length,
+  //       //   0
+  //       // );
+  //       // const totalAnswered = Object.keys(selectedAnswers).length;
+  //       // alert(
+  //       //   auto
+  //       //     ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
+  //       //     : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
+  //       // );
+  //       // console.log("answer", selectedAnswers);
+  //       // console.log("markedForReview", markedForReview);
 
-const handleSubmit = useCallback((auto = false) => {
-  const total = subjects.reduce(
-    (acc, subj) => acc + subj.questions.length,
-    0
+  //       const payload = [];
+
+  //       for (const key in selectedAnswers) {
+  //         const [subjectId, questionIdx] = key.split("-");
+  //         const questionIndex = Number(questionIdx);
+
+  //         const subject = subjects.find((sub) => sub.id === subjectId);
+  //         const question = subject?.questions[questionIndex];
+
+  //         if (!question) continue;
+
+  //         const selectedOptionText = selectedAnswers[key];
+  //         const selectedOptionIndex =
+  //           question.options.indexOf(selectedOptionText);
+
+  //         payload.push({
+  //           subjectId,
+  //           questionId: question.id, // ✅ Real questionId from DB
+  //           selectedOptionIndex, // ✅ Converted from text → index
+  //         });
+  //       }
+
+  //       console.log("Payload to send:", payload);
+
+  //       // const
+
+  //       // postSubmittedData({ testID: testData? testData.testID:testID, answers: payload })
+  //       const postSubmittedData = async (submitdata: PostData) => {
+  //         try {
+  //           console.log("call function");
+  //           console.log("send this:", JSON.stringify(submitdata));
+  //           const response = await apiClient.post<ResponseType>(
+  //             "/user/tests/submit-test",
+  //             submitdata
+  //           );
+  //           console.log("Test submitted successfully", response);
+  //           return response;
+  //         } catch (error) {
+  //           console.error("Error while submit test:", error);
+  //         }
+  //       };
+
+  //       console.log("Final testID:", testData?.testID || testID);
+
+  //       // ✅ Usage (sending testID exactly)
+  //       postSubmittedData({
+  //         answers: payload,
+  //         testID: testData?.testID || testID,
+  //       });
+
+  //       console.log("Final testID after cllaalff:", testData?.testID || testID);
+  //       // dispatch(clearCurrentExam());
+  //       // dispatch(clearCurrentTest());
+  //       // router.push("/thankyou");
+  //     } catch (error) {
+  //       console.error("❌ API Failed:", error);
+  //     }
+  //   },
+  //   [subjects, selectedAnswers, markedForReview, dispatch, router]
+  // );
+
+  // move this outside the handler if you call it from multiple places
+  const postSubmittedData = async (submitdata: PostData): Promise<ResponseType> => {
+    try {
+      const response = await apiClient.post<ResponseType>(
+        "/user/tests/submit-test",
+        submitdata
+      );
+      return response;
+    } catch (error) {
+      console.error("Error while submit test:", error);
+      throw error; // re-throw so caller can react to failure
+    }
+  };
+
+  const handleSubmit = useCallback(
+    async (auto = false) => {
+      try {
+        // build payload
+        const payload: {
+          subjectId: string;
+          questionId: string;
+          selectedOptionIndex: number;
+        }[] = [];
+
+        for (const key in selectedAnswers) {
+          const [subjectId, questionIdx] = key.split("-");
+          const questionIndex = Number(questionIdx);
+
+          const subject = subjects.find((sub) => sub.id === subjectId);
+          const question = subject?.questions[questionIndex];
+
+          if (!question) continue;
+
+          const selectedOptionText = selectedAnswers[key];
+          const selectedOptionIndex =
+            question.options.indexOf(selectedOptionText);
+
+          payload.push({
+            subjectId,
+            questionId: question.id,
+            selectedOptionIndex,
+          });
+        }
+
+        const finalTestID = testData?.testID || testID;
+        // IMPORTANT: await the async call
+        const apiResponse = await postSubmittedData({
+          answers: payload,
+          testID: finalTestID, // you said backend expects testID
+        });
+
+        console.log("API response:", apiResponse);
+
+        // post-submit logic (only after API resolves)
+        dispatch(clearCurrentExam());
+        dispatch(clearCurrentTest());
+        router.push("/thankyou");
+      } catch (error) {
+        console.error("❌ Submit Failed:", error);
+        // optionally show user-facing error toast here
+      }
+    },
+    // include testData/testID in deps if used; otherwise stale values can be captured
+    [
+      subjects,
+      selectedAnswers,
+      markedForReview,
+      dispatch,
+      router,
+      testData,
+      testID,
+    ]
   );
-  const totalAnswered = Object.keys(selectedAnswers).length;
-  alert(
-    auto
-      ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
-      : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
-  );
-  console.log("answer", selectedAnswers);
-  console.log("markedForReview", markedForReview);
-  dispatch(clearCurrentExam());
-  dispatch(clearCurrentTest());
-  router.push("/thankyou");
-},[subjects, selectedAnswers, markedForReview, dispatch, router])
 
-// auto submit
-useEffect(() => {
-  if (timeLeft === 0 && testData) {
-    handleSubmit(true); // auto submit
-  }
-}, [timeLeft, testData, handleSubmit]); // now handleSubmit included
+  // auto submit
+  useEffect(() => {
+    if (timeLeft === 0 && testData) {
+      handleSubmit(true); // auto submit
+    }
+  }, [timeLeft, testData, handleSubmit]); // now handleSubmit included
 
- if (!testData) return <p className="p-6 text-center">Loading test...</p>;
-
+  if (!testData) return <p className="p-6 text-center">Loading test...</p>;
 
   return (
     <div className="p-4 md:p-6 w-full mx-auto bg-background text-foreground min-h-screen">

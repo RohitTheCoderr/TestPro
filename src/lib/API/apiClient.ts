@@ -23,7 +23,7 @@ export const apiClient = {
         } else {
           throw new Error(
             (error.response.data as { message?: string })?.message ||
-              `Request failed with status ${error.response.status}`
+            `Request failed with status ${error.response.status}`
           );
         }
       }
@@ -32,12 +32,36 @@ export const apiClient = {
     }
   },
 
-  post: async <T = unknown>(
+  // post: async <T = unknown>(
+  //   url: string,
+  //   data?: Record<string, unknown>
+  // ): Promise<T> => {
+  //   const res: AxiosResponse<T> = await axiosInstance.post(url, data);
+  //   return res.data;
+  // },
+
+  post: async <T = unknown, D = unknown>(
     url: string,
-    data?: Record<string, unknown>
+    data?: D
   ): Promise<T> => {
-    const res: AxiosResponse<T> = await axiosInstance.post(url, data);
-    return res.data;
+    try {
+      const res: AxiosResponse<T> = await axiosInstance.post(url, data);
+      return res.data;
+    }
+    catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (!error.response) {
+          throw new Error("Network error: Please check your internet connection.");
+        } else {
+          throw new Error(
+            (error.response.data as { message?: string })?.message ||
+            `Request failed with status ${error.response.status}`
+          );
+        }
+      }
+      console.error("Unexpected error:", error);
+      throw new Error("An unexpected error occurred. Please try again.");
+    }
   },
 
   put: async <T = unknown>(
