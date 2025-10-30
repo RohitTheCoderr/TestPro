@@ -17,8 +17,8 @@ interface Answer {
 }
 
 interface PostData {
-  testID: string;
   answers: Answer[];
+  testID: string;
 }
 
 export default function AttemptPage() {
@@ -245,7 +245,7 @@ export default function AttemptPage() {
           });
         }
 
-        const finalTestID = testData?.testID || testID;
+        const finalTestID = testData?.testID || testID || "";;
         // IMPORTANT: await the async call
         const apiResponse = await postSubmittedData({
           answers: payload,
