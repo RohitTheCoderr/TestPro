@@ -5,7 +5,7 @@ import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 import { RootState } from "@/lib/redux/store";
 import axios from "axios";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FaArrowsAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -17,13 +17,7 @@ function CategoriesSection() {
   const categoriesss =
     useSelector((state: RootState) => state.category.categories) || [];
 
-  useEffect(() => {
-    if (categoryname) {
-      fetchExamData();
-    }
-  }, [categoryname, ]);
-
-  const fetchExamData = async () => {
+  const fetchExamData = useCallback(async () => {
     try {
       const result = await apiClient.get<Examresponse>(
         `/category/${categoryname}/exams`
@@ -41,7 +35,39 @@ function CategoriesSection() {
         console.error("Unexpected error:", error);
       }
     }
-  };
+  }, [categoryname]); // ✅ stable & correct
+
+  useEffect(() => {
+    if (categoryname) {
+      fetchExamData();
+    }
+  }, [categoryname, fetchExamData]); // ✅ warning removed
+
+  // useEffect(() => {
+  //   if (categoryname) {
+  //     fetchExamData();
+  //   }
+  // }, [categoryname,]);
+
+  // const fetchExamData = async () => {
+  //   try {
+  //     const result = await apiClient.get<Examresponse>(
+  //       `/category/${categoryname}/exams`
+  //     );
+  //     setExamdata(result?.data?.exams || []);
+  //   } catch (error: unknown) {
+  //     if (axios.isAxiosError(error)) {
+  //       console.error(
+  //         "Error fetching Exams:",
+  //         error.response?.data || error.message
+  //       );
+  //     } else if (error instanceof Error) {
+  //       console.error("Error fetching Exams:", error.message);
+  //     } else {
+  //       console.error("Unexpected error:", error);
+  //     }
+  //   }
+  // };
 
   const handleExamSelect = (exam: Exams) => {
     dispatch(setCurrentExam(exam));
@@ -87,7 +113,9 @@ function CategoriesSection() {
                   <div className=" w-[80%] text-xl text-center font-semibold group-hover:text-primary text-foreground">
                     {exam?.name}
                   </div>
-                  <div><FaArrowsAlt/></div>
+                  <div>
+                    <FaArrowsAlt />
+                  </div>
                 </Link>
               ))
             ) : (

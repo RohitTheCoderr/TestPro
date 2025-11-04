@@ -1,7 +1,7 @@
 "use client";
 import { apiClient } from "@/lib/API/apiClient";
 import { RootState } from "@/lib/redux/store";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { clearCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
@@ -75,7 +75,11 @@ export default function AttemptPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  const subjects = testData?.subjects ?? [];
+  // const subjects = testData?.subjects ?? [];
+  const subjects = useMemo(() => {
+    return testData?.subjects ?? [];
+  }, [testData?.subjects]);
+
   const currentSubject = subjects[currentSubjectIndex];
   const currentQuestion = currentSubject?.questions[currentQuestionIndex];
 
@@ -202,7 +206,9 @@ export default function AttemptPage() {
   // );
 
   // move this outside the handler if you call it from multiple places
-  const postSubmittedData = async (submitdata: PostData): Promise<ResponseType> => {
+  const postSubmittedData = async (
+    submitdata: PostData
+  ): Promise<ResponseType> => {
     try {
       const response = await apiClient.post<ResponseType>(
         "/user/tests/submit-test",
@@ -218,6 +224,9 @@ export default function AttemptPage() {
   const handleSubmit = useCallback(
     async (auto = false) => {
       try {
+        if (auto) {
+          console.log("Auto submit triggered");
+        }
         // build payload
         const payload: {
           subjectId: string;
@@ -245,7 +254,7 @@ export default function AttemptPage() {
           });
         }
 
-        const finalTestID = testData?.testID || testID || "";;
+        const finalTestID = testData?.testID || testID || "";
         // IMPORTANT: await the async call
         const apiResponse = await postSubmittedData({
           answers: payload,
