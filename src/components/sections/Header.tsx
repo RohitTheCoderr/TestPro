@@ -27,7 +27,7 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between mb-4 sm:fixed w-full z-30 items-center px-8 md:px-16 py-4 shadow-md bg-white dark:bg-gray-700 dark:text-white">
+    <header className="flex justify-between w-full items-center px-8 md:px-16 py-4 shadow-md border-b-[1px] bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
         {/* <Link href="/" className="cursor-pointer flex gap-2">
           <svg

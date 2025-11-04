@@ -127,84 +127,6 @@ export default function AttemptPage() {
     }
   };
 
-  // const handleSubmit = useCallback(
-
-  //   (auto = false) => {
-  //     try {
-  //       // const total = subjects.reduce(
-  //       //   (acc, subj) => acc + subj.questions.length,
-  //       //   0
-  //       // );
-  //       // const totalAnswered = Object.keys(selectedAnswers).length;
-  //       // alert(
-  //       //   auto
-  //       //     ? `⏰ Time is over!\nAuto submitted.\nYou answered ${totalAnswered} out of ${total} questions.`
-  //       //     : `✅ Test Submitted!\nYou answered ${totalAnswered} out of ${total} questions.`
-  //       // );
-  //       // console.log("answer", selectedAnswers);
-  //       // console.log("markedForReview", markedForReview);
-
-  //       const payload = [];
-
-  //       for (const key in selectedAnswers) {
-  //         const [subjectId, questionIdx] = key.split("-");
-  //         const questionIndex = Number(questionIdx);
-
-  //         const subject = subjects.find((sub) => sub.id === subjectId);
-  //         const question = subject?.questions[questionIndex];
-
-  //         if (!question) continue;
-
-  //         const selectedOptionText = selectedAnswers[key];
-  //         const selectedOptionIndex =
-  //           question.options.indexOf(selectedOptionText);
-
-  //         payload.push({
-  //           subjectId,
-  //           questionId: question.id, // ✅ Real questionId from DB
-  //           selectedOptionIndex, // ✅ Converted from text → index
-  //         });
-  //       }
-
-  //       console.log("Payload to send:", payload);
-
-  //       // const
-
-  //       // postSubmittedData({ testID: testData? testData.testID:testID, answers: payload })
-  //       const postSubmittedData = async (submitdata: PostData) => {
-  //         try {
-  //           console.log("call function");
-  //           console.log("send this:", JSON.stringify(submitdata));
-  //           const response = await apiClient.post<ResponseType>(
-  //             "/user/tests/submit-test",
-  //             submitdata
-  //           );
-  //           console.log("Test submitted successfully", response);
-  //           return response;
-  //         } catch (error) {
-  //           console.error("Error while submit test:", error);
-  //         }
-  //       };
-
-  //       console.log("Final testID:", testData?.testID || testID);
-
-  //       // ✅ Usage (sending testID exactly)
-  //       postSubmittedData({
-  //         answers: payload,
-  //         testID: testData?.testID || testID,
-  //       });
-
-  //       console.log("Final testID after cllaalff:", testData?.testID || testID);
-  //       // dispatch(clearCurrentExam());
-  //       // dispatch(clearCurrentTest());
-  //       // router.push("/thankyou");
-  //     } catch (error) {
-  //       console.error("❌ API Failed:", error);
-  //     }
-  //   },
-  //   [subjects, selectedAnswers, markedForReview, dispatch, router]
-  // );
-
   // move this outside the handler if you call it from multiple places
   const postSubmittedData = async (
     submitdata: PostData
@@ -276,7 +198,7 @@ export default function AttemptPage() {
     [
       subjects,
       selectedAnswers,
-      markedForReview,
+      // markedForReview,
       dispatch,
       router,
       testData,
@@ -291,7 +213,31 @@ export default function AttemptPage() {
     }
   }, [timeLeft, testData, handleSubmit]); // now handleSubmit included
 
-  if (!testData) return <p className="p-6 text-center">Loading test...</p>;
+  //  Auto-submit when user switches tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log("❗ User switched tab — auto submitting...");
+        handleSubmit(true); // auto submit
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [handleSubmit]);
+
+  if (!testData)
+    return (
+      <p className="p-6 text-center flex justify-center items-center font-semibold text-green-500 h-[100vh]">
+        Loading test...
+      </p>
+    );
+
+
+    
 
   return (
     <div className="p-4 md:p-6 w-full mx-auto bg-background text-foreground min-h-screen">

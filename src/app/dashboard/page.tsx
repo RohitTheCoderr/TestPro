@@ -78,7 +78,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8 rounded-lg bg-gradient-to-r from-primary to-accent p-8 text-card shadow-lg">
           <h1 className="mb-2 text-4xl font-bold lg:text-5xl">
-            Welcome back, Rohit!
+            Welcome back, User!
           </h1>
           <p className="text-base leading-relaxed text-card-foreground">
             Your personalized dashboard to track progress and stay ahead.

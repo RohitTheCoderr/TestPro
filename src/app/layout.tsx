@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/sections/Header";
 import Footer from "@/components/sections/Footer";
 import Providers from "@/lib/redux/providers";
+import LayoutClient from "./layoutClient";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,10 +33,17 @@ export default function RootLayout({
       >
         <Providers>
           {/* <GlobalLoader /> */}
-          <Header />
-          <div className=" max-sm:hidden sm:h-[6rem] w-full"></div>
+           <LayoutClient
+            header={<Header />}
+            footer={<Footer />}
+          >
+            {children}
+            {/* <Footer /> */}
+          </LayoutClient>
+
+          {/* <Header />
           {children}
-          <Footer />
+          <Footer /> */}
         </Providers>
       </body>
     </html>
