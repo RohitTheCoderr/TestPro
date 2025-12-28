@@ -33,8 +33,6 @@ const router=useRouter()
     }
 
     setIsLoading(true);
-    console.log(`+91${contact}`);
-
     // Determine if contact is email or mobile
     const isEmail = /^\S+@\S+\.\S+$/.test(contact);
     const bodyData = isEmail
@@ -49,8 +47,6 @@ const router=useRouter()
       });
       const data = await res.json();
 
-      console.log("data otp", data?.data?.otpID);
-      
       if (data.success) {
         setOtpSent(true);
         setOtpID(data?.data?.otpID); // save otpID returned from backend
@@ -74,7 +70,6 @@ const router=useRouter()
     }
 
     setIsLoading(true);
-
     // Determine if contact is email or mobile
     const isEmail = /^\S+@\S+\.\S+$/.test(contact);
     const bodyData = isEmail
@@ -99,7 +94,7 @@ const router=useRouter()
         alert(data.message || "OTP verification failed");
       }
     } catch (err) {
-      console.error(err);
+      console.error("error>>",err);
       alert("Server error");
     } finally {
       setIsLoading(false);
