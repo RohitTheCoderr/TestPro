@@ -5,9 +5,10 @@ export interface CategoryDetails {
 }
 
 export interface Category {
-  categoryID: string;
+  categoryID?: string;
   name: string;
-  slug: string;
+  slug?: string;
   categoryDetails?: CategoryDetails;
   id?: string;
+  status?: boolean;
 }

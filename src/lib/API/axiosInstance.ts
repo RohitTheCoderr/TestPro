@@ -9,7 +9,8 @@ const axiosInstance = axios.create({
 // ✅ Automatically attach token from localStorage (or Redux if needed)
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     // const token = useSelector((state: RootState) => state.auth.token) || null;
 
     if (token) {
@@ -17,7 +18,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 export default axiosInstance;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { RootState } from "@/lib/redux/store";
 import { useSelector } from "react-redux";
 import { Category } from "@/Interfaces";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 const CategoryCard: React.FC<Category> = ({
   name,
@@ -60,9 +61,10 @@ export default function TestsPage() {
     },
   ];
 
-  const categoriesss = useSelector(
-    (state: RootState) => state.category.categories
-  );
+  // const categoriesss = useSelector(
+  //   (state: RootState) => state.category.categories,
+  // );
+  const categoriesss = useAppSelector((state) => state.category.categories);
 
   // const { exams, loading, error, refetch } = useFetchExams(params.category);
 

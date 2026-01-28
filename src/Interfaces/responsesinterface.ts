@@ -18,6 +18,11 @@ export interface CategoryResponse {
   };
 }
 
+export interface SingleCategoryResponse {
+  data: {
+    category: Category;
+  };
+}
 
 export interface TestsResponse {
   success: boolean;

@@ -17,20 +17,25 @@ import authReducer from "./slices/authSlice";
 import categoryReducer from "./slices/categorySlice";
 import examReducer from "./slices/examdetailsSlice"; // ✅ your new slice
 import testReducer from "./slices/testSlice"; // ✅ your new slice
+import categoriesListReducer from "./slices/forAdminSlice/categoriesSlice";
 
 // ✅ Combine all reducers
 const rootReducer = combineReducers({
   auth: authReducer,
   category: categoryReducer,
   exam: examReducer,
-  test:testReducer
+  test: testReducer,
+
+  // AdminPage
+
+  categories: categoriesListReducer,
 });
 
 // ✅ Persist config
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "category", "exam", "test"], // only persist what you need
+  whitelist: ["auth", "category", "exam", "test", "categories"], // only persist what you need
 };
 
 // ✅ Create persisted reducer
@@ -53,8 +58,6 @@ export const persistor = persistStore(store);
 // ✅ Typed hooks
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
-
 
 // ####################
 // import { configureStore } from '@reduxjs/toolkit';
@@ -84,17 +87,13 @@ export type AppDispatch = typeof store.dispatch;
 
 // const persistedState = typeof window !== "undefined" ? loadFromLocalStorage() : undefined;
 
-
-
-
-
 // // end
 //  export const store = configureStore({
 //   reducer: {
 //     auth: authReducer,
 //     category: categoryReducer,
 //   },
-  
+
 // });
 
 // export type RootState = ReturnType<typeof store.getState>;

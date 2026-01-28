@@ -43,6 +43,8 @@ export default function HomePage() {
     const fetchData = async () => {
       try {
         const data = await apiClient.get<CategoryResponse>("/category");
+        console.log("data category", data);
+
         dispatch(setCategories(data?.data?.categories));
       } catch (error: unknown) {
         let message = "An unexpected error occurred.";

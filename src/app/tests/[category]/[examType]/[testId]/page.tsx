@@ -1,6 +1,6 @@
 "use client";
 import TestDetailsClient from "@/components/ui/TestDetailsClient/TestDetailsClient";
-import { use, } from "react";
+import { use } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -11,13 +11,10 @@ interface PageProps {
 }
 
 // Do NOT make this async
-export default function TestDetailsPage({
-  params,
-}: PageProps) {
+export default function TestDetailsPage({ params }: PageProps) {
   const { category, examType, testId } = use(params); // ✅
 
   return (
-    
     <TestDetailsClient
       category={category}
       examType={examType}

@@ -15,5 +15,5 @@ export interface Exams {
   ExamID: string;
   categoryID: string;
   id?: string;
-  categoryName?:string
+  categoryName?: string;
 }

@@ -17,17 +17,22 @@ function CategoriesSection() {
   const categoriesss =
     useSelector((state: RootState) => state.category.categories) || [];
 
+  console.log("state categiruy", categoriesss);
+
   const fetchExamData = useCallback(async () => {
     try {
       const result = await apiClient.get<Examresponse>(
-        `/category/${categoryname}/exams`
+        `/category/${categoryname}/exams`,
       );
+
+      console.log(" resultresultre", result);
+
       setExamdata(result?.data?.exams || []);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error(
           "Error fetching Exams:",
-          error.response?.data || error.message
+          error.response?.data || error.message,
         );
       } else if (error instanceof Error) {
         console.error("Error fetching Exams:", error.message);
