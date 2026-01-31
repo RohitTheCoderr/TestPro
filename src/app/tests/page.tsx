@@ -24,7 +24,11 @@ const CategoryCard: React.FC<Category> = ({
       {categoryID && (
         <div className="mt-4 flex gap-4">
           <Link
-            href={`/tests/${slug}/`}
+            // href={`/tests/${slug}/`}
+            href={{
+              pathname: `/tests/${slug}`,
+              query: { categoryID },
+            }}
             className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             Explore category

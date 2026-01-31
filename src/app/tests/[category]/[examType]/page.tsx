@@ -39,9 +39,6 @@ import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 //   categoryName: string;
 // }
 
-
-
-
 const Testcard: React.FC<TestCardProps> = ({
   examName,
   title,
@@ -96,7 +93,7 @@ export default function ExamTypeTests({
   const [examList, setExamList] = useState<TestCardProps[]>([]);
 
   const currentExam = useSelector(
-    (state: RootState) => state.exam.currentExam
+    (state: RootState) => state.exam.currentExam,
   ) as Exams | null;
 
   const dispatch = useDispatch();
@@ -107,8 +104,10 @@ export default function ExamTypeTests({
   useEffect(() => {
     const fetchAllExams = async () => {
       try {
-        const res = await apiClient.get<TestsResponse>(`/user/tests/${currentExam?.ExamID}`);
-        const exams: TestCardProps[] = res.tests.map((exam:Test) => ({
+        const res = await apiClient.get<TestsResponse>(
+          `/user/tests/${currentExam?.ExamID}`,
+        );
+        const exams: TestCardProps[] = res.tests.map((exam: Test) => ({
           title: exam.title,
           type: exam.type,
           duration: Number(exam.duration),
@@ -125,7 +124,7 @@ export default function ExamTypeTests({
     };
 
     fetchAllExams();
-  }, [currentExam?.ExamID,currentExam?.name,category, examType]);
+  }, [currentExam?.ExamID, currentExam?.name, category, examType]);
 
   return (
     <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">
@@ -134,6 +133,7 @@ export default function ExamTypeTests({
         <span className="uppercase">{category} </span>→ {examType} Tests
       </h1>
 
+      <p>rohit</p>
       {/* Grid of Tests */}
       {examList.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

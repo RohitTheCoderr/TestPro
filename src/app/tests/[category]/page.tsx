@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 // import type { Exam } from "@/lib/redux/slices/examdetailsSlice.ts";
 import { ExamDetails, Examresponse, Exams } from "@/Interfaces";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Define the type for selected exam
 type ExamSelect = {
@@ -90,11 +90,15 @@ export default function TestsPage({
   const router = useRouter();
   const decodedCategory = decodeURIComponent(category);
 
+  const searchParams = useSearchParams();
+  const categoryID = searchParams.get("categoryID");
+  // const categoryID = searchParams.get("categoryID");
+
   useEffect(() => {
     const fetchExamData = async () => {
       try {
         const res = await apiClient.get<Examresponse>(
-          `/category/${decodedCategory}/exams`
+          `/category/${categoryID}/exams`,
         );
         const categoryName = res.data.category.name;
         const exams: ExamCardProps[] = res.data.exams.map((exam: Exams) => ({
@@ -112,8 +116,8 @@ export default function TestsPage({
       }
     };
 
-    if (decodedCategory) fetchExamData();
-  }, [decodedCategory]);
+    if (categoryID) fetchExamData();
+  }, [categoryID]);
 
   const handleExamSelect = (exam: Exams) => {
     dispatch(setCurrentExam(exam));
@@ -124,7 +128,8 @@ export default function TestsPage({
       {/* Header */}
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white drop-shadow-sm">
-          <span className="uppercase text-primary">{decodedCategory}</span> Exams
+          <span className="uppercase text-primary">{decodedCategory}</span>{" "}
+          Exams
         </h1>
         <p className="mt-4 text-lg md:text-xl text-gray-600 dark:text-gray-300">
           Sharpen your skills with practice tests specifically designed for{" "}
