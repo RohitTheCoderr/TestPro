@@ -2,11 +2,7 @@ import EditCategoryForm from "@/components/adminReleted/editCategoryForm/editcat
 import React from "react";
 
 function CreatePage() {
-  return (
-    <div>
-      <EditCategoryForm />
-    </div>
-  );
+  return <EditCategoryForm />;
 }
 
 export default CreatePage;

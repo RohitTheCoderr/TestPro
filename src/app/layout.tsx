@@ -33,10 +33,7 @@ export default function RootLayout({
       >
         <Providers>
           {/* <GlobalLoader /> */}
-           <LayoutClient
-            header={<Header />}
-            footer={<Footer />}
-          >
+          <LayoutClient header={<Header />} footer={<Footer />}>
             {children}
             {/* <Footer /> */}
           </LayoutClient>

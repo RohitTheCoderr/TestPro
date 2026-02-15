@@ -65,7 +65,7 @@ function CategoriesSection() {
         {categoriesss.map((cat, index) => (
           <div
             key={cat.categoryID || index}
-            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-full my-auto text-center hover:shadow-lg hover:border-primary hover:text-primary group transition ${
+            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-full my-auto text-center hover:shadow-lg hover:border-primary group transition ${
               categoryname == cat.slug ? "bg-primary shadow-lg text-white" : ""
             }`}
             onClick={() => {

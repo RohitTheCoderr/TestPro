@@ -104,6 +104,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Categories Section */}
+      <section className="py-16 px-8 md:px-16 ">
+        <div className="text-center max-w-3xl mx-auto ">
+          <h2 className="text-4xl font-bold tracking-tight mb-4">
+            Our Mock Test Categories
+          </h2>
+          <p className="text-lg text-text-light/70 dark:text-text-dark/70">
+            Explore our wide range of mock tests tailored for your specific exam
+            needs.
+          </p>
+        </div>
+        {error ? (
+          <div className="text-red-600 text-center my-6 p-3 rounded">
+            ⚠️ {error}
+          </div>
+        ) : (
+          <CategoriesSection />
+        )}
+      </section>
+
       <section className="py-16 px-8 md:px-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
@@ -168,26 +188,6 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="py-16 px-8 md:px-16 ">
-        <div className="text-center max-w-3xl mx-auto ">
-          <h2 className="text-4xl font-bold tracking-tight mb-4">
-            Our Mock Test Categories
-          </h2>
-          <p className="text-lg text-text-light/70 dark:text-text-dark/70">
-            Explore our wide range of mock tests tailored for your specific exam
-            needs.
-          </p>
-        </div>
-        {error ? (
-          <div className="text-red-600 text-center my-6 p-3 rounded">
-            ⚠️ {error}
-          </div>
-        ) : (
-          <CategoriesSection />
-        )}
       </section>
 
       <section className="bg-gradient-to-r from-green-500 to-teal-500 dark:from-gray-900 dark:to-gray-800 text-white rounded-3xl py-20 px-6 md:px-16 my-12  text-center shadow-lg relative overflow-hidden">
