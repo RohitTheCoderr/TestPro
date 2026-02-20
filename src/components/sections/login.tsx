@@ -1,10 +1,11 @@
 // File: pages/login.tsx
 "use client";
-import { setAuthToken } from "@/lib/redux/slices/authSlice";
-import { AppDispatch } from "@/lib/redux/store";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
+// import { AppDispatch } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 
 export default function Login() {
   //  const router = useRouter(); // This is now from 'next/navigation'
@@ -13,8 +14,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const dispatch = useDispatch<AppDispatch>();
-const router=useRouter()
+  // const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -35,23 +37,31 @@ const router=useRouter()
       : { mobile: `+91${contact}`, password }; // send mobile
 
     try {
-      // const res = await fetch("http://localhost:8000/api/user/auth/login", {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(bodyData),
-        }
+        },
       );
 
       const data = await res.json();
       console.log("login data", data);
+      console.log("login data.?data", data?.data);
+      console.log("data?.data?.token", data?.data?.token);
+      console.log("data?.data?.user", data?.data?.user);
 
       if (res.ok) {
+        const isAdmin = data?.data?.user;
         dispatch(setAuthToken(data?.data?.token));
-        localStorage.setItem("authToken", data?.data?.token);
-        router.push("/")
+        dispatch(setUser(isAdmin));
+
+        if (isAdmin.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       } else {
         alert(data.message || "OTP verification failed");
       }

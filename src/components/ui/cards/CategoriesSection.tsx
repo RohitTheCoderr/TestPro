@@ -3,35 +3,29 @@ import { Category, Examresponse, Exams } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useAppSelector } from "@/lib/redux/hooks";
 import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
-import { RootState } from "@/lib/redux/store";
 import axios from "axios";
 import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { FaArrowsAlt } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 function CategoriesSection() {
   const [examdata, setExamdata] = useState<Exams[]>([]);
   const dispatch = useDispatch();
   const [categoryname, setCategoryname] = useState<string | undefined>("ssc");
   const [cateID, setCateID] = useState<string | undefined>(
-    "68e72331a220cc0408e793a0",
+    "69942e1e1b4a6b26c8769148",
   );
 
-  // const categoriesss =useSelector((state: RootState) => state.category.categories) || [];
   const categoriesss = useAppSelector(
     (state) => state.category.categories,
   ) as Category[];
-
-  console.log("state categiruy", categoriesss);
 
   const fetchExamData = useCallback(async () => {
     try {
       const result = await apiClient.get<Examresponse>(
         `/category/${cateID}/exams`,
       );
-
-      console.log(" resultresultre", result);
 
       setExamdata(result?.data?.exams || []);
     } catch (error: unknown) {
@@ -65,7 +59,7 @@ function CategoriesSection() {
         {categoriesss.map((cat, index) => (
           <div
             key={cat.categoryID || index}
-            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-full my-auto text-center hover:shadow-lg hover:border-primary group transition ${
+            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-auto my-auto text-center hover:shadow-lg hover:border-primary group transition ${
               categoryname == cat.slug ? "bg-primary shadow-lg text-white" : ""
             }`}
             onClick={() => {
@@ -73,13 +67,7 @@ function CategoriesSection() {
               setCateID(cat.categoryID);
             }}
           >
-            {/* <p
-              className={`text-lg group-hover:text-primary font-semibold   ${
-                categoryname == cat.slug ? " group-hover:text-white" : ""
-              }`}
-            > */}
             {cat.name}
-            {/* </p> */}
           </div>
         ))}
       </div>

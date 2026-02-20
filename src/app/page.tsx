@@ -4,10 +4,8 @@ import CategoriesSection from "@/components/ui/cards/CategoriesSection";
 import { Category } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { setCategories } from "@/lib/redux/slices/categorySlice";
-import { AppDispatch } from "@/lib/redux/store";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import {
   MdAnalytics,
   MdTimer,
@@ -16,18 +14,7 @@ import {
 } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-
-// Define your Category type
-// interface Category {
-//   categoryID: string;
-//   name: string;
-//   slug: string;
-//   categoryDetails?: {
-//     details: string;
-//     otherdetails: string;
-//   };
-// }
-
+import { useAppDispatch } from "@/lib/redux/hooks";
 // Define the API response structure
 interface CategoryResponse {
   data: {
@@ -37,14 +24,12 @@ interface CategoryResponse {
 
 export default function HomePage() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await apiClient.get<CategoryResponse>("/category");
-        console.log("data category", data);
-
         dispatch(setCategories(data?.data?.categories));
       } catch (error: unknown) {
         let message = "An unexpected error occurred.";

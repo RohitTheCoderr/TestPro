@@ -9,11 +9,12 @@ import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
 import { apiClient } from "@/lib/API/apiClient";
 import { details } from "framer-motion/client";
+import { toast } from "sonner";
 
 interface EditCategoryFormProps {
   category?: Category;
 }
-export default function EditCategoryForm({ category }: EditCategoryFormProps) {
+export default function CategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -53,11 +54,12 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
         "/admin/category/update",
         payload,
       );
+      toast.success(res.message);
       if (res) {
         router.push("/admin/categories");
       }
     } catch (err: any) {
-      console.error(" eroororor", err);
+      toast.success(err.message);
       setError(err?.message || "Failed to Update category");
     } finally {
       setLoading(false);
@@ -71,12 +73,13 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
         "/admin/category/create",
         payload,
       );
+      toast.success(res.message);
       if (res) {
         router.push("/admin/categories");
       }
     } catch (err: any) {
-      console.error(" eroororor", err);
       setError(err?.message || "Failed to create new categories");
+      toast.success(err.message);
     } finally {
       setLoading(false);
     }

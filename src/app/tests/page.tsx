@@ -116,11 +116,6 @@ export default function TestsPage() {
                 </Link>
               </div>
             </div>
-            // <CategoryCard
-            //   key={idx}
-            //   name={test.name}
-            //   categoryDetails={test.categoryDetails}
-            // />
           ))}
         </div>
       </section>

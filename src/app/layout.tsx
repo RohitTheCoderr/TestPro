@@ -5,6 +5,8 @@ import Header from "@/components/sections/Header";
 import Footer from "@/components/sections/Footer";
 import Providers from "@/lib/redux/providers";
 import LayoutClient from "./layoutClient";
+import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,17 +33,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {/* <GlobalLoader /> */}
-          <LayoutClient header={<Header />} footer={<Footer />}>
-            {children}
-            {/* <Footer /> */}
-          </LayoutClient>
-
-          {/* <Header />
-          {children}
-          <Footer /> */}
-        </Providers>
+        <TooltipProvider>
+          <Providers>
+            <Toaster position="top-right" richColors />;
+            <LayoutClient header={<Header />} footer={<Footer />}>
+              {children}
+            </LayoutClient>
+          </Providers>
+        </TooltipProvider>
       </body>
     </html>
   );

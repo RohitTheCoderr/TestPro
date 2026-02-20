@@ -13,7 +13,9 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname();
 
-  const hideHeader =  pathname.startsWith("/tests") && pathname.includes("/attempt")|| pathname.startsWith("/start-test") ;
+  const hideHeader =
+    (pathname.startsWith("/tests") && pathname.includes("/attempt")) ||
+    pathname.startsWith("/start-test");
 
   return (
     <>

@@ -9,36 +9,6 @@ import { setCurrentTest } from "@/lib/redux/slices/testSlice";
 import { Exams, TestsResponse } from "@/Interfaces";
 import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 
-// interface PageProps {
-//   params: { category: string; examType: string };
-// }
-
-// type ExamDetails = {
-//   ExamID: string;
-//   categoryID: string;
-//   categoryName: string;
-//   name: string;
-//   slug: string;
-//   examDetails: {
-//     details: string[];
-//     negativeMark: number;
-//     permark: number;
-//     totalQuestion: number;
-//     totalmarks: number;
-//   };
-// };
-
-// interface Exam {
-//   title: string;
-//   type: string;
-//   duration: number;
-//   price: number;
-//   testID: string;
-//   examID: string;
-//   examName: string;
-//   categoryName: string;
-// }
-
 const Testcard: React.FC<TestCardProps> = ({
   examName,
   title,
@@ -76,7 +46,7 @@ const Testcard: React.FC<TestCardProps> = ({
     <Link
       href={`/tests/${categoryName}/${examName}/${title}`}
       onClick={() => onSelect?.(testID)}
-      className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-accent hover:text-accent-foreground transition w-full text-center"
+      className="mt-4 px-4 py-2 bg-primary text-sm text-white hover:opacity-70 transition w-full text-center"
     >
       View Details
     </Link>
@@ -130,10 +100,9 @@ export default function ExamTypeTests({
     <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">
       {/* Header */}
       <h1 className="text-2xl md:text-3xl font-bold mb-6 capitalize">
-        <span className="uppercase">{category} </span>→ {examType} Tests
+        <span className="uppercase">{category} </span>→ {examType} Tests rohit
       </h1>
 
-      <p>rohit</p>
       {/* Grid of Tests */}
       {examList.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

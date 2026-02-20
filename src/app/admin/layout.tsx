@@ -1,10 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import AdminSidebar from "@/components/adminReleted/sideBar/adminSideBar";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 function LayoutPage({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  const { token, user } = useAppSelector((state) => state.auth);
+  const rehydrated = useAppSelector((state: any) => state._persist?.rehydrated);
+
+  useEffect(() => {
+    if (!rehydrated) return;
+
+    // 1️⃣ Not logged in
+    if (!token || !user) {
+      router.replace("/auth");
+      return;
+    }
+
+    // 2️⃣ Logged in but not admin
+    if (user.role !== "admin") {
+      router.replace("/");
+      return;
+    }
+  }, [token, user, rehydrated, router]);
+
+  // 3️⃣ Prevent UI flash
+  if (!rehydrated || !token || !user || user.role !== "admin") {
+    return null; // or loader
+  }
+
   return (
     // <div className=" w-full ">
     <div className="flex bg-gray-50 overflow-scroll min-h-screen">

@@ -9,8 +9,11 @@ export default function AuthForm() {
 
   return (
     <div className="flex items-center justify-center h-[80vh] bg-background text-foreground">
-      <div className="relative flex w-[400px] md:w-[800px] h-[500px] overflow-hidden rounded-2xl dark:bg-gray-800 dark:border dark:border-gray-400 shadow-xl transition-colors duration-300">
+      <div className="relative flex w-[400px] md:w-[800px] h-[600px] overflow-hidden rounded-2xl dark:bg-gray-800 dark:border dark:border-gray-400 shadow-xl transition-colors duration-300">
         {/* Animated Form Container for small devices */}
+        <div className="text-lg absolute p-2 z-40 font-bold text-gray-300 dark:text-gray-100 hover:opacity-90">
+          TestPro
+        </div>
         <AnimatePresence mode="wait">
           {isLogin ? (
             <motion.div

@@ -1,23 +1,25 @@
 "use client";
-import { setAuthToken } from "@/lib/redux/slices/authSlice";
-import { AppDispatch } from "@/lib/redux/store";
+import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
+// import { AppDispatch } from "@/lib/redux/store";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
+import { useAppDispatch } from "@/lib/redux/hooks";
 
 export default function SignUp() {
   const [contact, setContact] = useState(""); // email or mobile
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
 
-  const dispatch = useDispatch<AppDispatch>();
-//  const navigate=useNavigate()
-const router=useRouter()
-
+  // const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
+  //  const navigate=useNavigate()
+  const router = useRouter();
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
@@ -40,11 +42,14 @@ const router=useRouter()
       : { mobile: `+91${contact}` }; // send only mobile
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/send_opt`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/send_opt`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData),
+        },
+      );
       const data = await res.json();
 
       if (data.success) {
@@ -77,24 +82,35 @@ const router=useRouter()
       : { mobile: `+91${contact}`, otp, otpID, password }; // send mobile
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData),
+        },
+      );
 
       const data = await res.json();
+      console.log("data register", data);
+
       if (res.ok) {
+        const isAdmin = data?.data?.user;
         dispatch(setAuthToken(data?.data?.token));
-        localStorage.setItem("authToken", data?.data?.token);
+        dispatch(setUser(isAdmin));
+
         alert("Registration successful");
-        // redirect or reset form
-        router.push("/")
+        if (isAdmin.role === "admin") {
+          router.push("/admin");
+        } else {
+          // redirect or reset form
+          router.push("/");
+        }
       } else {
         alert(data.message || "OTP verification failed");
       }
     } catch (err) {
-      console.error("error>>",err);
+      console.error("error>>", err);
       alert("Server error");
     } finally {
       setIsLoading(false);
@@ -113,7 +129,7 @@ const router=useRouter()
             placeholder="Email or Mobile"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
-           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
           <button
             type="submit"
@@ -129,31 +145,39 @@ const router=useRouter()
           </h2>
           <input
             type="text"
+            value={name}
+            placeholder="Enter your name"
+            onChange={(e) => setName(e.target.value)}
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+          />
+          <input
+            type="text"
             readOnly
             value={contact}
-           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-       />
+            placeholder={contact ? contact : "Your email or mobile"}
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+          />
           <input
             type="text"
             placeholder="OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        />
+          />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-       />
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+          />
           <input
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-           className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        />
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+          />
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-3 rounded-full"
