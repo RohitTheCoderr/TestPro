@@ -35,11 +35,11 @@ function LayoutPage({ children }: { children: React.ReactNode }) {
 
   return (
     // <div className=" w-full ">
-    <div className="flex bg-gray-50 overflow-scroll min-h-screen">
+    <div className="flex bg-gray-50 min-h-screen">
       {/* Sidebar */}
       <AdminSidebar />
       {/* Main content */}
-      <div className="flex-1 flex flex-col w-full">
+      <div className="flex-1 flex flex-col overflow-auto">
         {/* Top bar */}
         <header className="h-16 bg-white shadow flex items-center px-6">
           <h1

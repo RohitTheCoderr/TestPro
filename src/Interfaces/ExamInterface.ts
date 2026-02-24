@@ -4,8 +4,8 @@ export interface ExamDetails {
   permark: number;
   totalQuestion: number;
   totalmarks: number;
-  otherdetails: string;
-  _id: string;
+  otherdetails?: string;
+  _id?: string;
 }
 
 export interface Exams {
@@ -16,4 +16,5 @@ export interface Exams {
   categoryID: string;
   id?: string;
   categoryName?: string;
+  status: boolean;
 }

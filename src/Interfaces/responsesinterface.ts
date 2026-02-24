@@ -6,7 +6,7 @@ import { Test } from "./TestInterfaces";
 export interface Examresponse {
   success: boolean;
   data: {
-    category: Category[];
+    category: Category;
     exams: Exams[];
   };
 }
@@ -26,6 +26,13 @@ export interface SingleCategoryResponse {
   };
 }
 
+export interface SingleExamResponse {
+  data: {
+    exam: Exams;
+  };
+  message: string;
+  success: boolean;
+}
 export interface TestsResponse {
   success: boolean;
   message: string;

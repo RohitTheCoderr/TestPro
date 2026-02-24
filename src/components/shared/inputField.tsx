@@ -1,6 +1,6 @@
 function InputField({ label, icon, formError, ...props }: any) {
   return (
-    <div>
+    <div className="mb-2">
       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
         {label}
       </label>

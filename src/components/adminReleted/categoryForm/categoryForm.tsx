@@ -3,12 +3,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, CategoryResponse } from "@/Interfaces";
 import { motion } from "framer-motion";
-import { Tag, Link2, FileText, Info, Save, ArrowLeft } from "lucide-react";
+import { Tag, FileText, Info, Save, ArrowLeft } from "lucide-react";
 
 import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
 import { apiClient } from "@/lib/API/apiClient";
-import { details } from "framer-motion/client";
 import { toast } from "sonner";
 
 interface EditCategoryFormProps {
@@ -34,7 +33,7 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
 
     setFormError({
@@ -85,7 +84,7 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const ErrorsObj = {
