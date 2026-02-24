@@ -1,4 +1,4 @@
-import { Examresponse, Exams, SingleExamResponse } from "@/Interfaces";
+import { Exams, SingleExamResponse } from "@/Interfaces";
 import React, { useEffect, useState } from "react";
 
 import { motion, number } from "framer-motion";
@@ -8,35 +8,50 @@ import InputField from "@/components/shared/inputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAppSelector } from "@/lib/redux/hooks";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 type examFormProps = {
   exam?: Exams;
+  isEdit?: boolean;
 };
 
-function ExamForm({ exam }: examFormProps) {
+function ExamForm({ exam, isEdit }: examFormProps) {
   const router = useRouter();
+
+  const categories = useAppSelector((state) => state.categories) || [];
+
   const [formdata, setFormdata] = useState({
     name: exam?.name ?? "",
     status: exam?.status ?? true,
-    // details: exam?.examDetails.details || [],
+    slug: exam?.slug ?? "",
     negativeMark: exam?.examDetails.negativeMark ?? "",
     permark: exam?.examDetails.permark ?? "",
     totalQuestion: exam?.examDetails.totalQuestion ?? "",
     totalmarks: exam?.examDetails.totalmarks ?? "",
     otherdetails: exam?.examDetails.otherdetails ?? "",
+    categoryID: "",
   });
   const [details, setDetails] = useState<string[]>([]);
 
   const [formError, setFormError] = useState({
     name: "",
+    slug: "",
     status: "",
     details: "",
     negativeMark: "",
     permark: "",
     totalQuestion: "",
     totalmarks: "",
+    categoryID: "",
   });
-
-  console.log("exams", exam);
 
   useEffect(() => {
     if (exam?.examDetails?.details?.length) {
@@ -46,7 +61,7 @@ function ExamForm({ exam }: examFormProps) {
     }
   }, [exam]);
 
-  const handlechange = (e: any) => {
+  const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormError({
       ...formError,
@@ -58,14 +73,12 @@ function ExamForm({ exam }: examFormProps) {
     });
   };
 
-  const handleEditAPI = async (payload: Exams) => {
+  const handleCreateAPI = async (payload: Exams) => {
     try {
-      const res = await apiClient.patch<SingleExamResponse>(
-        `admin/exam/update`,
+      const res = await apiClient.post<SingleExamResponse>(
+        `admin/exam/create`,
         payload,
       );
-
-      console.log("res", res);
 
       if (res.success) {
         toast.success(res.message);
@@ -78,23 +91,53 @@ function ExamForm({ exam }: examFormProps) {
     }
   };
 
-  const hanglesubmit = async (e: any) => {
+  const handleEditAPI = async (payload: Exams) => {
+    try {
+      const res = await apiClient.patch<SingleExamResponse>(
+        `admin/exam/update`,
+        payload,
+      );
+
+      if (res.success) {
+        toast.success(res.message);
+        if (res) {
+          router.push("/admin/exams");
+        }
+      }
+    } catch (error) {
+      console.log("errorr", error);
+    }
+  };
+
+  const hanglesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const setformError = {
       name: "",
+      slug: "",
       status: "",
       details: "",
       negativeMark: "",
       permark: "",
       totalQuestion: "",
       totalmarks: "",
+      categoryID: "",
     };
 
     let hasError = false;
 
+    if (!isEdit && !exam) {
+      if (!formdata.categoryID) {
+        setformError.categoryID = "Please select category";
+        hasError = true;
+      }
+    }
     if (!formdata.name) {
-      setformError.name = "Please enter Exam name";
+      setformError.name = "Please Enter Exam name";
+      hasError = true;
+    }
+    if (!formdata.slug) {
+      setformError.slug = "Enter Exam Shortcut Name";
       hasError = true;
     }
     if (!formdata.negativeMark) {
@@ -123,8 +166,8 @@ function ExamForm({ exam }: examFormProps) {
       name: formdata.name,
       status: formdata.status,
       ExamID: exam?.ExamID || "",
-      categoryID: exam?.categoryID || "",
-      slug: formdata.name || "",
+      categoryID: `${isEdit ? exam?.categoryID : formdata.categoryID || ""}`,
+      slug: formdata.slug.toLowerCase() || "",
       examDetails: {
         details: details.map((d) => d.trim()).filter(Boolean),
         negativeMark: Number(formdata.negativeMark),
@@ -139,7 +182,7 @@ function ExamForm({ exam }: examFormProps) {
     if (payload.ExamID) {
       handleEditAPI(payload);
     } else {
-      console.log("createAPI hanfle");
+      handleCreateAPI(payload);
     }
   };
 
@@ -158,7 +201,7 @@ function ExamForm({ exam }: examFormProps) {
         <div className="flex items-center justify-between border-b pb-4 dark:border-zinc-800">
           <div>
             <h2 className="text-xl font-semibold text-zinc-800 dark:text-white">
-              {exam ? "Edit Exam" : "create new Exam"}
+              {exam ? "Edit Exam" : "Create New Exam"}
             </h2>
             <p className="text-sm text-zinc-500">
               Manage Exam details and status
@@ -174,20 +217,65 @@ function ExamForm({ exam }: examFormProps) {
             Back
           </button>
         </div>
+        <div className="flex items-center gap-4 mt-6">
+          {!isEdit && (
+            <div>
+              <SelectGroup>
+                <SelectLabel className="font-normal -mt-4">
+                  Select Category
+                </SelectLabel>
+              </SelectGroup>
+              <Select
+                value={formdata.categoryID}
+                onValueChange={(value) => {
+                  setFormdata((pre) => ({
+                    ...pre,
+                    categoryID: value,
+                  }));
 
-        <InputField
-          className="mb-4"
-          icon={<Tag size={18} />}
-          label="Exam Name"
-          name="name"
-          formError={formError.name}
-          value={formdata.name}
-          placeholder={"Enter Exam name"}
-          onChange={handlechange}
-        />
+                  setFormError((pre) => ({
+                    ...pre,
+                    categoryID: "",
+                  }));
+                }}
+              >
+                <SelectTrigger className="w-[15rem] mb-1">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.categoriesList.map((cat, index) => (
+                    <SelectItem key={index} value={String(cat?.categoryID)}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <InputField
+            className="mb-4 w-full"
+            icon={<Tag size={18} />}
+            label="Exam Name"
+            name="name"
+            formError={formError.name}
+            value={formdata.name}
+            placeholder={"Enter Exam name"}
+            onChange={handlechange}
+          />
+          <InputField
+            className="mb-4 w-full"
+            icon={<Tag size={18} />}
+            label="Exam Shortcut Name"
+            name="slug"
+            formError={formError.slug}
+            value={formdata.slug}
+            placeholder={"Enter Exam slug"}
+            onChange={handlechange}
+          />
+        </div>
         <div className="flex gap-4 items-center flex-wrap">
           <InputField
-            className="mb-4"
+            className="mb-4 "
             icon={<Tag size={18} />}
             label="Negative Mark"
             name="negativeMark"
@@ -198,7 +286,7 @@ function ExamForm({ exam }: examFormProps) {
             onChange={handlechange}
           />
           <InputField
-            className="mb-4"
+            className="mb-4 "
             icon={<Tag size={18} />}
             label="Exam permark"
             name="permark"
@@ -209,9 +297,9 @@ function ExamForm({ exam }: examFormProps) {
             onChange={handlechange}
           />
           <InputField
-            className="mb-4"
+            className="mb-4 "
             icon={<Tag size={18} />}
-            label="Exam Total totalmarks"
+            label="Exam Total Marks"
             name="totalmarks"
             type={number}
             formError={formError.totalmarks}
@@ -220,30 +308,31 @@ function ExamForm({ exam }: examFormProps) {
             onChange={handlechange}
           />
           <InputField
-            className="mb-4"
+            className="mb-4 "
             icon={<Tag size={18} />}
-            label="Exam Total totalQuestion"
+            label="Exam Total Question"
             name="totalQuestion"
             type="number"
             formError={formError.totalQuestion}
             value={formdata.totalQuestion}
-            placeholder={"Enter totalQuestion"}
+            placeholder={"Enter Total Question"}
             onChange={handlechange}
           />
         </div>
 
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-end mb-2">
           <p>Details</p>
           <button
             type="button"
-            className="bg-green-600 p-2 "
+            className="bg-green-600 p-2 text-white "
             onClick={() => setDetails([...details, ""])}
           >
             + Add Sentence
           </button>
         </div>
         {details.map((item, index) => (
-          <div key={index} className="flex gap-2 mb-2">
+          <div key={index} className="flex items-center gap-2 mb-2">
+            <span className="text-xs">{index + 1}.</span>
             <input
               type="text"
               value={item}
@@ -282,16 +371,6 @@ function ExamForm({ exam }: examFormProps) {
           placeholder={"Enter other details"}
           onChange={handlechange}
         />
-        {/* <InputField
-        className="mb-4"
-            icon={<Tag size={18} />}
-            label="Exam status"
-            name="status"
-            type="checkbox"
-            formError={formError.status}
-            value={formdata.status}
-            onChange={handlechange}
-          /> */}
         <div
           className="flex items-center justify-between rounded-xl border
                       border-zinc-200 dark:border-zinc-800

@@ -13,38 +13,42 @@ export interface Question {
 
 // Subject Interface
 export interface Subject {
-   id: string;
+  id: string;
   name: string;
   questions: Question[];
 }
 
-
-
 export interface Test {
   title: string;
-  type: string;       // e.g., "free" or "paid"
-  duration: number;   // in minutes
-  price: number;      // 0 for free, >0 for paid
+  type: string; // e.g., "free" or "paid"
+  duration: number; // in minutes
+  price: number; // 0 for free, >0 for paid
   examID: string;
   testID: string;
   id?: string;
   subjects?: Subject[];
   createdAt?: string;
   updatedAt?: string;
+  status: boolean;
 }
 
 export interface TestCardProps {
   title: string;
   type: string;
-  duration: number|string;
-  price?: number|string;
+  duration: number | string;
+  price?: number | string;
   testID: string;
   examID: string;
   categoryName?: string;
   examName?: string;
   onSelect?: (id: string) => void;
-};
+}
 
+// export interface TestResponse {
+//   message: string;
+//   success: boolean;
+//   tests: Test;
+// }
 
 // export interface TestCardProps {
 //   title: string;

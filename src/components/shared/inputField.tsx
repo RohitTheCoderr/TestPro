@@ -1,6 +1,6 @@
-function InputField({ label, icon, formError, ...props }: any) {
+function InputField({ label, icon, formError, className, ...props }: any) {
   return (
-    <div className="mb-2">
+    <div className={`mb-2 ${className}`}>
       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
         {label}
       </label>

@@ -35,7 +35,7 @@ export default function RootLayout({
       >
         <TooltipProvider>
           <Providers>
-            <Toaster position="top-right" richColors />;
+            <Toaster position="top-right" richColors />
             <LayoutClient header={<Header />} footer={<Footer />}>
               {children}
             </LayoutClient>

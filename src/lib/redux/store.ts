@@ -18,7 +18,7 @@ import categoryReducer from "./slices/categorySlice";
 import examReducer from "./slices/examdetailsSlice"; // ✅ your new slice
 import testReducer from "./slices/testSlice"; // ✅ your new slice
 import categoriesListReducer from "./slices/forAdminSlice/categoriesSlice";
-
+import examsListReducer from "./slices/forAdminSlice/examsSlice";
 // ✅ Combine all reducers
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -29,13 +29,14 @@ const rootReducer = combineReducers({
   // AdminPage
 
   categories: categoriesListReducer,
+  exams: examsListReducer,
 });
 
 // ✅ Persist config
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "category", "exam", "test", "categories"], // only persist what you need
+  whitelist: ["auth", "category", "exam", "test", "categories", "exams"], // only persist what you need
 };
 
 // ✅ Create persisted reducer

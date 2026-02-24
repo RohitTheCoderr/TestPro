@@ -1,6 +1,6 @@
-function TextAreaField({ label, icon, formError, ...props }: any) {
+function TextAreaField({ label, icon, formError, className, ...props }: any) {
   return (
-    <div>
+    <div className={`${className}`}>
       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
         {label}
       </label>
