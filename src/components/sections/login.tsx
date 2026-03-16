@@ -47,11 +47,6 @@ export default function Login() {
       );
 
       const data = await res.json();
-      console.log("login data", data);
-      console.log("login data.?data", data?.data);
-      console.log("data?.data?.token", data?.data?.token);
-      console.log("data?.data?.user", data?.data?.user);
-
       if (res.ok) {
         const isAdmin = data?.data?.user;
         dispatch(setAuthToken(data?.data?.token));

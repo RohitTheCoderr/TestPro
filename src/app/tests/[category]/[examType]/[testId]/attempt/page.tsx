@@ -9,6 +9,7 @@ import { clearCurrentTest } from "@/lib/redux/slices/testSlice";
 import Image from "next/image";
 import { SingleTestsResponse } from "@/Interfaces";
 import { Test } from "@/Interfaces/TestInterfaces";
+import { toast } from "sonner";
 
 interface Answer {
   subjectId: string;
@@ -36,7 +37,7 @@ export default function AttemptPage() {
   const dispatch = useDispatch();
 
   const currentExamdetails = useSelector(
-    (state: RootState) => state.exam.currentExam
+    (state: RootState) => state.exam.currentExam,
   );
   const testID = useSelector((state: RootState) => state.test.testID);
 
@@ -44,7 +45,7 @@ export default function AttemptPage() {
     const fetchTest = async () => {
       try {
         const res = await apiClient.get<SingleTestsResponse>(
-          `/user/tests/${currentExamdetails?.ExamID}/${testID}`
+          `/user/tests/${currentExamdetails?.ExamID}/${testID}`,
         );
         const test = res?.test;
         setTestData(test);
@@ -105,7 +106,7 @@ export default function AttemptPage() {
       setCurrentSubjectIndex((prev) => prev + 1);
       setCurrentQuestionIndex(0);
     } else {
-      console.log("✅ Last question of last subject reached");
+      toast.message(" Last question of last subject reached");
     }
   };
 
@@ -129,12 +130,12 @@ export default function AttemptPage() {
 
   // move this outside the handler if you call it from multiple places
   const postSubmittedData = async (
-    submitdata: PostData
+    submitdata: PostData,
   ): Promise<ResponseType> => {
     try {
       const response = await apiClient.post<ResponseType>(
         "/user/tests/submit-test",
-        submitdata
+        submitdata,
       );
       return response;
     } catch (error) {
@@ -147,7 +148,7 @@ export default function AttemptPage() {
     async (auto = false) => {
       try {
         if (auto) {
-          console.log("Auto submit triggered");
+          toast.success("Test submitted successfully");
         }
         // build payload
         const payload: {
@@ -183,8 +184,6 @@ export default function AttemptPage() {
           testID: finalTestID, // you said backend expects testID
         });
 
-        console.log("API response:", apiResponse);
-
         // post-submit logic (only after API resolves)
         dispatch(clearCurrentExam());
         dispatch(clearCurrentTest());
@@ -203,7 +202,7 @@ export default function AttemptPage() {
       router,
       testData,
       testID,
-    ]
+    ],
   );
 
   // auto submit
@@ -217,7 +216,9 @@ export default function AttemptPage() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log("❗ User switched tab — auto submitting...");
+        toast.message(
+          "test submitted successfuly because you switched new tab",
+        );
         handleSubmit(true); // auto submit
       }
     };
@@ -235,9 +236,6 @@ export default function AttemptPage() {
         Loading test...
       </p>
     );
-
-
-    
 
   return (
     <div className="p-4 md:p-6 w-full mx-auto bg-background text-foreground min-h-screen">
@@ -300,10 +298,10 @@ export default function AttemptPage() {
                       isCurrent
                         ? "bg-primary text-white"
                         : isMarked
-                        ? "bg-yellow-400 text-black"
-                        : isAnswered
-                        ? "bg-green-500 text-white"
-                        : "bg-muted text-muted-foreground"
+                          ? "bg-yellow-400 text-black"
+                          : isAnswered
+                            ? "bg-green-500 text-white"
+                            : "bg-muted text-muted-foreground"
                     }`}
                 >
                   {i + 1}
