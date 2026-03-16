@@ -8,6 +8,7 @@ import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 // import type { Exam } from "@/lib/redux/slices/examdetailsSlice.ts";
 import { ExamDetails, Examresponse, Exams } from "@/Interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 // Define the type for selected exam
 type ExamSelect = {
@@ -48,14 +49,9 @@ const TestCard: React.FC<ExamCardProps> = ({
         </p>
       )}
     </div>
-    <div className="mt-4 flex gap-4">
+    <Button className="mt-4 flex gap-4">
       <Link
         href={`/tests/${categoryName}/${slug}`}
-        // href={{
-        //   pathname: `/tests/${categoryName}/${slug}`,
-        //   query: { ExamID },
-        // }}
-        className="w-full text-center px-4 py-2 bg-primary text-white rounded-full hover:bg-accent hover:text-accent-foreground text-sm transition"
         onClick={() =>
           onSelect?.({
             ExamID,
@@ -65,11 +61,11 @@ const TestCard: React.FC<ExamCardProps> = ({
             categoryName,
             examDetails,
           })
-        } // ✅ pass full exam object
+        }
       >
         Explore {name} Tests
       </Link>
-    </div>
+    </Button>
   </div>
 );
 
@@ -170,12 +166,13 @@ export default function TestsPage({
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             You can explore other categories or check back later for updates.
           </p>
-          <button
+          <Button
             onClick={() => router.push("/tests")}
-            className="mt-4 px-8 py-3 rounded-lg bg-primary text-white font-semibold shadow-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300"
+            variant="secondary"
+            className="mt-4 px-8 py-3 shadow-lg "
           >
             Explore Other Categories
-          </button>
+          </Button>
         </div>
       )}
 
@@ -189,12 +186,15 @@ export default function TestsPage({
           practice.
         </p>
         <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-          <button className="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold shadow hover:bg-green-600 transition-colors">
+          <Button
+            className="px-6 py-3 font-semibold shadow"
+            variant="secondary"
+          >
             Start Free Test
-          </button>
-          <button className="px-6 py-3 rounded-lg border border-green-500 text-green-500 font-semibold shadow hover:bg-green-50 transition-colors">
+          </Button>
+          <Button className="px-6 py-3 font-semibold shadow" variant="outline">
             Explore More Tests
-          </button>
+          </Button>
         </div>
       </div>
     </main>

@@ -64,13 +64,15 @@ export default function HomePage() {
           <div className="mt-6 sm:space-x-4">
             <Button
               href="/tests"
-              className="bg-primary w-full sm:w-[10rem] text-lg hover:bg-accent text-white "
+              className=" w-full sm:w-[10rem] max-sm:mt-4 text-lg "
+              variant="default"
             >
               Start Free Test
             </Button>
             <Button
               href={"#category"}
-              className="bg-gray-100 w-full sm:w-[10rem] max-sm:mt-4 text-lg border border-primary text-black hover:text-white "
+              variant="secondary"
+              className=" w-full sm:w-[10rem] max-sm:mt-4 text-lg "
             >
               Explore Tests
             </Button>

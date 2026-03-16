@@ -22,18 +22,17 @@ const CategoryCard: React.FC<Category> = ({
         </p>
       </div>
       {categoryID && (
-        <div className="mt-4 flex gap-4">
+        <Button className="mt-4 flex gap-4">
           <Link
             // href={`/tests/${slug}/`}
             href={{
               pathname: `/tests/${slug}`,
               query: { categoryID },
             }}
-            className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             Explore category
           </Link>
-        </div>
+        </Button>
       )}
     </div>
   );
@@ -107,14 +106,9 @@ export default function TestsPage() {
                   {test?.categoryDetails?.details}
                 </p>
               </div>
-              <div className="mt-4 flex gap-4">
-                <Link
-                  href={`/tests`}
-                  className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  Explore category
-                </Link>
-              </div>
+              <Button className="mt-4 flex gap-4">
+                <Link href={`/tests`}>Explore category</Link>
+              </Button>
             </div>
           ))}
         </div>
@@ -157,14 +151,14 @@ export default function TestsPage() {
         <div className="mt-6 flex max-sm:flex-col justify-center gap-4">
           <Button
             size="lg"
-            className="bg-background max-sm:w-full text-foreground hover:bg-muted"
+            // className="bg-background max-sm:w-full text-foreground hover:bg-muted"
           >
             Start Free Test
           </Button>
           <Button
             variant="outline"
             size="lg"
-            className="bg-primary-foreground max-sm:w-full text-secondary hover:bg-background hover:text-foreground"
+            // className="bg-primary-foreground max-sm:w-full text-secondary hover:bg-background hover:text-foreground"
           >
             Explore More Tests
           </Button>

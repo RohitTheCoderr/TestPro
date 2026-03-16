@@ -1,11 +1,13 @@
 // app/tests/[category]/[examType]/[testId]/start/page.tsx
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { RootState } from "@/lib/redux/store";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
- import { IoArrowBackCircle } from "react-icons/io5";
+import { IoArrowBackCircle } from "react-icons/io5";
 import { useSelector } from "react-redux";
+import { toast } from "sonner";
 
 interface ExamDetails {
   details: string[];
@@ -27,9 +29,10 @@ interface currentExamdetails {
 export default function StartTestPage() {
   const { category, examType, testId } = useParams();
   const [isChecked, setIsChecked] = useState(false);
+  const [isCheckedMsg, setIsCheckedMsg] = useState("");
   const router = useRouter();
   const currentExamdetails = useSelector(
-    (state: RootState) => state.exam.currentExam
+    (state: RootState) => state.exam.currentExam,
   ) as currentExamdetails | null;
 
   const { examDetails } = {
@@ -37,6 +40,11 @@ export default function StartTestPage() {
   };
 
   const handleStart = () => {
+    if (!isChecked) {
+      toast.error("please Accept condition first");
+      setIsCheckedMsg("Accept condition first");
+      return;
+    }
     // In real app: enforce full screen & API start call
     router.push(`/tests/${category}/${examType}/${testId}/attempt`);
   };
@@ -156,29 +164,15 @@ export default function StartTestPage() {
               I have read all the instructions and I am ready to start the test.
             </span>
           </label>
+          <div className="text-sm text-red-600">{isCheckedMsg}</div>
         </div>
 
         <div className="flex justify-end items-center gap-4">
           {/* CTA */}
-          <button
-            onClick={handlePrevious}
-            className="w-[10rem] flex justify-center items-center gap-2 mt-2 px-6 py-3 rounded-[5px] bg-primary text-primary-foreground text-lg font-medium hover:bg-accent hover:text-accent-foreground hover:text-white transition"
-          >
+          <Button variant="secondary" onClick={handlePrevious}>
             <IoArrowBackCircle /> Back
-           
-          </button>
-          <button
-            onClick={handleStart}
-            disabled={!isChecked}
-            className={`w-[10rem] mt-2 px-6 py-3 rounded-[5px] text-lg font-medium transition 
-            ${
-              isChecked
-                ? "bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground hover:text-white"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-            }`}
-          >
-            Start Test
-          </button>
+          </Button>
+          <Button onClick={handleStart}>Start Test</Button>
         </div>
       </div>
     </div>

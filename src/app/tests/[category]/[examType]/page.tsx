@@ -8,6 +8,7 @@ import { RootState } from "@/lib/redux/store";
 import { setCurrentTest } from "@/lib/redux/slices/testSlice";
 import { Exams, TestsResponse } from "@/Interfaces";
 import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
+import { Button } from "@/components/ui/button";
 
 const Testcard: React.FC<TestCardProps> = ({
   examName,
@@ -22,18 +23,20 @@ const Testcard: React.FC<TestCardProps> = ({
 }) => (
   <div className="rounded-xl border border-border bg-card shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
     <div>
-      <h2 className="font-semibold text-lg mb-2 uppercase">{title}</h2>
+      <h2 className="font-semibold text-lg mb-2 uppercase flex justify-between">
+        <span>{title}</span>
+        <span
+          className={`inline-block mb-3 px-2 py-0.5 !text-xs rounded-full ${
+            type === "free"
+              ? "bg-green-100 text-green-600"
+              : "bg-yellow-100 text-yellow-600"
+          }`}
+        >
+          {type === "free" ? "Free" : "Paid"}
+        </span>
+      </h2>
 
       {/* Tag */}
-      <span
-        className={`inline-block mb-3 px-2 py-1 text-xs rounded-full ${
-          type === "free"
-            ? "bg-green-100 text-green-600"
-            : "bg-yellow-100 text-yellow-600"
-        }`}
-      >
-        {type === "free" ? "Free Test" : "Paid Test"}
-      </span>
 
       {/* Info */}
       <div className="text-sm text-muted-foreground space-y-1">
@@ -43,13 +46,14 @@ const Testcard: React.FC<TestCardProps> = ({
     </div>
 
     {/* Button */}
-    <Link
-      href={`/tests/${categoryName}/${examName}/${title}`}
-      onClick={() => onSelect?.(testID)}
-      className="mt-4 px-4 py-2 bg-primary text-sm text-white hover:opacity-70 transition w-full text-center"
-    >
-      View Details
-    </Link>
+    <Button className="mt-4 ">
+      <Link
+        href={`/tests/${categoryName}/${examName}/${title}`}
+        onClick={() => onSelect?.(testID)}
+      >
+        View Details
+      </Link>
+    </Button>
   </div>
 );
 
@@ -105,7 +109,7 @@ export default function ExamTypeTests({
 
       {/* Grid of Tests */}
       {examList.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4">
           {examList.map((test) => (
             <Testcard key={test.testID} {...test} onSelect={handleTestSelect} />
           ))}
