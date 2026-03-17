@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 // import { useDispatch } from "react-redux";
 import { useAppDispatch } from "@/lib/redux/hooks";
+import { Button } from "../ui/button";
 
 export default function SignUp() {
   const [contact, setContact] = useState(""); // email or mobile
@@ -131,12 +132,9 @@ export default function SignUp() {
             onChange={(e) => setContact(e.target.value)}
             className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-full"
-          >
+          <Button type="submit" size="xl" className="w-full !py-3 rounded-full">
             {isLoading ? "Sending OTP..." : "Send OTP"}
-          </button>
+          </Button>
         </form>
       ) : (
         <form onSubmit={handleRegister}>
@@ -178,12 +176,9 @@ export default function SignUp() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-3 rounded-full"
-          >
+          <Button type="submit" size="xl" className="w-full py-3 rounded-full">
             {isLoading ? "Registering..." : "Register"}
-          </button>
+          </Button>
         </form>
       )}
     </div>

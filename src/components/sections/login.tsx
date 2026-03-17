@@ -5,6 +5,7 @@ import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
 // import { AppDispatch } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "../ui/button";
 // import { useDispatch } from "react-redux";
 
 export default function Login() {
@@ -77,8 +78,7 @@ export default function Login() {
       >
         {/* Heading */}
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
-          Log In to{" "}
-          <span className="text-blue-600 dark:text-blue-400">TestPro</span>
+          Log In to <span className="text-primary">TestPro</span>
         </h2>
 
         {/* Email */}
@@ -100,12 +100,13 @@ export default function Login() {
         />
 
         {/* Submit Button */}
-        <button
+        <Button
+          size="xl"
           type="submit"
-          className="w-full bg-green-600 text-white py-3 rounded-full text-lg font-semibold shadow-md hover:from-blue-700 hover:to-purple-700 transition-all"
+          className="w-full text-white rounded-full text-lg font-semibold shadow-md"
         >
           {loading ? "Logging in..." : "Log In"}
-        </button>
+        </Button>
 
         {/* Error Message */}
         {error && <p className="text-red-500 text-sm mt-3">{error}</p>}

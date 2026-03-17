@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   href?: string; // 👈 add this
   variant?: "default" | "outline" | "secondary";
-  size?: "default" | "lg" | "sm";
+  size?: "default" | "lg" | "sm" | "xl";
 };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,6 +25,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       {
         "h-9 px-4": size === "default",
         "h-10 px-6 text-lg": size === "lg",
+        "h-12 px-8 text-lg": size === "xl",
         "h-8 px-3 text-sm": size === "sm",
       },
       className,

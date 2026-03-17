@@ -195,8 +195,9 @@ export default function HomePage() {
           </p>
           {!token ? (
             <Button
+              variant="outline"
               onClick={() => router.push("/auth")}
-              className="px-6 py-4 md:px-8 md:py-5 rounded-xl flex justify-center items-center gap-3 "
+              className="px-6 py-4 md:px-8 md:py-5 flex justify-center items-center gap-3 mx-auto"
             >
               <span>Sign Up Now & Get a Free Mock Test</span>
               <FaArrowRight className="text-lg" />

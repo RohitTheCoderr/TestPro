@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SignUp from "@/components/sections/signup";
 import Login from "@/components/sections/login";
+import { Button } from "@/components/ui/button";
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
@@ -37,12 +38,12 @@ export default function AuthForm() {
                 <span className="text-gray-600 dark:text-gray-300">
                   Don&apos;t have an account?
                 </span>
-                <button
+                <Button
                   onClick={() => setIsLogin(false)}
-                  className="text-blue-600 font-semibold hover:underline"
+                  className=" font-semibold hover:underline"
                 >
                   Signup
-                </button>
+                </Button>
               </div>
             </motion.div>
           ) : (
@@ -67,12 +68,13 @@ export default function AuthForm() {
                 <span className="text-gray-600 dark:text-gray-300">
                   Already have an account?
                 </span>
-                <button
+                <Button
+                  variant="default"
                   onClick={() => setIsLogin(true)}
                   className="text-blue-600 font-semibold hover:underline"
                 >
                   Login
-                </button>
+                </Button>
               </div>
             </motion.div>
           )}
@@ -101,7 +103,7 @@ export default function AuthForm() {
             transition={{ type: "spring", stiffness: 80, damping: 20 }}
             className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center text-white p-10 bg-gradient-to-br ${
               isLogin
-                ? "from-blue-500 to-blue-700"
+                ? "from-primary to-primary"
                 : "from-green-500 to-green-700"
             } bg-opacity-80 backdrop-blur-sm`}
           >
@@ -111,12 +113,13 @@ export default function AuthForm() {
                 <p className="mb-6 text-center">
                   Log In to continue exploring our platform.
                 </p>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setIsLogin(false)}
-                  className="border-2 border-white text-white hover:text-blue-600 w-[12rem] px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition"
+                  className=" hover:text-primary w-[12rem] rounded-full "
                 >
                   Sign Up
-                </button>
+                </Button>
               </>
             ) : (
               <>
@@ -124,12 +127,13 @@ export default function AuthForm() {
                 <p className="mb-6 text-center">
                   Sign Up to start your journey with us.
                 </p>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setIsLogin(true)}
-                  className="border-2 border-white text-white hover:text-green-600 w-[12rem] px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition"
+                  className=" hover:text-green-600 w-[12rem] rounded-full "
                 >
                   Log In
-                </button>
+                </Button>
               </>
             )}
           </motion.div>
