@@ -34,17 +34,20 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value, type } = e.target;
 
     setFormError({
       ...formError,
       [name]: "",
     });
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox" && "checked" in e.target ? e.target.checked : value,
+    }));
   };
 
   const updatecategoryHandle = async (payload: Category) => {
