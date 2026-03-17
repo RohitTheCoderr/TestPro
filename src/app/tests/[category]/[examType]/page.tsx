@@ -9,6 +9,7 @@ import { setCurrentTest } from "@/lib/redux/slices/testSlice";
 import { Exams, TestsResponse } from "@/Interfaces";
 import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const Testcard: React.FC<TestCardProps> = ({
   examName,
@@ -36,12 +37,17 @@ const Testcard: React.FC<TestCardProps> = ({
         </span>
       </h2>
 
-      {/* Tag */}
-
       {/* Info */}
       <div className="text-sm text-muted-foreground space-y-1">
-        <p>⏱ {duration} mins</p>
-        <p>₹ {price} </p>
+        <p className="flex gap-2">
+          <span className="font-semibold text-primary">Duration:</span>⏱{" "}
+          {duration} mins
+        </p>
+        <p className="flex gap-2">
+          {" "}
+          <span className="font-semibold text-primary">Price:</span>₹
+          {price}{" "}
+        </p>
       </div>
     </div>
 
@@ -101,11 +107,21 @@ export default function ExamTypeTests({
   }, [currentExam?.ExamID, currentExam?.name, category, examType]);
 
   return (
-    <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 capitalize">
-        <span className="uppercase">{category} </span>→ {examType} Tests rohit
-      </h1>
+    <div className="px-8 md:px-16 py-12 text-foreground">
+      <div className="flex mb-6">
+        <div
+          className="flex items-center text-gray-600 hover:text-primary w-20 rounded-md py-1 cursor-pointer"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft size={14} /> Back
+        </div>
+        {/* Header */}
+
+        <h1 className="text-2xl md:text-3xl font-bold capitalize">
+          <span className="uppercase text-primary">{category} </span>
+          {examType} Tests
+        </h1>
+      </div>
 
       {/* Grid of Tests */}
       {examList.length > 0 ? (

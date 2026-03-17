@@ -37,7 +37,9 @@ export default function RootLayout({
           <Providers>
             <Toaster position="top-right" richColors />
             <LayoutClient header={<Header />} footer={<Footer />}>
-              {children}
+              <section className=" min-h-screen bg-background ">
+                {children}
+              </section>
             </LayoutClient>
           </Providers>
         </TooltipProvider>

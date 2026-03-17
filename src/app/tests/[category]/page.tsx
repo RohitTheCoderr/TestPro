@@ -9,6 +9,7 @@ import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
 import { ExamDetails, Examresponse, Exams } from "@/Interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 // Define the type for selected exam
 type ExamSelect = {
@@ -90,7 +91,7 @@ export default function TestsPage({
           `/category/${categoryID}/exams`,
         );
 
-        const categoryName = res?.data?.category?.[0]?.name;
+        const categoryName = res?.data?.category[0]?.name;
 
         const exams: ExamCardProps[] = res.data.exams.map((exam: Exams) => ({
           name: exam.name,
@@ -115,14 +116,20 @@ export default function TestsPage({
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-16 px-6">
+    <main className=" px-8 md:px-16 py-12">
       {/* Header */}
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="w-full text-center ">
+        <div
+          className="flex items-center text-gray-600 hover:text-primary w-20 rounded-md py-1 cursor-pointer"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft size={14} /> Back
+        </div>
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white drop-shadow-sm">
           <span className="uppercase text-primary">{decodedCategory}</span>{" "}
           Exams
         </h1>
-        <p className="mt-4 text-lg md:text-xl text-gray-600 dark:text-gray-300">
+        <p className="mt-4 text-xs sm:text-lg md:text-xl text-gray-500 dark:text-gray-300">
           Sharpen your skills with practice tests specifically designed for{" "}
           <span className="font-semibold">{decodedCategory}</span>. Attempt
           these tests to improve your knowledge and boost your confidence.
@@ -131,7 +138,7 @@ export default function TestsPage({
 
       {/* Exam Cards */}
       {examTypes.length !== 0 ? (
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+        <div className="mt-12 grid gap-8 sm:grid-cols-3 lg:grid-cols-4 ">
           {examTypes.map((exam) => (
             <TestCard key={exam.ExamID} {...exam} onSelect={handleExamSelect} />
           ))}
@@ -189,10 +196,15 @@ export default function TestsPage({
           <Button
             className="px-6 py-3 font-semibold shadow"
             variant="secondary"
+            onClick={() => router.push("/tests")}
           >
             Start Free Test
           </Button>
-          <Button className="px-6 py-3 font-semibold shadow" variant="outline">
+          <Button
+            className="px-6 py-3 font-semibold shadow"
+            variant="outline"
+            onClick={() => router.push("/tests")}
+          >
             Explore More Tests
           </Button>
         </div>

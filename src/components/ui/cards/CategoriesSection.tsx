@@ -12,14 +12,19 @@ import { useDispatch } from "react-redux";
 function CategoriesSection() {
   const [examdata, setExamdata] = useState<Exams[]>([]);
   const dispatch = useDispatch();
-  const [categoryname, setCategoryname] = useState<string | undefined>("ssc");
-  const [cateID, setCateID] = useState<string | undefined>(
-    "69942e1e1b4a6b26c8769148",
-  );
 
   const categoriesss = useAppSelector(
     (state) => state.category.categories,
   ) as Category[];
+
+  const firstCategory = categoriesss[0];
+
+  const [categoryname, setCategoryname] = useState<string | undefined>(
+    firstCategory?.slug,
+  );
+  const [cateID, setCateID] = useState<string | undefined>(
+    firstCategory?.categoryID,
+  );
 
   const fetchExamData = useCallback(async () => {
     try {
@@ -46,7 +51,14 @@ function CategoriesSection() {
     if (cateID) {
       fetchExamData();
     }
-  }, [cateID, fetchExamData]); // ✅ warning removed
+  }, [cateID, fetchExamData]);
+
+  useEffect(() => {
+    if (!cateID && categoriesss.length > 0) {
+      setCategoryname(categoriesss[0].slug);
+      setCateID(categoriesss[0].categoryID);
+    }
+  }, [categoriesss, cateID]);
 
   const handleExamSelect = (exam: Exams) => {
     dispatch(setCurrentExam(exam));

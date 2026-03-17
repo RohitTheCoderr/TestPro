@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import AdminSidebar from "@/components/adminReleted/sideBar/adminSideBar";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/redux/hooks";
+import { Loader } from "@/components/shared/loader";
 
 function LayoutPage({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -30,7 +31,7 @@ function LayoutPage({ children }: { children: React.ReactNode }) {
 
   // 3️⃣ Prevent UI flash
   if (!rehydrated || !token || !user || user.role !== "admin") {
-    return null; // or loader
+    return <Loader className=" flex justify-center items-center h-[90vh] " />; // or loader
   }
 
   return (
