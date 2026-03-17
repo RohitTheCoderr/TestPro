@@ -184,6 +184,10 @@ export default function AttemptPage() {
           testID: finalTestID, // you said backend expects testID
         });
 
+        if (apiResponse) {
+          toast.success("Test submitted successfully ");
+        }
+
         // post-submit logic (only after API resolves)
         dispatch(clearCurrentExam());
         dispatch(clearCurrentTest());

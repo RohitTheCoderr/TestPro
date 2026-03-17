@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Category, CategoryResponse } from "@/Interfaces";
+import { Category, CategoryResponse, createCategory } from "@/Interfaces";
 import { motion } from "framer-motion";
 import { Tag, FileText, Info, Save, ArrowLeft } from "lucide-react";
 
@@ -13,6 +13,8 @@ import { toast } from "sonner";
 interface EditCategoryFormProps {
   category?: Category;
 }
+
+interface cratecategory {}
 export default function CategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
 
@@ -57,15 +59,20 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
       if (res) {
         router.push("/admin/categories");
       }
-    } catch (err: any) {
-      toast.success(err.message);
-      setError(err?.message || "Failed to Update category");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError("Failed to Update category");
+        toast.error("Failed to Update category");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const CreatecategoryHandle = async (payload: Category) => {
+  const CreatecategoryHandle = async (payload: createCategory) => {
     try {
       setLoading(true);
       const res = await apiClient.post<CategoryResponse>(
@@ -76,9 +83,14 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
       if (res) {
         router.push("/admin/categories");
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to create new categories");
-      toast.success(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError("Failed to create new category");
+        toast.error("Failed to create new category");
+      }
     } finally {
       setLoading(false);
     }
@@ -109,25 +121,29 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
       return;
     }
 
-    const payload = {
-      categoryID: category?.categoryID,
-      name: formData.name,
-      slug: formData.name,
-      categoryDetails: {
-        details: formData.details,
-        otherdetails: formData.otherdetails,
-      },
-      status: formData.status,
-    };
-    if (!payload) {
-      return;
-    }
-
-    if (payload.categoryID) {
-      updatecategoryHandle(payload);
-    }
-    if (!category?.categoryID) {
-      CreatecategoryHandle(payload);
+    if (category?.categoryID) {
+      // UPDATE
+      updatecategoryHandle({
+        categoryID: category.categoryID,
+        name: formData.name,
+        slug: formData.name,
+        categoryDetails: {
+          details: formData.details,
+          otherdetails: formData.otherdetails,
+        },
+        status: formData.status,
+      });
+    } else {
+      // CREATE
+      CreatecategoryHandle({
+        name: formData.name,
+        slug: formData.name,
+        categoryDetails: {
+          details: formData.details,
+          otherdetails: formData.otherdetails,
+        },
+        status: formData.status,
+      });
     }
   };
 

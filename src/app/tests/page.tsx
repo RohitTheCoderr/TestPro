@@ -2,8 +2,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button"; // adjust path
 import Link from "next/link";
-import { RootState } from "@/lib/redux/store";
-import { useSelector } from "react-redux";
 import { Category } from "@/Interfaces";
 import { useAppSelector } from "@/lib/redux/hooks";
 
@@ -24,7 +22,6 @@ const CategoryCard: React.FC<Category> = ({
       {categoryID && (
         <Button className="mt-4 flex gap-4">
           <Link
-            // href={`/tests/${slug}/`}
             href={{
               pathname: `/tests/${slug}`,
               query: { categoryID },

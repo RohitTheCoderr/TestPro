@@ -1,6 +1,5 @@
 "use client";
 import { Timehelper } from "@/components/shared/timehelper";
-import TruncateTextTooltip from "@/components/shared/truncketTooltip";
 import {
   Select,
   SelectContent,
@@ -23,9 +22,8 @@ import { useAppSelector } from "@/lib/redux/hooks";
 // import { SelectItem } from "@radix-ui/react-select";
 import { ArrowLeft, Edit } from "lucide-react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 function TestsPage() {
   const [examIDstate, setExamIDstate] = useState<string>("");

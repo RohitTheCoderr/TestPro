@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { motion, number } from "framer-motion";
 import { apiClient } from "@/lib/API/apiClient";
-import { ArrowLeft, FileText, Save, Tag } from "lucide-react";
+import { ArrowLeft, Save, Tag } from "lucide-react";
 import InputField from "@/components/shared/inputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -279,7 +279,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
             icon={<Tag size={18} />}
             label="Negative Mark"
             name="negativeMark"
-            type={number}
+            type="number"
             formError={formError.negativeMark}
             value={formdata.negativeMark}
             placeholder={"Enter negative Mark"}
@@ -290,7 +290,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
             icon={<Tag size={18} />}
             label="Exam permark"
             name="permark"
-            type={number}
+            type="number"
             formError={formError.permark}
             value={formdata.permark}
             placeholder={"Enter Permark"}
@@ -301,7 +301,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
             icon={<Tag size={18} />}
             label="Exam Total Marks"
             name="totalmarks"
-            type={number}
+            type="number"
             formError={formError.totalmarks}
             value={formdata.totalmarks}
             placeholder={"Enter totalmarks"}
@@ -322,13 +322,9 @@ function ExamForm({ exam, isEdit }: examFormProps) {
 
         <div className="flex justify-between items-end mb-2">
           <p>Details</p>
-          <button
-            type="button"
-            className="bg-green-600 p-2 text-white "
-            onClick={() => setDetails([...details, ""])}
-          >
+          <Button type="button" onClick={() => setDetails([...details, ""])}>
             + Add Sentence
-          </button>
+          </Button>
         </div>
         {details.map((item, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
@@ -348,15 +344,15 @@ function ExamForm({ exam, isEdit }: examFormProps) {
             />
 
             {details.length > 1 && (
-              <button
+              <Button
                 type="button"
-                className="bg-gray-200 px-4"
+                variant="outline"
                 onClick={() =>
                   setDetails((prev) => prev.filter((_, i) => i !== index))
                 }
               >
                 ❌
-              </button>
+              </Button>
             )}
           </div>
         ))}

@@ -1,4 +1,17 @@
-function InputField({ label, icon, formError, className, ...props }: any) {
+type InputFieldProps = {
+  label: string;
+  icon?: React.ReactNode;
+  formError?: string;
+  className?: string;
+} & React.InputHTMLAttributes<HTMLInputElement>;
+
+function InputField({
+  label,
+  icon,
+  formError,
+  className,
+  ...props
+}: InputFieldProps) {
   return (
     <div className={`mb-2 ${className}`}>
       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">

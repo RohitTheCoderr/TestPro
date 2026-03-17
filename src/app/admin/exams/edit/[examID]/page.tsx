@@ -1,6 +1,7 @@
 "use client";
 import ExamForm from "@/components/adminReleted/examForm/examForm";
-import { Examresponse, Exams, SingleExamResponse } from "@/Interfaces";
+import { Loader } from "@/components/shared/loader";
+import { Exams, SingleExamResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -30,7 +31,7 @@ function EditExamPage() {
   }, [ExamID]);
 
   if (!examData) {
-    return <p>Loading...</p>;
+    return <Loader />;
   }
 
   return <ExamForm exam={examData} />;

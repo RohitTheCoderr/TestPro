@@ -15,6 +15,7 @@ import {
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { toast } from "sonner";
 // Define the API response structure
 interface CategoryResponse {
   data: {
@@ -27,7 +28,7 @@ export default function HomePage() {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
 
-  const { token, user } = useAppSelector((state) => state.auth);
+  const { token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,8 +42,7 @@ export default function HomePage() {
           message = error.message;
         }
 
-        console.error("Error fetching categories:", message);
-        alert(message);
+        toast(message);
         setError(message);
       }
     };

@@ -2,6 +2,7 @@
 import { useAppSelector } from "@/lib/redux/hooks";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 interface ClientGuardProps {
   children: React.ReactNode;
@@ -10,17 +11,16 @@ interface ClientGuardProps {
 function ClientGuard({ children }: ClientGuardProps) {
   const router = useRouter();
   const { token, user } = useAppSelector((state) => state.auth);
-  const rehydrated = useAppSelector((state: any) => state._persist?.rehydrated);
+  const rehydrated = useAppSelector((state) => state._persist?.rehydrated);
 
   useEffect(() => {
     if (!token || !user) {
       if (!rehydrated) return;
-      alert("please login/Register before starting Test");
+      toast.message("please login/Register before starting Test");
       router.replace("/auth");
       return;
     }
-  }, [token, user, rehydrated]);
-  1;
+  }, [token, user, rehydrated, router, toast]);
   return <>{children}</>;
 }
 export default ClientGuard;

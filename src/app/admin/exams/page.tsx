@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { apiClient } from "@/lib/API/apiClient";
-import { Examresponse, Exams } from "@/Interfaces";
+import { Category, Examresponse, Exams } from "@/Interfaces";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -35,7 +35,7 @@ function ExamsPage() {
         setActiveExam(exams[0]);
       }
     } catch (error) {
-      //   console.error("Error fetching exams:", error);
+      console.error("Error fetching exams:", error);
       toast.error("Error while fetching exams");
     } finally {
       setLoading(false);
@@ -49,12 +49,12 @@ function ExamsPage() {
       setActiveCategory(firstCategoryId);
       fetchExams(firstCategoryId);
     }
-  }, [categories]);
+  }, [categories, fetchExams]);
 
   const handleCategoryClick = (categoryID: string) => {
     setActiveCategory(categoryID);
 
-    if (activeExam?.categoryID !== categoryID) {
+    if (!activeExam || activeExam.categoryID !== categoryID) {
       setActiveExam(null);
       fetchExams(categoryID);
     }
@@ -75,7 +75,7 @@ function ExamsPage() {
 
       {/* Categories (Top Horizontal) */}
       <div className="flex gap-2 overflow-x-auto scroll-m-4 pb-2">
-        {categories?.map((cat: any) => (
+        {categories?.map((cat: Category) => (
           <button
             key={cat.categoryID}
             onClick={() => handleCategoryClick(cat.categoryID)}

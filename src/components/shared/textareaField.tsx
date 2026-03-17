@@ -1,4 +1,17 @@
-function TextAreaField({ label, icon, formError, className, ...props }: any) {
+type TextAreaFieldProps = {
+  label: string;
+  icon?: React.ReactNode;
+  formError?: string;
+  className?: string;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+
+function TextAreaField({
+  label,
+  icon,
+  formError,
+  className,
+  ...props
+}: TextAreaFieldProps) {
   return (
     <div className={`${className}`}>
       <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">

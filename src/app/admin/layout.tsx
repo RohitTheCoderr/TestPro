@@ -11,7 +11,7 @@ function LayoutPage({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const { token, user } = useAppSelector((state) => state.auth);
-  const rehydrated = useAppSelector((state: any) => state._persist?.rehydrated);
+  const rehydrated = useAppSelector((state) => state._persist?.rehydrated);
 
   useEffect(() => {
     if (!rehydrated) return;

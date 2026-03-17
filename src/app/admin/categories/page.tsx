@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Edit } from "lucide-react";
 import TruncateTextTooltip from "@/components/shared/truncketTooltip";
+import { toast } from "sonner";
 
 function CategoriesPage() {
   const dispatch = useAppDispatch();
@@ -29,8 +30,15 @@ function CategoriesPage() {
       setLoading(true);
       const res = await apiClient.get<CategoryResponse>("/admin/category/list");
       dispatch(setCategoriesList(res?.data?.categories));
-    } catch (err: any) {
-      setError(err?.message || "Failed to load categories");
+    } catch (error: unknown) {
+      let message = "An unexpected error occurred.";
+
+      if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -38,7 +46,7 @@ function CategoriesPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   return (
     <div className="space-y-6">
