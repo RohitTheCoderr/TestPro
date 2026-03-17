@@ -14,7 +14,6 @@ interface EditCategoryFormProps {
   category?: Category;
 }
 
-interface cratecategory {}
 export default function CategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
 

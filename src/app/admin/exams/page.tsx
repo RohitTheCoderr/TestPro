@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/API/apiClient";
 import { Category, Examresponse, Exams } from "@/Interfaces";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
@@ -19,28 +19,31 @@ function ExamsPage() {
   const [activeExam, setActiveExam] = useState<Exams | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchExams = async (categoryID: string) => {
-    try {
-      setLoading(true);
-      const res = await apiClient.get<Examresponse>(
-        `/admin/${categoryID}/exams/list`,
-      );
+  const fetchExams = useCallback(
+    async (categoryID: string) => {
+      try {
+        setLoading(true);
+        const res = await apiClient.get<Examresponse>(
+          `/admin/${categoryID}/exams/list`,
+        );
 
-      const exams: Exams[] = res?.data?.exams;
+        const exams: Exams[] = res?.data?.exams;
 
-      // setExamsByCategory(exams);
-      dispatch(setExamsList(exams));
+        // setExamsByCategory(exams);
+        dispatch(setExamsList(exams));
 
-      if (exams.length > 0) {
-        setActiveExam(exams[0]);
+        if (exams.length > 0) {
+          setActiveExam(exams[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+        toast.error("Error while fetching exams");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching exams:", error);
-      toast.error("Error while fetching exams");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (categories.length > 0) {

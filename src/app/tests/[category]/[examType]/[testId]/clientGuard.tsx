@@ -20,7 +20,7 @@ function ClientGuard({ children }: ClientGuardProps) {
       router.replace("/auth");
       return;
     }
-  }, [token, user, rehydrated, router, toast]);
+  }, [token, user, rehydrated, router]);
   return <>{children}</>;
 }
 export default ClientGuard;

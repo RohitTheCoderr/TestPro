@@ -25,28 +25,26 @@ function CategoriesPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await apiClient.get<CategoryResponse>("/admin/category/list");
-      dispatch(setCategoriesList(res?.data?.categories));
-    } catch (error: unknown) {
-      let message = "An unexpected error occurred.";
-
-      if (error instanceof Error) {
-        message = error.message;
-      }
-
-      toast(message);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await apiClient.get<CategoryResponse>(
+          "/admin/category/list",
+        );
+        dispatch(setCategoriesList(res?.data?.categories));
+      } catch (error: unknown) {
+        let message = "An unexpected error occurred.";
+        if (error instanceof Error) message = error.message;
+        toast(message);
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  }, [fetchData]);
+  }, [dispatch]); // ✅ only include real dependencies
 
   return (
     <div className="space-y-6">
