@@ -115,6 +115,7 @@ export default function AuthForm() {
                 </p>
                 <Button
                   variant="outline"
+                  size="lg"
                   onClick={() => setIsLogin(false)}
                   className=" hover:text-primary w-[12rem] rounded-full "
                 >
@@ -129,6 +130,7 @@ export default function AuthForm() {
                 </p>
                 <Button
                   variant="outline"
+                  size="lg"
                   onClick={() => setIsLogin(true)}
                   className=" hover:text-green-600 w-[12rem] rounded-full "
                 >

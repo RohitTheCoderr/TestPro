@@ -2,18 +2,18 @@
 "use client";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
-// import { AppDispatch } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
-// import { useDispatch } from "react-redux";
+import ResetPassword from "./resetPassword";
+import { toast } from "sonner";
 
 export default function Login() {
-  //  const router = useRouter(); // This is now from 'next/navigation'
   const [contact, setContact] = useState(""); // email or mobile
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [forgetpass, setForgetpass] = useState(false);
 
   // const dispatch = useDispatch<AppDispatch>();
   const dispatch = useAppDispatch();
@@ -24,11 +24,11 @@ export default function Login() {
     setError(""); // Clear previous error
 
     if (!password) {
-      alert("please provide Passwords");
+      toast.warning("please provide Passwords");
       return;
     }
     if (!contact) {
-      alert("please provide Email or mobile");
+      toast.warning("please provide Email or mobile");
       return;
     }
 
@@ -59,58 +59,71 @@ export default function Login() {
           router.push("/");
         }
       } else {
-        alert(data.message || "OTP verification failed");
+        toast.message(data.message || "OTP verification failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error");
+      toast.error("Server error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className=" flex items-center justify-center text-gray-800 dark:text-gray-100 transition-colors duration-300">
-      <form
-        onSubmit={handleLogin}
-        // className="bg-white dark:bg-gray-800 p-2 sm:p-4 md:p-8 rounded-2xl shadow-xl w-full max-w-md transition-colors duration-300"
-        className=""
-      >
-        {/* Heading */}
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
-          Log In to <span className="text-primary">TestPro</span>
-        </h2>
+    <>
+      {" "}
+      {!forgetpass ? (
+        <div className=" flex items-center justify-center text-gray-800 dark:text-gray-100 transition-colors duration-300">
+          <form
+            onSubmit={handleLogin}
+            // className="bg-white dark:bg-gray-800 p-2 sm:p-4 md:p-8 rounded-2xl shadow-xl w-full max-w-md transition-colors duration-300"
+            className=""
+          >
+            {/* Heading */}
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
+              Log In to <span className="text-primary">TestPro</span>
+            </h2>
 
-        {/* Email */}
-        <input
-          type="text"
-          placeholder="Email or Mobile"
-          value={contact}
-          onChange={(e) => setContact(e.target.value)}
-          className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        />
+            {/* Email */}
+            <input
+              type="text"
+              placeholder="Email or Mobile"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            />
 
-        {/* Password */}
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-        />
+            {/* Password */}
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            />
 
-        {/* Submit Button */}
-        <Button
-          size="xl"
-          type="submit"
-          className="w-full text-white rounded-full text-lg font-semibold shadow-md"
-        >
-          {loading ? "Logging in..." : "Log In"}
-        </Button>
+            {/* Submit Button */}
+            <Button
+              size="xl"
+              type="submit"
+              className="w-full text-white rounded-full text-lg font-semibold shadow-md"
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </Button>
 
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
-      </form>
-    </div>
+            <div
+              className="text-primary text-sm text-right mt-2 cursor-pointer hover:text-accent"
+              onClick={() => setForgetpass(true)}
+            >
+              Forget password
+            </div>
+            {/* Error Message */}
+            {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
+          </form>
+        </div>
+      ) : (
+        <ResetPassword setForgetpass={setForgetpass} />
+      )}
+    </>
   );
 }

@@ -1,26 +1,23 @@
 "use client";
 import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
-// import { AppDispatch } from "@/lib/redux/store";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// import { useDispatch } from "react-redux";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-
-export default function SignUp() {
+interface PropsForget {
+  setForgetpass: (value: boolean) => void;
+}
+export default function ResetPassword({ setForgetpass }: PropsForget) {
   const [contact, setContact] = useState(""); // email or mobile
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
 
-  // const dispatch = useDispatch<AppDispatch>();
   const dispatch = useAppDispatch();
-  //  const navigate=useNavigate()
   const router = useRouter();
 
   const validateContact = (value: string) => {
@@ -45,7 +42,7 @@ export default function SignUp() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/send_opt`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/forget_password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -84,7 +81,7 @@ export default function SignUp() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/register`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/reset_password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -92,13 +89,15 @@ export default function SignUp() {
         },
       );
 
+      // const res=await apiClient.post("/user/auth/reset_password", bodyData)
+
       const data = await res.json();
       if (res.ok) {
         const isAdmin = data?.data?.user;
         dispatch(setAuthToken(data?.data?.token));
         dispatch(setUser(isAdmin));
 
-        toast.success("Registration successful");
+        toast.success("Password reset successful");
         if (isAdmin.role === "admin") {
           router.push("/admin");
         } else {
@@ -106,11 +105,11 @@ export default function SignUp() {
           router.push("/");
         }
       } else {
-        toast.error(data.message || "OTP verification failed");
+        toast.error(data.message);
       }
     } catch (err) {
       console.error("error>>", err);
-      toast.error("Server error");
+      toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +120,7 @@ export default function SignUp() {
       {!otpSent ? (
         <form onSubmit={handleSendOtp}>
           <h2 className="text-2xl font-bold mb-6 text-center">
-            Enter Email or Mobile
+            Reset Password
           </h2>
           <input
             type="text"
@@ -133,19 +132,18 @@ export default function SignUp() {
           <Button type="submit" size="xl" className="w-full !py-3 rounded-full">
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </Button>
+          <div
+            className="text-primary text-sm text-right mt-2 px-4 cursor-pointer hover:text-accent"
+            onClick={() => setForgetpass(false)}
+          >
+            Login
+          </div>
         </form>
       ) : (
         <form onSubmit={handleRegister}>
           <h2 className="text-2xl font-bold mb-6 text-center">
             Verify OTP & Set Password
           </h2>
-          <input
-            type="text"
-            value={name}
-            placeholder="Enter your name"
-            onChange={(e) => setName(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
           <input
             type="text"
             readOnly
@@ -162,14 +160,14 @@ export default function SignUp() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="New Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
           <input
             type="password"
-            placeholder="Confirm Password"
+            placeholder="Confirm New Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
@@ -177,6 +175,12 @@ export default function SignUp() {
           <Button type="submit" size="xl" className="w-full py-3 rounded-full">
             {isLoading ? "Registering..." : "Register"}
           </Button>
+          <div
+            className="text-primary text-sm text-right mt-2 px-4 cursor-pointer hover:text-accent"
+            onClick={() => setForgetpass(false)}
+          >
+            Login
+          </div>
         </form>
       )}
     </div>
