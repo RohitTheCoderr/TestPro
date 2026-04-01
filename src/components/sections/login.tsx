@@ -52,7 +52,7 @@ export default function Login() {
         const isAdmin = data?.data?.user;
         dispatch(setAuthToken(data?.data?.token));
         dispatch(setUser(isAdmin));
-
+        toast.success(`Welcome back, ${data?.data?.user.name || "User"}!`);
         if (isAdmin.role === "admin") {
           router.push("/admin");
         } else {

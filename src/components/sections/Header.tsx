@@ -9,9 +9,9 @@ import { FaThList } from "react-icons/fa";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { LogIn, LogOut, User } from "lucide-react";
+import { toast } from "sonner";
 const Header = () => {
   const [toggle, setToggle] = useState(false);
-  // const token = useSelector((state: RootState) => state.auth.token);
   const token = useAppSelector((state) => state.auth.token) || "";
   const user = useAppSelector((state) => state.auth.user) || null;
   const nameTwoChar = user?.name
@@ -24,7 +24,7 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    alert("logout");
+    toast.info("See you soon! You are now logged out.");
     persistor.purge(); // for clear all data from persits and redux
   };
 

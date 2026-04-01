@@ -50,7 +50,9 @@ function CategoriesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl md:text-2xl font-semibold">Categories</h2>
+        <h2 className="text-xl md:text-2xl font-semibold dark:text-white">
+          Categories
+        </h2>
 
         <Link
           href="/admin/categories/create"
@@ -87,7 +89,7 @@ function CategoriesPage() {
             categoriesList.map((cat: Category, index: number) => (
               <TableRow
                 key={index}
-                className={`${index % 2 != 0 ? "bg-slate-50" : ""}`}
+                className={`${index % 2 != 0 ? "bg-slate-50" : "dark:bg-slate-100"}`}
               >
                 <TableCell>{cat.categoryID}</TableCell>
                 <TableCell>{cat.name}</TableCell>
