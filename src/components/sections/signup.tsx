@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {
   const [contact, setContact] = useState(""); // email or mobile
@@ -17,6 +18,16 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConPassword, setShowConPassword] = useState(false);
+
+  const [errors, setErrors] = useState({
+    name: "",
+    contact: "",
+    password: "",
+    confirmPassword: "",
+    otp: "",
+  });
 
   // const dispatch = useDispatch<AppDispatch>();
   const dispatch = useAppDispatch();
@@ -29,8 +40,29 @@ export default function SignUp() {
     return isEmail || isMobile;
   };
 
+  const validateForm = () => {
+    const newErrors: any = {};
+
+    if (!name) newErrors.name = "Name is required";
+    if (!contact) newErrors.contact = "Email or mobile is required";
+    if (!password) newErrors.password = "Password is required";
+    if (!otp) newErrors.otp = "OTP is required";
+
+    if (password && password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     if (!validateContact(contact)) {
       toast.warning("Enter a valid email or 10-digit mobile number");
       return;
@@ -70,6 +102,27 @@ export default function SignUp() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
+    if (!name) {
+      toast.warning("Please enter your name");
+      return;
+    }
+    if (!contact) {
+      toast.warning("Please enter email or mobile");
+      return;
+    }
+
+    if (!password) {
+      toast.warning("Please enter password");
+      return;
+    }
+
+    if (!otp) {
+      toast.warning("Please enter OTP");
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.warning("Passwords do not match");
       return;
@@ -123,14 +176,30 @@ export default function SignUp() {
           <h2 className="text-2xl font-bold mb-6 text-center">
             Enter Email or Mobile
           </h2>
-          <input
-            type="text"
-            placeholder="Email or Mobile"
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <Button type="submit" size="xl" className="w-full !py-3 rounded-full">
+          <div className="mb-2 ">
+            <input
+              type="text"
+              placeholder="Email or Mobile"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.name
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+            />
+            {errors.contact && (
+              <p className="text-red-500 text-sm ml-2">{errors.contact}</p>
+            )}
+          </div>
+          <Button
+            disabled={isLoading}
+            type="submit"
+            size="xl"
+            className="w-full !py-3 rounded-full"
+          >
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </Button>
         </form>
@@ -139,42 +208,128 @@ export default function SignUp() {
           <h2 className="text-2xl font-bold mb-6 text-center">
             Verify OTP & Set Password
           </h2>
-          <input
-            type="text"
-            value={name}
-            placeholder="Enter your name"
-            onChange={(e) => setName(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <input
-            type="text"
-            readOnly
-            value={contact}
-            placeholder={contact ? contact : "Your email or mobile"}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <input
-            type="text"
-            placeholder="OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <Button type="submit" size="xl" className="w-full py-3 rounded-full">
+          <div className="mb-2 ">
+            <input
+              type="text"
+              value={name}
+              placeholder="Enter your name"
+              onChange={(e) => setName(e.target.value)}
+              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.name
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm ml-2">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="mb-2">
+            <input
+              type="text"
+              readOnly
+              value={contact}
+              placeholder={contact ? contact : "Your email or mobile"}
+              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.contact
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+            />
+
+            {errors.contact && (
+              <p className="text-red-500 text-sm ml-2">{errors.contact}</p>
+            )}
+          </div>
+          <div className="mb-2">
+            <input
+              type="text"
+              placeholder="OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.otp
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+            />
+
+            {errors.otp && (
+              <p className="text-red-500 text-sm mb-2">{errors.otp}</p>
+            )}
+          </div>
+          <div className="mb-2">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.password
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+              />
+
+              {/* Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-red-500 text-sm mb-2">{errors.password}</p>
+            )}
+          </div>
+          <div className="mb-2">
+            <div className="relative ">
+              <input
+                type={showConPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.confirmPassword
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+              />
+              {/* Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowConPassword(!showConPassword)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300"
+              >
+                {showConPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mb-2">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
+          <Button
+            disabled={isLoading}
+            type="submit"
+            size="xl"
+            className="w-full py-3 rounded-full"
+          >
             {isLoading ? "Registering..." : "Register"}
           </Button>
         </form>
