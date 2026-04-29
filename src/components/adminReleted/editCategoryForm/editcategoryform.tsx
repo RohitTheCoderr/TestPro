@@ -53,6 +53,8 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
         "/admin/category/update",
         payload,
       );
+      console.log("response", res);
+      
       if (res) {
         router.push("/admin/categories");
       }

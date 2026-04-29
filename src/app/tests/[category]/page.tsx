@@ -62,14 +62,6 @@ const TestCard: React.FC<ExamCardProps> = ({
               categoryName,
               examDetails,
             })
-          // onSelect({
-          //   ExamID,
-          //   name,
-          //   slug,
-          //   categoryID,
-          //   categoryName,
-          //   examDetails,
-          // })
         } // ✅ pass full exam object
       >
         Explore {name} Tests

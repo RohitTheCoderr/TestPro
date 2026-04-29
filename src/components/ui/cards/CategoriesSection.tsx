@@ -65,21 +65,15 @@ function CategoriesSection() {
         {categoriesss.map((cat, index) => (
           <div
             key={cat.categoryID || index}
-            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-full my-auto text-center hover:shadow-lg hover:border-primary hover:text-primary group transition ${
-              categoryname == cat.slug ? "bg-primary shadow-lg text-white" : ""
+            className={` border border-border bg-card cursor-pointer shadow rounded-full px-4 py-2 w-auto min-w-[10rem]  my-auto text-center hover:shadow-md hover:border-primary group transition flex justify-center items-center ${
+              categoryname == cat.slug ? "bg-primary shadow-lg text-white " : ""
             }`}
             onClick={() => {
               setCategoryname(cat.slug);
               setCateID(cat.categoryID);
             }}
           >
-            {/* <p
-              className={`text-lg group-hover:text-primary font-semibold   ${
-                categoryname == cat.slug ? " group-hover:text-white" : ""
-              }`}
-            > */}
             {cat.name}
-            {/* </p> */}
           </div>
         ))}
       </div>
