@@ -62,7 +62,6 @@ export default function SignUp() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
     if (!validateContact(contact)) {
       toast.warning("Enter a valid email or 10-digit mobile number");
       return;
@@ -173,13 +172,11 @@ export default function SignUp() {
     <div className="flex items-center justify-center">
       {!otpSent ? (
         <form onSubmit={handleSendOtp}>
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            Enter Email or Mobile
-          </h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">Generate OTP</h2>
           <div className="mb-2 ">
             <input
               type="text"
-              placeholder="Email or Mobile"
+              placeholder=" Enter Email"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
