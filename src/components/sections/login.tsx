@@ -59,7 +59,7 @@ export default function Login() {
           router.push("/");
         }
       } else {
-        toast.message(data.message || "OTP verification failed");
+        toast.error(data.message || "OTP verification failed");
       }
     } catch (err) {
       console.error(err);

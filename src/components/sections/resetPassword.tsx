@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 interface PropsForget {
   setForgetpass: (value: boolean) => void;
 }
@@ -16,7 +17,8 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConPassword, setShowConPassword] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -49,8 +51,8 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
           body: JSON.stringify(bodyData),
         },
       );
-
       const data = await res.json();
+
       if (data.success) {
         setOtpSent(true);
         setOtpID(data?.data?.otpID); // save otpID returned from backend
@@ -65,7 +67,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSetpassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast.warning("Passwords do not match");
@@ -127,7 +129,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             placeholder="Email or Mobile"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
           <Button type="submit" size="xl" className="w-full !py-3 rounded-full">
             {isLoading ? "Sending OTP..." : "Send OTP"}
@@ -140,7 +142,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
           </div>
         </form>
       ) : (
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleSetpassword}>
           <h2 className="text-2xl font-bold mb-6 text-center">
             Verify OTP & Set Password
           </h2>
@@ -149,30 +151,56 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             readOnly
             value={contact}
             placeholder={contact ? contact : "Your email or mobile"}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
           <input
             type="text"
             placeholder="OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
           />
-          <input
-            type="password"
-            placeholder="New Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <input
-            type="password"
-            placeholder="Confirm New Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
-          />
-          <Button type="submit" size="xl" className="w-full py-3 rounded-full">
+          <div className="relative mb-4">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            />
+
+            {/* Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          <div className="relative mb-4">
+            <input
+              type={showConPassword ? "text" : "password"}
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            />
+            {/* Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setShowConPassword(!showConPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300"
+            >
+              {showConPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          <Button
+            disabled={isLoading}
+            type="submit"
+            size="xl"
+            className="w-full py-3 rounded-full"
+          >
             {isLoading ? "Registering..." : "Register"}
           </Button>
           <div
