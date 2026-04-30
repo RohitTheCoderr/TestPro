@@ -74,7 +74,7 @@ const Header = () => {
           </div>
 
           {/* Dropdown */}
-          <div className="absolute right-0 w-48 rounded-[5px] bg-white dark:bg-slate-800 shadow-lg hidden group-hover:block border-[1px]">
+          <div className="absolute z-50 right-0 w-48 rounded-[5px] bg-white dark:bg-slate-800 shadow-lg hidden group-hover:block border-[1px]">
             <div className="px-4 py-2 border-b text-sm font-medium">
               {user?.name || "User Name"}
             </div>

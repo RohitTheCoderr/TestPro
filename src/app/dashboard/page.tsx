@@ -181,9 +181,9 @@ export default function DashboardPage() {
                       <TableCell className="text-sm">
                         {new Date(test.submittedAt).toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-center mx-auto">
+                      <TableCell className="text-center">
                         <EyeIcon
-                          className={`hover:text-primary cursor-pointer ${selectedIndex === index ? "text-primary" : ""}`}
+                          className={`hover:text-primary cursor-pointer mx-auto ${selectedIndex === index ? "text-primary" : ""}`}
                           onClick={() => setSelectedIndex(index)}
                         />
                       </TableCell>

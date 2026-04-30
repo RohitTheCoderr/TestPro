@@ -51,8 +51,8 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
           body: JSON.stringify(bodyData),
         },
       );
-
       const data = await res.json();
+
       if (data.success) {
         setOtpSent(true);
         setOtpID(data?.data?.otpID); // save otpID returned from backend
