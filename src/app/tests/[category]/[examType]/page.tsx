@@ -66,9 +66,9 @@ const Testcard: React.FC<TestCardProps> = ({
 export default function ExamTypeTests({
   params,
 }: {
-  params: Promise<{ category: string; examType: string }>;
+  params: { category: string; examType: string };
 }) {
-  const { category, examType } = use(params);
+  const { category, examType } = params;
 
   const [examList, setExamList] = useState<TestCardProps[]>([]);
 

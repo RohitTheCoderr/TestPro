@@ -5,15 +5,15 @@ import TestDetailsClient from "@/components/ui/TestDetailsClient/TestDetailsClie
 import ClientGuard from "./clientGuard";
 
 interface PageProps {
-  params: Promise<{
+  params: {
     category: string;
     examType: string;
     testId: string;
-  }>;
+  };
 }
 
 export default function TestDetailsPage({ params }: PageProps) {
-  const { category, examType, testId } = use(params);
+  const { category, examType, testId } = params;
 
   return (
     <ClientGuard>
