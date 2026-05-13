@@ -100,102 +100,126 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {load && <p className="text-center text-blue-600 mt-12">Loading...!</p>}
-        {/* ✅ All Test Cards */}
         <div className="mb-10">
-          {testResults.length === 0 ? (
-            <p className="text-muted-foreground text-center mt-20 text-red-600 text-xl">
-              Sorry, You Are not Attempt any Test.
-            </p>
+          {load ? (
+            // ✅ Loading State
+            <div className="flex flex-col items-center justify-center py-24">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+
+              <p className="mt-4 text-lg font-medium text-muted-foreground">
+                Loading your test results...
+              </p>
+            </div>
+          ) : testResults.length === 0 ? (
+            // ✅ Empty State
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed py-20">
+              <div className="mb-4 text-6xl">📄</div>
+
+              <h2 className="text-2xl font-semibold">No Test Results Found</h2>
+
+              <p className="mt-2 max-w-md text-center text-muted-foreground">
+                You haven’t attempted any tests yet. Start practicing to see
+                your performance and results here.
+              </p>
+            </div>
           ) : (
+            // Table Data
             <>
               <h2 className="mb-4 text-2xl font-semibold">Your Test Results</h2>
-              <Table>
-                <TableHeader>
-                  {/* Header row 1 */}
 
-                  <TableRow>
-                    <TableHead rowSpan={3}>Test Title</TableHead>
-                    <TableHead colSpan={8} className="text-center">
-                      Subjects Wise
-                    </TableHead>
-                    <TableHead rowSpan={3}>Total Score</TableHead>
-                    <TableHead rowSpan={3}>Submitted At</TableHead>
-                    <TableHead rowSpan={3}>Actions</TableHead>
-                  </TableRow>
+              <div className="overflow-x-auto rounded-xl border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead rowSpan={3}>Test Title</TableHead>
 
-                  {/* Header row 2 */}
-                  <TableRow>
-                    {testResults[0]?.subjectWiseResult?.map((subHead, ind) => (
-                      <TableHead key={ind} colSpan={2}>
-                        {subHead?.subjectName}
+                      <TableHead colSpan={8} className="text-center">
+                        Subjects Wise
                       </TableHead>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    {testResults[0]?.subjectWiseResult?.map((_, index) => (
-                      <React.Fragment key={index}>
-                        <TableHead>Attempt</TableHead>
-                        <TableHead>Correct</TableHead>
-                      </React.Fragment>
-                    ))}
-                  </TableRow>
-                </TableHeader>
 
-                <TableBody>
-                  {testResults.map((test, index) => (
-                    <TableRow key={index}>
-                      {/* Test title */}
-                      <TableCell className="font-medium">
-                        {test.testTitle}
-                      </TableCell>
-
-                      {/* Subject-wise marks */}
-                      {test?.subjectWiseResult?.map((sub, index) => {
-                        return (
-                          <React.Fragment key={index}>
-                            <TableCell className="text-center">
-                              <span className="font-semibold">
-                                {" "}
-                                {sub ? sub.attempted : "-"}
-                              </span>
-                              /{sub ? sub.totalQuestions : "-"}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <span className="font-semibold">
-                                {" "}
-                                {sub ? sub.correct : "-"}
-                              </span>
-                              /{sub ? sub.attempted : "-"}
-                            </TableCell>
-                          </React.Fragment>
-                        );
-                      })}
-
-                      {/* Total score */}
-                      <TableCell className="font-semibold text-center">
-                        {test.totalScore}
-                      </TableCell>
-
-                      {/* Submitted time */}
-                      <TableCell className="text-sm">
-                        {new Date(test.submittedAt).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <EyeIcon
-                          className={`hover:text-primary cursor-pointer mx-auto ${selectedIndex === index ? "text-primary" : ""}`}
-                          onClick={() => setSelectedIndex(index)}
-                        />
-                      </TableCell>
+                      <TableHead rowSpan={3}>Total Score</TableHead>
+                      <TableHead rowSpan={3}>Submitted At</TableHead>
+                      <TableHead rowSpan={3}>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+
+                    <TableRow>
+                      {testResults[0]?.subjectWiseResult?.map(
+                        (subHead, ind) => (
+                          <TableHead
+                            key={ind}
+                            colSpan={2}
+                            className="text-center"
+                          >
+                            {subHead?.subjectName}
+                          </TableHead>
+                        ),
+                      )}
+                    </TableRow>
+
+                    <TableRow>
+                      {testResults[0]?.subjectWiseResult?.map((_, index) => (
+                        <React.Fragment key={index}>
+                          <TableHead className="text-center">Attempt</TableHead>
+
+                          <TableHead className="text-center">Correct</TableHead>
+                        </React.Fragment>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {testResults.map((test, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">
+                          {test.testTitle}
+                        </TableCell>
+
+                        {test?.subjectWiseResult?.map((sub, index) => {
+                          return (
+                            <React.Fragment key={index}>
+                              <TableCell className="text-center">
+                                <span className="font-semibold">
+                                  {sub ? sub.attempted : "-"}
+                                </span>
+                                /{sub ? sub.totalQuestions : "-"}
+                              </TableCell>
+
+                              <TableCell className="text-center">
+                                <span className="font-semibold text-green-600">
+                                  {sub ? sub.correct : "-"}
+                                </span>
+                                /{sub ? sub.attempted : "-"}
+                              </TableCell>
+                            </React.Fragment>
+                          );
+                        })}
+
+                        <TableCell className="text-center font-semibold">
+                          {test.totalScore}
+                        </TableCell>
+
+                        <TableCell className="text-sm">
+                          {new Date(test.submittedAt).toLocaleString()}
+                        </TableCell>
+
+                        <TableCell className="text-center">
+                          <EyeIcon
+                            className={`mx-auto cursor-pointer hover:text-primary ${
+                              selectedIndex === index ? "text-primary" : ""
+                            }`}
+                            onClick={() => setSelectedIndex(index)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </>
           )}
         </div>
 
-        {/* ✅ Subject-wise Graph */}
+        {/*  Subject-wise Graph */}
         {selectedTest && (
           <div className="">
             <div className="flex justify-between items-center">
