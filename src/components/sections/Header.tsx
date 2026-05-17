@@ -2,57 +2,39 @@
 
 import Link from "next/link";
 import ThemeToggle from "../shared/mode";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/lib/redux/store";
 import { persistor } from "@/lib/redux/store";
 import { logout } from "@/lib/redux/slices/authSlice";
 import Image from "next/image";
 import { FaThList } from "react-icons/fa";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { LogIn, LogOut, User } from "lucide-react";
+import { toast } from "sonner";
 const Header = () => {
   const [toggle, setToggle] = useState(false);
-  const token = useSelector((state: RootState) => state.auth.token);
-  const dispatch = useDispatch();
+  const token = useAppSelector((state) => state.auth.token) || "";
+  const user = useAppSelector((state) => state.auth.user) || null;
+  const nameTwoChar = user?.name
+    ?.split(" ") // split into words
+    .slice(0, 2) // take first 2 words
+    .map((word) => word[0]) // take first letter of each word
+    .join("");
+
+  const dispatch = useAppDispatch();
+
   const handleLogout = () => {
     dispatch(logout());
-    alert("logout");
-    localStorage.removeItem("authToken");
+    toast.info("See you soon! You are now logged out.");
     persistor.purge(); // for clear all data from persits and redux
   };
 
   const handletoggle = () => {
-    console.log("click", toggle);
-
     setToggle(!toggle);
   };
 
   return (
     <header className="flex justify-between w-full items-center px-8 md:px-16 py-4 shadow-md border-b-[1px] bg-white dark:bg-gray-700 dark:text-white">
       <div className="text-primary dark:text-accent flex justify-center gap-2 items-center">
-        {/* <Link href="/" className="cursor-pointer flex gap-2">
-          <svg
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 48 48"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              clipRule="evenodd"
-              d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
-            <path
-              clipRule="evenodd"
-              d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
-          </svg>
-          <h1 className="text-2xl font-bold text-primary dark:text-accent">
-            TestPro
-          </h1>
-        </Link> */}
         <Link
           href="/"
           className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white"
@@ -67,39 +49,58 @@ const Header = () => {
           {/* <span>TestPro</span> */}
         </Link>
       </div>
-      <nav className="space-x-6 max-sm:hidden text-black dark:text-white">
-        <Link href="/" className="hover:text-primary ">
+      <nav className="space-x-6 max-sm:hidden text-black dark:text-white flex items-center justify-start px-4">
+        <Link href="/" className="hover:text-primary">
           Home
         </Link>
+
         <Link href="/tests" className="hover:text-primary">
           Tests
         </Link>
-
-        {!token ? (
+        {token && (
           <Link
-            href="/auth"
-            className="bg-primary text-white px-4 py-[5px] rounded-[3px] hover:bg-accent transition"
+            href="/dashboard"
+            className="hover:text-primary bg-muted py-1 px-2 rounded"
           >
-            Login
+            Dashboard
           </Link>
-        ) : (
-          <>
-            <Link
-              href="/dashboard"
-              className="hover:text-primary w-full bg-muted py-1 px-2  "
-            >
-              dashboard
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-1 rounded-[3px] hover:bg-red-600 transition"
-            >
-              Logout
-            </button>
-          </>
         )}
 
-        <ThemeToggle />
+        {/* USER DROPDOWN */}
+        <div className="relative group ml-auto">
+          {/* Avatar */}
+          <div className="bg-muted hover:bg-gray-200 dark:bg-slate-800 text-primary dark:text-white rounded-full h-10 w-10 flex justify-center items-center cursor-pointer">
+            {nameTwoChar ? nameTwoChar : <User />}
+          </div>
+
+          {/* Dropdown */}
+          <div className="absolute right-0 w-48 rounded-[5px] bg-white dark:bg-slate-800 shadow-lg hidden group-hover:block border-[1px]">
+            <div className="px-4 py-2 border-b text-sm font-medium">
+              {user?.name || "User Name"}
+            </div>
+
+            <div className="px-4 py-2 flex justify-start items-center gap-2 ">
+              <div>Theme</div>
+              <ThemeToggle />
+            </div>
+
+            {!token ? (
+              <Link
+                href="/auth"
+                className="w-full flex items-center gap-3 text-left px-4 py-2 text-green-600 hover:bg-green-50 dark:hover:bg-slate-700"
+              >
+                <LogIn className="text-[12px]" /> Log In
+              </Link>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 text-left px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-slate-700"
+              >
+                <LogOut className="text-[12px]" /> Logout
+              </button>
+            )}
+          </div>
+        </div>
       </nav>
 
       <div className="sm:hidden">
@@ -128,7 +129,7 @@ const Header = () => {
                 href="/auth"
                 className="bg-primary text-white px-2 py-[5px] rounded-[3px] hover:bg-accent transition"
               >
-                Login
+                Log In
               </Link>
             ) : (
               <>
@@ -140,9 +141,9 @@ const Header = () => {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 text-white px-2 py-1 rounded-[3px] hover:bg-red-600 transition"
+                  className="bg-red-500 flex items-center text-white px-2 py-1 rounded-[3px] hover:bg-red-600 transition"
                 >
-                  Logout
+                  <LogOut /> Logout
                 </button>
               </>
             )}

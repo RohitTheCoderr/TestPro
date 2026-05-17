@@ -1,6 +1,16 @@
 "use client";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { apiClient } from "@/lib/API/apiClient";
+import { useAppSelector } from "@/lib/redux/hooks";
+import { EyeIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   BarChart,
@@ -13,17 +23,20 @@ import {
   Cell,
   PieChart,
   Pie,
+  Tooltip,
 } from "recharts";
+import { toast } from "sonner";
 
 // 🧩 Define updated TypeScript interfaces
 interface SubjectWiseResult {
   subjectID: string;
   subjectName: string;
-  totalQuestions: number; // ✅ total questions in subject
-  attempted: number; // ✅ attempted by user
+  totalQuestions: number; // total questions in subject
+  attempted: number; // attempted by user
   correct: number;
   wrong: number;
   percentage: string;
+  marksGained: number;
 }
 
 interface TestResult {
@@ -45,17 +58,19 @@ export default function DashboardPage() {
   // const [selectedTest, setSelectedTest] = useState<TestResult | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [viewType, setViewType] = useState<"bar" | "circular">("bar");
-
+  const [load, setLoad] = useState<boolean>(false);
   const selectedTest = testResults[selectedIndex];
+
+  const user = useAppSelector((state) => state.auth.user) || null;
   // ✅ Fetch test data from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoad(true);
         const res = await apiClient.get<ApiResponse>("/user/tests/testsresult");
-        console.log("Fetched Data:", res);
-
         if (res?.success && Array.isArray(res.data)) {
           setTestResults(res.data);
+          setLoad(false);
           if (res.data.length > 0) setSelectedIndex(0); // default to first test
         }
       } catch (error: unknown) {
@@ -63,63 +78,120 @@ export default function DashboardPage() {
           error instanceof Error
             ? error.message
             : "An unexpected error occurred.";
-        console.error("Error fetching test results:", message);
-        alert(message);
+        toast.error(message);
+      } finally {
+        setLoad(false);
       }
     };
 
     fetchData();
   }, []);
 
-  // ✅ Handle card click
-  // const handleTestClick = (index: Number) => {
-  //   const found = testResults.find((t) => t.testID === testID);
-  //   if (found) setSelectedTest(found);
-  // };
-
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <main className="container mx-auto flex-1 px-4 py-8 lg:px-8">
+      <main className="container mx-auto flex-1 px-4 py-8 ">
         {/* Header */}
-        <div className="mb-8 rounded-lg bg-gradient-to-r from-primary to-accent p-8 text-card shadow-lg">
-          <h1 className="mb-2 text-4xl font-bold lg:text-5xl">
-            Welcome back, User!
+        <div className="mb-8 rounded-full bg-gradient-to-r text-center from-primary to-accent p-2 sm:p-8 text-card shadow-lg">
+          <h1 className="mb-2 text-xl sm:text-4xl font-bold lg:text-5xl">
+            Welcome back {user?.name}
           </h1>
-          <p className="text-base leading-relaxed text-card-foreground">
+          <p className="text-xs sm:text-base leading-relaxed text-gray-400">
             Your personalized dashboard to track progress and stay ahead.
           </p>
         </div>
 
+        {load && <p className="text-center text-blue-600 mt-12">Loading...!</p>}
         {/* ✅ All Test Cards */}
         <div className="mb-10">
-          <h2 className="mb-4 text-2xl font-semibold">Your Test Results</h2>
           {testResults.length === 0 ? (
-            <p className="text-muted-foreground">
-              Loading or no tests found...
+            <p className="text-muted-foreground text-center mt-20 text-red-600 text-xl">
+              Sorry, You Are not Attempt any Test.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {testResults.map((test, index) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedIndex(index)}
-                  className={`cursor-pointer rounded-lg  border p-5 transition-all hover:shadow-md ${
-                    selectedIndex === index
-                      ? "border-primary bg-primary/10 bg-card"
-                      : "border-border"
-                  }`}
-                >
-                  <h3 className="text-lg font-bold">{test.testTitle}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Total Score:{" "}
-                    <span className="font-medium">{test.totalScore}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Submitted: {new Date(test.submittedAt).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <>
+              <h2 className="mb-4 text-2xl font-semibold">Your Test Results</h2>
+              <Table>
+                <TableHeader>
+                  {/* Header row 1 */}
+
+                  <TableRow>
+                    <TableHead rowSpan={3}>Test Title</TableHead>
+                    <TableHead colSpan={8} className="text-center">
+                      Subjects Wise
+                    </TableHead>
+                    <TableHead rowSpan={3}>Total Score</TableHead>
+                    <TableHead rowSpan={3}>Submitted At</TableHead>
+                    <TableHead rowSpan={3}>Actions</TableHead>
+                  </TableRow>
+
+                  {/* Header row 2 */}
+                  <TableRow>
+                    {testResults[0]?.subjectWiseResult?.map((subHead, ind) => (
+                      <TableHead key={ind} colSpan={2}>
+                        {subHead?.subjectName}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                  <TableRow>
+                    {testResults[0]?.subjectWiseResult?.map((_, index) => (
+                      <React.Fragment key={index}>
+                        <TableHead>Attempt</TableHead>
+                        <TableHead>Correct</TableHead>
+                      </React.Fragment>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {testResults.map((test, index) => (
+                    <TableRow key={index}>
+                      {/* Test title */}
+                      <TableCell className="font-medium">
+                        {test.testTitle}
+                      </TableCell>
+
+                      {/* Subject-wise marks */}
+                      {test?.subjectWiseResult?.map((sub, index) => {
+                        return (
+                          <React.Fragment key={index}>
+                            <TableCell className="text-center">
+                              <span className="font-semibold">
+                                {" "}
+                                {sub ? sub.attempted : "-"}
+                              </span>
+                              /{sub ? sub.totalQuestions : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <span className="font-semibold">
+                                {" "}
+                                {sub ? sub.correct : "-"}
+                              </span>
+                              /{sub ? sub.attempted : "-"}
+                            </TableCell>
+                          </React.Fragment>
+                        );
+                      })}
+
+                      {/* Total score */}
+                      <TableCell className="font-semibold text-center">
+                        {test.totalScore}
+                      </TableCell>
+
+                      {/* Submitted time */}
+                      <TableCell className="text-sm">
+                        {new Date(test.submittedAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-center mx-auto">
+                        <EyeIcon
+                          className={`hover:text-primary cursor-pointer ${selectedIndex === index ? "text-primary" : ""}`}
+                          onClick={() => setSelectedIndex(index)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           )}
         </div>
 
@@ -132,8 +204,8 @@ export default function DashboardPage() {
               </h2>
               <div className="flex gap-3 mb-4">
                 <button
-                  className={`px-4 py-2 rounded-md text-white ${
-                    viewType === "bar" ? "bg-blue-600" : "bg-gray-400"
+                  className={`px-4 py-2 rounded-[5px] hover:bg-primary text-white ${
+                    viewType === "bar" ? "bg-primary" : "bg-gray-400"
                   }`}
                   onClick={() => setViewType("bar")}
                 >
@@ -141,8 +213,8 @@ export default function DashboardPage() {
                 </button>
 
                 <button
-                  className={`px-4 py-2 rounded-md text-white ${
-                    viewType === "circular" ? "bg-blue-600" : "bg-gray-400"
+                  className={`px-4 py-2 rounded-[5px] hover:bg-primary text-white ${
+                    viewType === "circular" ? "bg-primary" : "bg-gray-400"
                   }`}
                   onClick={() => setViewType("circular")}
                 >
@@ -178,7 +250,7 @@ export default function DashboardPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                         <YAxis />
-                        {/* <Tooltip /> */}
+                        <Tooltip />
                         <Legend />
                         <Bar dataKey="Total" fill="#a3a3a3" />
                         <Bar dataKey="Attempted" fill="#f59e0b" />
@@ -188,8 +260,9 @@ export default function DashboardPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <ResponsiveContainer width="100%" height={260}>
+                    <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
+                        <Tooltip />
                         <Pie
                           data={[
                             { name: "Total", value: sub.totalQuestions },

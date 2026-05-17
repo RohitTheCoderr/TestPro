@@ -1,19 +1,20 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Category, CategoryResponse } from "@/Interfaces";
+import { Category, CategoryResponse, createCategory } from "@/Interfaces";
 import { motion } from "framer-motion";
-import { Tag, Link2, FileText, Info, Save, ArrowLeft } from "lucide-react";
+import { Tag, FileText, Info, Save, ArrowLeft } from "lucide-react";
 
 import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
 import { apiClient } from "@/lib/API/apiClient";
-import { details } from "framer-motion/client";
+import { toast } from "sonner";
 
 interface EditCategoryFormProps {
   category?: Category;
 }
-export default function EditCategoryForm({ category }: EditCategoryFormProps) {
+
+export default function CategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -33,17 +34,20 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e: any) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value, type } = e.target;
 
     setFormError({
       ...formError,
       [name]: "",
     });
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox" && "checked" in e.target ? e.target.checked : value,
+    }));
   };
 
   const updatecategoryHandle = async (payload: Category) => {
@@ -53,38 +57,48 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
         "/admin/category/update",
         payload,
       );
-      console.log("response", res);
-      
+      toast.success(res.message);
       if (res) {
         router.push("/admin/categories");
       }
-    } catch (err: any) {
-      console.error(" eroororor", err);
-      setError(err?.message || "Failed to Update category");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError("Failed to Update category");
+        toast.error("Failed to Update category");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const CreatecategoryHandle = async (payload: Category) => {
+  const CreatecategoryHandle = async (payload: createCategory) => {
     try {
       setLoading(true);
       const res = await apiClient.post<CategoryResponse>(
         "/admin/category/create",
         payload,
       );
+      toast.success(res.message);
       if (res) {
         router.push("/admin/categories");
       }
-    } catch (err: any) {
-      console.error(" eroororor", err);
-      setError(err?.message || "Failed to create new categories");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError("Failed to create new category");
+        toast.error("Failed to create new category");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const ErrorsObj = {
@@ -109,25 +123,29 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
       return;
     }
 
-    const payload = {
-      categoryID: category?.categoryID,
-      name: formData.name,
-      slug: formData.name,
-      categoryDetails: {
-        details: formData.details,
-        otherdetails: formData.otherdetails,
-      },
-      status: formData.status,
-    };
-    if (!payload) {
-      return;
-    }
-
-    if (payload.categoryID) {
-      updatecategoryHandle(payload);
-    }
-    if (!category?.categoryID) {
-      CreatecategoryHandle(payload);
+    if (category?.categoryID) {
+      // UPDATE
+      updatecategoryHandle({
+        categoryID: category.categoryID,
+        name: formData.name,
+        slug: formData.name,
+        categoryDetails: {
+          details: formData.details,
+          otherdetails: formData.otherdetails,
+        },
+        status: formData.status,
+      });
+    } else {
+      // CREATE
+      CreatecategoryHandle({
+        name: formData.name,
+        slug: formData.name,
+        categoryDetails: {
+          details: formData.details,
+          otherdetails: formData.otherdetails,
+        },
+        status: formData.status,
+      });
     }
   };
 

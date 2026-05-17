@@ -3,35 +3,34 @@ import { Category, Examresponse, Exams } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useAppSelector } from "@/lib/redux/hooks";
 import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
-import { RootState } from "@/lib/redux/store";
 import axios from "axios";
 import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { FaArrowsAlt } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 function CategoriesSection() {
   const [examdata, setExamdata] = useState<Exams[]>([]);
   const dispatch = useDispatch();
-  const [categoryname, setCategoryname] = useState<string | undefined>("ssc");
-  const [cateID, setCateID] = useState<string | undefined>(
-    "68e72331a220cc0408e793a0",
-  );
 
-  // const categoriesss =useSelector((state: RootState) => state.category.categories) || [];
   const categoriesss = useAppSelector(
     (state) => state.category.categories,
   ) as Category[];
 
-  console.log("state categiruy", categoriesss);
+  const firstCategory = categoriesss[0];
+
+  const [categoryname, setCategoryname] = useState<string | undefined>(
+    firstCategory?.slug,
+  );
+  const [cateID, setCateID] = useState<string | undefined>(
+    firstCategory?.categoryID,
+  );
 
   const fetchExamData = useCallback(async () => {
     try {
       const result = await apiClient.get<Examresponse>(
         `/category/${cateID}/exams`,
       );
-
-      console.log(" resultresultre", result);
 
       setExamdata(result?.data?.exams || []);
     } catch (error: unknown) {
@@ -52,7 +51,14 @@ function CategoriesSection() {
     if (cateID) {
       fetchExamData();
     }
-  }, [cateID, fetchExamData]); // ✅ warning removed
+  }, [cateID, fetchExamData]);
+
+  useEffect(() => {
+    if (!cateID && categoriesss.length > 0) {
+      setCategoryname(categoriesss[0].slug);
+      setCateID(categoriesss[0].categoryID);
+    }
+  }, [categoriesss, cateID]);
 
   const handleExamSelect = (exam: Exams) => {
     dispatch(setCurrentExam(exam));
@@ -65,8 +71,8 @@ function CategoriesSection() {
         {categoriesss.map((cat, index) => (
           <div
             key={cat.categoryID || index}
-            className={` border border-border bg-card cursor-pointer shadow rounded-full px-4 py-2 w-auto min-w-[10rem]  my-auto text-center hover:shadow-md hover:border-primary group transition flex justify-center items-center ${
-              categoryname == cat.slug ? "bg-primary shadow-lg text-white " : ""
+            className={` border border-border bg-card cursor-pointer shadow rounded-full p-4 min-w-[10rem] w-auto my-auto text-center hover:shadow-lg hover:border-primary group transition ${
+              categoryname == cat.slug ? "bg-primary shadow-lg text-white" : ""
             }`}
             onClick={() => {
               setCategoryname(cat.slug);

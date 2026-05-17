@@ -1,31 +1,16 @@
 "use client";
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/redux/store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "@/lib/redux/store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Exams } from "@/Interfaces";
 import { MdOutlineNavigateNext } from "react-icons/md";
+import { useAppSelector } from "@/lib/redux/hooks";
 interface Props {
   category: string;
   examType: string;
   testId: string;
 }
-
-// type ExamDetails = {
-//   ExamID: string;
-//   categoryID: string;
-//   categoryName: string;
-//   name: string;
-//   slug: string;
-//   examDetails: {
-//     details: string[];
-//     negativeMark: number;
-//     permark: number;
-//     totalQuestion: number;
-//     totalmarks: number;
-//     otherdetails: string;
-//   };
-// };
 
 export default function TestDetailsClient({
   category,
@@ -33,22 +18,22 @@ export default function TestDetailsClient({
   testId,
 }: Props) {
   const router = useRouter();
-  const currentExam = useSelector(
-    (state: RootState) => state.exam.currentExam
-  ) as Exams| null;
+  const currentExam = useAppSelector(
+    (state) => state.exam.currentExam,
+  ) as Exams | null;
 
-  const token = useSelector((state: RootState) => state.auth.token) || "";
-  const testID = useSelector((state: RootState) => state.test.testID);
+  // const token = useSelector((state: RootState) => state.auth.token) || "";
+  const testID = useAppSelector((state) => state.test.testID);
   const decodedTestName = decodeURIComponent(testId as string);
   const { name, examDetails } = { ...currentExam };
 
   useEffect(() => {
-    if (!token) {
-      alert("please login/Register before starting Test");
-      router.push("/auth");
-    }
+    // if (!token) {
+    //   alert("please login/Register before starting Test");
+    //   router.push("/auth");
+    // }
     if (!currentExam) router.push(`/tests/${category}`);
-  }, [token, currentExam, category, router]);
+  }, [currentExam, category, router]);
 
   if (!currentExam) return <div>Loading...</div>;
 
@@ -118,7 +103,7 @@ export default function TestDetailsClient({
           onClick={handleStart}
           className="w-[5rem] sm:w-[10rem] flex justify-center gap-1 items-center mt-6 p-2 sm:px-6 sm:py-3 rounded-xl bg-primary text-primary-foreground text-lg font-medium hover:bg-accent text-white transition"
         >
-          Next <MdOutlineNavigateNext className="font-semibold text-2xl"/> 
+          Next <MdOutlineNavigateNext className="font-semibold text-2xl" />
         </button>
       </div>
     </div>

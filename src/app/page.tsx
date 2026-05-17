@@ -4,10 +4,8 @@ import CategoriesSection from "@/components/ui/cards/CategoriesSection";
 import { Category } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { setCategories } from "@/lib/redux/slices/categorySlice";
-import { AppDispatch } from "@/lib/redux/store";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import {
   MdAnalytics,
   MdTimer,
@@ -16,18 +14,8 @@ import {
 } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-
-// Define your Category type
-// interface Category {
-//   categoryID: string;
-//   name: string;
-//   slug: string;
-//   categoryDetails?: {
-//     details: string;
-//     otherdetails: string;
-//   };
-// }
-
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { toast } from "sonner";
 // Define the API response structure
 interface CategoryResponse {
   data: {
@@ -37,14 +25,15 @@ interface CategoryResponse {
 
 export default function HomePage() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
+
+  const { token } = useAppSelector((state) => state.auth);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await apiClient.get<CategoryResponse>("/category");
-        console.log("data category", data);
-
         dispatch(setCategories(data?.data?.categories));
       } catch (error: unknown) {
         let message = "An unexpected error occurred.";
@@ -53,8 +42,7 @@ export default function HomePage() {
           message = error.message;
         }
 
-        console.error("Error fetching categories:", message);
-        alert(message);
+        toast(message);
         setError(message);
       }
     };
@@ -63,7 +51,7 @@ export default function HomePage() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col text-foreground">
       {/* Hero Section */}
       <section className="flex flex-1 flex-col md:flex-row items-center justify-around px-8 md:px-16 py-6 bg-gradient-to-r from-secondary to-background">
         {/* Left Content */}
@@ -79,13 +67,15 @@ export default function HomePage() {
           <div className="mt-6 sm:space-x-4">
             <Button
               href="/tests"
-              className="bg-primary w-full sm:w-[10rem] text-lg hover:bg-accent text-white "
+              className=" w-full sm:w-[10rem] max-sm:mt-4 text-lg "
+              variant="default"
             >
               Start Free Test
             </Button>
             <Button
               href={"#category"}
-              className="bg-gray-100 w-full sm:w-[10rem] max-sm:mt-4 text-lg border border-primary text-black hover:text-white "
+              variant="secondary"
+              className=" w-full sm:w-[10rem] max-sm:mt-4 text-lg "
             >
               Explore Tests
             </Button>
@@ -102,6 +92,26 @@ export default function HomePage() {
             className="object-cover rounded-xl"
           />
         </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-16 px-8 md:px-16 ">
+        <div className="text-center max-w-3xl mx-auto ">
+          <h2 className="text-4xl font-bold tracking-tight mb-4">
+            Our Mock Test Categories
+          </h2>
+          <p className="text-lg text-text-light/70 dark:text-text-dark/70">
+            Explore our wide range of mock tests tailored for your specific exam
+            needs.
+          </p>
+        </div>
+        {error ? (
+          <div className="text-red-600 text-center my-6 p-3 rounded">
+            ⚠️ {error}
+          </div>
+        ) : (
+          <CategoriesSection />
+        )}
       </section>
 
       <section className="py-16 px-8 md:px-16">
@@ -170,27 +180,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-16 px-8 md:px-16 ">
-        <div className="text-center max-w-3xl mx-auto ">
-          <h2 className="text-4xl font-bold tracking-tight mb-4">
-            Our Mock Test Categories
-          </h2>
-          <p className="text-lg text-text-light/70 dark:text-text-dark/70">
-            Explore our wide range of mock tests tailored for your specific exam
-            needs.
-          </p>
-        </div>
-        {error ? (
-          <div className="text-red-600 text-center my-6 p-3 rounded">
-            ⚠️ {error}
-          </div>
-        ) : (
-          <CategoriesSection />
-        )}
-      </section>
-
-      <section className="bg-gradient-to-r from-green-500 to-teal-500 dark:from-gray-900 dark:to-gray-800 text-white rounded-3xl py-20 px-6 md:px-16 my-12  text-center shadow-lg relative overflow-hidden">
+      <section className="bg-gradient-to-r from-primary to-primary/80 dark:from-accent/90 dark:to-accent/80 text-white rounded-t-3xl py-20 px-6 md:px-16 my-12  text-center shadow-lg relative overflow-hidden">
         {/* Optional decorative shapes */}
         <div className="absolute -top-16 -left-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-16 -right-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
@@ -203,13 +193,24 @@ export default function HomePage() {
             Join <span className="font-semibold">TestPro</span> and take the
             first step towards achieving your career goals.
           </p>
-          <button
-            onClick={() => router.push("/auth")}
-            className="px-6 py-4 md:px-8 md:py-5 rounded-xl flex justify-center items-center gap-3 m-auto bg-white text-green-600 font-bold shadow-xl hover:bg-green-50 hover:text-green-700 transition-all duration-300 transform hover:scale-105"
-          >
-            <span>Sign Up Now & Get a Free Mock Test</span>
-            <FaArrowRight className="text-lg" />
-          </button>
+          {!token ? (
+            <Button
+              variant="outline"
+              onClick={() => router.push("/auth")}
+              className="px-6 py-4 md:px-8 md:py-5 flex justify-center items-center gap-3 mx-auto"
+            >
+              <span>Sign Up Now & Get a Free Mock Test</span>
+              <FaArrowRight className="text-lg" />
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-[15rem] "
+              onClick={() => router.push("/tests")}
+            >
+              Explore Tests
+            </Button>
+          )}
         </div>
       </section>
     </div>

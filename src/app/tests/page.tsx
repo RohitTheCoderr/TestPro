@@ -2,8 +2,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button"; // adjust path
 import Link from "next/link";
-import { RootState } from "@/lib/redux/store";
-import { useSelector } from "react-redux";
 import { Category } from "@/Interfaces";
 import { useAppSelector } from "@/lib/redux/hooks";
 
@@ -16,24 +14,22 @@ const CategoryCard: React.FC<Category> = ({
   return (
     <div className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200">
       <div>
-        <h3 className="text-xl font-semibold text-foreground">{name}</h3>
+        <h3 className="text-xl font-medium text-foreground">{name}</h3>
         <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
           {categoryDetails?.details}
         </p>
       </div>
       {categoryID && (
-        <div className="mt-4 flex gap-4">
+        <Button className="mt-4 flex gap-4">
           <Link
-            // href={`/tests/${slug}/`}
             href={{
               pathname: `/tests/${slug}`,
               query: { categoryID },
             }}
-            className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             Explore category
           </Link>
-        </div>
+        </Button>
       )}
     </div>
   );
@@ -65,34 +61,27 @@ export default function TestsPage() {
     },
   ];
 
-  // const categoriesss = useSelector(
-  //   (state: RootState) => state.category.categories,
-  // );
   const categoriesss = useAppSelector((state) => state.category.categories);
 
-  // const { exams, loading, error, refetch } = useFetchExams(params.category);
-
-  // if (loading) return <p>Loading exams...</p>;
-  // if (error) return <p className="text-red-500">{error}</p>;
-
   return (
-    <main className="min-h-screen bg-background py-12 px-6">
+    <main className="py-12 px-8 md:px-16  ">
       {/* Hero Section */}
-      <div className="max-w-5xl mx-auto text-center">
+      <div className=" w-full mx-auto text-center">
         <h1 className="text-4xl font-bold text-accent dark:text-white">
           Practice Tests
         </h1>
-        <p className="mt-3 text-lg text-muted-foreground">
+        <p className="mt-3  text-xs md:text-lg text-muted-foreground">
           Improve your skills by taking practice tests designed for students and
           job seekers. Choose from various categories and track your progress.
         </p>
       </div>
 
       {/* Popular Tests */}
-      <section className="max-w-6xl mx-auto mt-12">
-        <h2 className="text-2xl font-semibold text-foreground mb-6">
+      <section className="w-full mx-auto mt-12">
+        <h2 className="text-2xl font-semibold text-foreground  ">
           Popular Tests
         </h2>
+        <div className="bg-primary h-[2px] mt-1 mb-6 w-12"></div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tests.map((test, idx) => (
             <div
@@ -100,37 +89,28 @@ export default function TestsPage() {
               className="rounded-2xl border border-border shadow-md p-6 flex flex-col justify-between bg-card hover:shadow-lg transition-shadow duration-200"
             >
               <div>
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-xl font-medium text-foreground">
                   {test?.name}
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
                   {test?.categoryDetails?.details}
                 </p>
               </div>
-              <div className="mt-4 flex gap-4">
-                <Link
-                  href={`/tests`}
-                  className="px-4 w-full text-center py-2 text-sm rounded-[3px] text-white font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  Explore category
-                </Link>
-              </div>
+              <Button className="mt-4 flex gap-4">
+                <Link href={`/tests`}>Explore category</Link>
+              </Button>
             </div>
-            // <CategoryCard
-            //   key={idx}
-            //   name={test.name}
-            //   categoryDetails={test.categoryDetails}
-            // />
           ))}
         </div>
       </section>
 
       {/* Categories */}
-      <section className="max-w-6xl mx-auto mt-16">
-        <h2 className="text-2xl font-semibold text-foreground mb-6">
+      <section className="w-full mx-auto mt-16">
+        <h2 className="text-2xl font-semibold text-foreground ">
           Explore by Category
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="bg-primary h-[2px] mt-1 mb-6 w-12"></div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.isArray(categoriesss) && categoriesss.length > 0 ? (
             categoriesss.map((cat) => (
               <CategoryCard
@@ -160,17 +140,8 @@ export default function TestsPage() {
           Start your first free test today and climb up the leaderboard.
         </p>
         <div className="mt-6 flex max-sm:flex-col justify-center gap-4">
-          <Button
-            size="lg"
-            className="bg-background max-sm:w-full text-foreground hover:bg-muted"
-          >
-            Start Free Test
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-primary-foreground max-sm:w-full text-secondary hover:bg-background hover:text-foreground"
-          >
+          <Button size="lg">Start Free Test</Button>
+          <Button variant="outline" size="lg">
             Explore More Tests
           </Button>
         </div>

@@ -34,14 +34,6 @@ export const apiClient = {
     }
   },
 
-  // post: async <T = unknown>(
-  //   url: string,
-  //   data?: Record<string, unknown>
-  // ): Promise<T> => {
-  //   const res: AxiosResponse<T> = await axiosInstance.post(url, data);
-  //   return res.data;
-  // },
-
   post: async <T = unknown, D = unknown>(url: string, data?: D): Promise<T> => {
     try {
       const res: AxiosResponse<T> = await axiosInstance.post(url, data);

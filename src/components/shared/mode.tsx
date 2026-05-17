@@ -16,9 +16,18 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="mt-4 rounded-full text-secondary-foreground bg-gray-300 p-2 group"
+      className=" rounded-full text-secondary-foreground bg-gray-200 dark:text-black p-2 sm:py-1 "
     >
-      {dark ?(<div className="flex gap-2 items-center"> <MdLightMode className="group-hover:scale-150"/> <span className="sm:hidden">Light</span> </div>) : (<div className="flex gap-2 items-center"><MdModeNight className="group-hover:scale-150"/> <span className="sm:hidden">Dark</span></div>)}
+      {dark ? (
+        <div className="flex gap-2 items-center">
+          {" "}
+          <MdLightMode className="" /> <span className="">Light</span>{" "}
+        </div>
+      ) : (
+        <div className="flex gap-2 items-center">
+          <MdModeNight className="" /> <span className="">Dark</span>
+        </div>
+      )}
     </button>
   );
 }

@@ -1,11 +1,7 @@
 "use client";
 
-import EditCategoryForm from "@/components/adminReleted/editCategoryForm/editcategoryform";
-import {
-  Category,
-  CategoryResponse,
-  SingleCategoryResponse,
-} from "@/Interfaces";
+import CategoryForm from "@/components/adminReleted/categoryForm/categoryForm";
+import { SingleCategoryResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useAppSelector } from "@/lib/redux/hooks";
 import { useParams } from "next/navigation";
@@ -21,10 +17,6 @@ function EditCategoryPage() {
     ),
   );
   const [category, setCategory] = useState(categoryFromStore);
-
-  // const [category, setCategory] = useState<Category | null>(
-  //   categoryFromStore ?? null,
-  // );
 
   useEffect(() => {
     if (!categoryFromStore && categoryID) {
@@ -50,7 +42,7 @@ function EditCategoryPage() {
   }, [categoryFromStore, categoryID]);
 
   if (!category) return <p>Loading...</p>;
-  return <EditCategoryForm category={category} />;
+  return <CategoryForm category={category} />;
 }
 
 export default EditCategoryPage;

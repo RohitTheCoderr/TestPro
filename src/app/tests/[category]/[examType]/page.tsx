@@ -8,36 +8,8 @@ import { RootState } from "@/lib/redux/store";
 import { setCurrentTest } from "@/lib/redux/slices/testSlice";
 import { Exams, TestsResponse } from "@/Interfaces";
 import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
-
-// interface PageProps {
-//   params: { category: string; examType: string };
-// }
-
-// type ExamDetails = {
-//   ExamID: string;
-//   categoryID: string;
-//   categoryName: string;
-//   name: string;
-//   slug: string;
-//   examDetails: {
-//     details: string[];
-//     negativeMark: number;
-//     permark: number;
-//     totalQuestion: number;
-//     totalmarks: number;
-//   };
-// };
-
-// interface Exam {
-//   title: string;
-//   type: string;
-//   duration: number;
-//   price: number;
-//   testID: string;
-//   examID: string;
-//   examName: string;
-//   categoryName: string;
-// }
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const Testcard: React.FC<TestCardProps> = ({
   examName,
@@ -52,34 +24,42 @@ const Testcard: React.FC<TestCardProps> = ({
 }) => (
   <div className="rounded-xl border border-border bg-card shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
     <div>
-      <h2 className="font-semibold text-lg mb-2 uppercase">{title}</h2>
-
-      {/* Tag */}
-      <span
-        className={`inline-block mb-3 px-2 py-1 text-xs rounded-full ${
-          type === "free"
-            ? "bg-green-100 text-green-600"
-            : "bg-yellow-100 text-yellow-600"
-        }`}
-      >
-        {type === "free" ? "Free Test" : "Paid Test"}
-      </span>
+      <h2 className="font-semibold text-lg mb-2 uppercase flex justify-between">
+        <span>{title}</span>
+        <span
+          className={`inline-block mb-3 px-2 py-0.5 !text-xs rounded-full ${
+            type === "free"
+              ? "bg-green-100 text-green-600"
+              : "bg-yellow-100 text-yellow-600"
+          }`}
+        >
+          {type === "free" ? "Free" : "Paid"}
+        </span>
+      </h2>
 
       {/* Info */}
       <div className="text-sm text-muted-foreground space-y-1">
-        <p>⏱ {duration} mins</p>
-        <p>₹ {price} </p>
+        <p className="flex gap-2">
+          <span className="font-semibold text-primary">Duration:</span>⏱{" "}
+          {duration} mins
+        </p>
+        <p className="flex gap-2">
+          {" "}
+          <span className="font-semibold text-primary">Price:</span>₹
+          {price}{" "}
+        </p>
       </div>
     </div>
 
     {/* Button */}
-    <Link
-      href={`/tests/${categoryName}/${examName}/${title}`}
-      onClick={() => onSelect?.(testID)}
-      className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-accent hover:text-accent-foreground transition w-full text-center"
-    >
-      View Details
-    </Link>
+    <Button className="mt-4 ">
+      <Link
+        href={`/tests/${categoryName}/${examName}/${title}`}
+        onClick={() => onSelect?.(testID)}
+      >
+        View Details
+      </Link>
+    </Button>
   </div>
 );
 
@@ -127,16 +107,25 @@ export default function ExamTypeTests({
   }, [currentExam?.ExamID, currentExam?.name, category, examType]);
 
   return (
-    <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 capitalize">
-        <span className="uppercase">{category} </span>→ {examType} Tests
-      </h1>
+    <div className="px-8 md:px-16 py-12 text-foreground">
+      <div className="flex mb-6">
+        <div
+          className="flex items-center text-gray-600 hover:text-primary w-20 rounded-md py-1 cursor-pointer"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft size={14} /> Back
+        </div>
+        {/* Header */}
 
-      <p>rohit</p>
+        <h1 className="text-2xl md:text-3xl font-bold capitalize">
+          <span className="uppercase text-primary">{category} </span>
+          {examType} Tests
+        </h1>
+      </div>
+
       {/* Grid of Tests */}
       {examList.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4">
           {examList.map((test) => (
             <Testcard key={test.testID} {...test} onSelect={handleTestSelect} />
           ))}
