@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiClient } from "@/lib/API/apiClient";
 import { Category, CategoryResponse } from "@/Interfaces";

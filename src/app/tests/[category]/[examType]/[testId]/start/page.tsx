@@ -41,8 +41,8 @@ export default function StartTestPage() {
 
   const handleStart = () => {
     if (!isChecked) {
-      toast.error("please Accept condition first");
-      setIsCheckedMsg("Accept condition first");
+      toast.error("Please Accept condition first");
+      setIsCheckedMsg("Please accept condition first");
       return;
     }
     // In real app: enforce full screen & API start call
@@ -86,19 +86,21 @@ export default function StartTestPage() {
             <p className="text-lg font-semibold">60 mins</p>
           </div>
           <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
-            <p className="text-sm text-muted-foreground">Questions</p>
+            <p className="text-sm text-muted-foreground"> Total Questions</p>
             <p className="text-lg font-semibold">
               {examDetails?.totalQuestion}
             </p>
           </div>
           <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
             <p className="text-sm text-muted-foreground">Correct Answer</p>
-            <p className="text-lg font-semibold">+ {examDetails?.permark}</p>
+            <p className="text-lg font-semibold">
+              + {examDetails?.permark} marks
+            </p>
           </div>
           <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
             <p className="text-sm text-muted-foreground">Wrong Answer</p>
             <p className="text-lg font-semibold">
-              - {examDetails?.negativeMark}
+              - {examDetails?.negativeMark} mark
             </p>
           </div>
           <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
@@ -153,18 +155,21 @@ export default function StartTestPage() {
         </div>
 
         <div>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <label className="flex items-center justify-end gap-2 text-sm text-gray-700 dark:text-gray-300">
             <input
               type="checkbox"
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
               className="w-4 h-4 accent-primary cursor-pointer"
             />
+
             <span>
               I have read all the instructions and I am ready to start the test.
             </span>
           </label>
-          <div className="text-sm text-red-600">{isCheckedMsg}</div>
+          {isCheckedMsg && (
+            <div className="text-sm text-red-500 text-end ">{isCheckedMsg}</div>
+          )}
         </div>
 
         <div className="flex justify-end items-center gap-4">

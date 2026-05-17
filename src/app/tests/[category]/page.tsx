@@ -88,10 +88,10 @@ const TestCard: React.FC<ExamCardProps> = ({
 export default function TestsPage({
   params,
 }: {
-  params: Promise<{ category: string }>;
+  params: { category: string };
 }) {
   // unwrap promise
-  const { category } = use(params);
+  const { category } = params;
   const dispatch = useDispatch();
   const [examTypes, setExamTypes] = useState<ExamCardProps[]>([]);
   const router = useRouter();
