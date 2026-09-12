@@ -73,11 +73,11 @@ export default function Login() {
     <>
       {" "}
       {!forgetpass ? (
-        <div className=" flex items-center justify-center text-gray-800 dark:text-gray-100 transition-colors duration-300">
+        <div className="flex w-full items-center justify-center text-gray-800 transition-colors duration-300 dark:text-gray-100">
           <form
             onSubmit={handleLogin}
             // className="bg-white dark:bg-gray-800 p-2 sm:p-4 md:p-8 rounded-2xl shadow-xl w-full max-w-md transition-colors duration-300"
-            className=""
+            className="w-full"
           >
             {/* Heading */}
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
@@ -90,7 +90,7 @@ export default function Login() {
               placeholder="Email or Mobile"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
-              className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
             />
 
             {/* Password */}
@@ -99,14 +99,14 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
             />
 
             {/* Submit Button */}
             <Button
               size="xl"
               type="submit"
-              className="w-full text-white rounded-full text-lg font-semibold shadow-md"
+              className="w-full rounded-xl text-base font-semibold shadow-md"
             >
               {loading ? "Logging in..." : "Log In"}
             </Button>

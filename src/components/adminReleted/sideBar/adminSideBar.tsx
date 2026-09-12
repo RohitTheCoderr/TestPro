@@ -10,6 +10,7 @@ import {
   FileText,
   ClipboardList,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -91,6 +92,13 @@ export default function AdminSidebar() {
                 );
               })}
             </nav>
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className="m-4 flex items-center gap-3 rounded-md border border-gray-700 px-3 py-2 text-sm text-gray-300 transition hover:bg-gray-800 hover:text-white"
+            >
+              <ArrowLeft size={18} /> View user site
+            </Link>
           </motion.aside>
         )}
       </AnimatePresence>
@@ -134,6 +142,12 @@ export default function AdminSidebar() {
               );
             })}
           </nav>
+          <Link
+            href="/"
+            className="m-4 flex items-center gap-3 rounded-md border border-gray-700 px-3 py-2 text-sm text-gray-300 transition hover:bg-gray-800 hover:text-white"
+          >
+            <ArrowLeft size={18} /> View user site
+          </Link>
         </motion.aside>
       </AnimatePresence>
     </>

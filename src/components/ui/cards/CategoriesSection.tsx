@@ -70,7 +70,7 @@ function CategoriesSection() {
   };
 
   return (
-    <section id="category" className="py-16 bg-background">
+    <section id="category" className=" bg-background">
       {/* Heading */}
       <div className="flex items-center justify-between mb-8">
         <div>

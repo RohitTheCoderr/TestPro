@@ -118,9 +118,9 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex w-full items-center justify-center">
       {!otpSent ? (
-        <form onSubmit={handleSendOtp}>
+        <form onSubmit={handleSendOtp} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">
             Reset Password
           </h2>
@@ -129,9 +129,9 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             placeholder="Email or Mobile"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
           />
-          <Button type="submit" size="xl" className="w-full !py-3 rounded-full">
+          <Button type="submit" size="xl" className="w-full !py-3 rounded-xl">
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </Button>
           <div
@@ -142,7 +142,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
           </div>
         </form>
       ) : (
-        <form onSubmit={handleSetpassword}>
+        <form onSubmit={handleSetpassword} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">
             Verify OTP & Set Password
           </h2>
@@ -151,14 +151,14 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             readOnly
             value={contact}
             placeholder={contact ? contact : "Your email or mobile"}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100"
           />
           <input
             type="text"
             placeholder="OTP"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="mb-4 w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+            className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
           />
           <div className="relative mb-4">
             <input
@@ -166,7 +166,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
             />
 
             {/* Toggle Button */}
@@ -184,7 +184,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
             />
             {/* Toggle Button */}
             <button
@@ -199,7 +199,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             disabled={isLoading}
             type="submit"
             size="xl"
-            className="w-full py-3 rounded-full"
+            className="w-full rounded-xl py-3"
           >
             {isLoading ? "Registering..." : "Register"}
           </Button>

@@ -114,7 +114,7 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="py-16 px-8 md:px-16">
+      <section className="py-16 px-8 md:px-16 ">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
             Why Choose TestPro ?

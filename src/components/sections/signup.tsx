@@ -169,9 +169,9 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex w-full items-center justify-center">
       {!otpSent ? (
-        <form onSubmit={handleSendOtp}>
+        <form onSubmit={handleSendOtp} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">Generate OTP</h2>
           <div className="mb-2 ">
             <input
@@ -179,7 +179,7 @@ export default function SignUp() {
               placeholder=" Enter Email"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
-              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+              className={`w-full rounded-xl border bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400
 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
 ${
   errors.name

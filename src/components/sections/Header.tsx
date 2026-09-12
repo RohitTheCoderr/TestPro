@@ -8,12 +8,22 @@ import Image from "next/image";
 import { FaThList } from "react-icons/fa";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { LogIn, LogOut, User } from "lucide-react";
+import {
+  ArrowLeft,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { toast } from "sonner";
+import { usePathname } from "next/navigation";
 const Header = () => {
   const [toggle, setToggle] = useState(false);
+  const pathname = usePathname();
   const token = useAppSelector((state) => state.auth.token) || "";
   const user = useAppSelector((state) => state.auth.user) || null;
+  const isAdmin = user?.role === "admin";
   const nameTwoChar = user?.name
     ?.split(" ") // split into words
     .slice(0, 2) // take first 2 words
@@ -57,6 +67,14 @@ const Header = () => {
         <Link href="/tests" className="hover:text-primary">
           Tests
         </Link>
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={`flex items-center gap-2 rounded px-2 py-1 font-medium ${pathname.startsWith("/admin") ? "bg-primary text-white" : "text-primary hover:bg-cyan-50 dark:hover:bg-slate-600"}`}
+          >
+            <ShieldCheck size={16} /> Admin panel
+          </Link>
+        )}
         {token && (
           <Link
             href="/dashboard"
@@ -83,6 +101,15 @@ const Header = () => {
               <div>Theme</div>
               <ThemeToggle />
             </div>
+
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex w-full items-center gap-3 border-b px-4 py-2 text-primary hover:bg-cyan-50 dark:hover:bg-slate-700"
+              >
+                <LayoutDashboard size={15} /> Admin panel
+              </Link>
+            )}
 
             {!token ? (
               <Link
@@ -124,6 +151,14 @@ const Header = () => {
             >
               Tests
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex w-full items-center gap-2 bg-primary px-2 py-1 text-white"
+              >
+                <ShieldCheck size={15} /> Admin panel
+              </Link>
+            )}
             {!token ? (
               <Link
                 href="/auth"
@@ -137,7 +172,7 @@ const Header = () => {
                   href="/dashboard"
                   className="hover:text-primary w-full bg-muted py-1 px-2"
                 >
-                  dashboard
+                  My dashboard
                 </Link>
                 <button
                   onClick={handleLogout}

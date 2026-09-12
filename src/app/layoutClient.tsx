@@ -15,13 +15,16 @@ export default function LayoutClient({
 
   const hideHeader =
     (pathname.startsWith("/tests") && pathname.includes("/attempt")) ||
-    pathname.startsWith("/start-test");
+    pathname.startsWith("/start-test") ||
+    pathname === "/auth";
+
+  const hideFooter = hideHeader;
 
   return (
     <>
       {!hideHeader && header}
       {children}
-      {!hideHeader && footer}
+      {!hideFooter && footer}
     </>
   );
 }

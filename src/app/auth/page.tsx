@@ -3,144 +3,108 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SignUp from "@/components/sections/signup";
 import Login from "@/components/sections/login";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="flex items-center justify-center h-[80vh] bg-background text-foreground">
-      <div className="relative flex w-[400px] md:w-[800px] h-[600px] overflow-hidden rounded-2xl dark:bg-gray-800 dark:border dark:border-gray-400 shadow-xl transition-colors duration-300">
-        {/* Animated Form Container for small devices */}
-        <div className="text-lg absolute p-2 z-40 font-bold text-gray-300 dark:text-gray-100 hover:opacity-90">
-          TestPro
-        </div>
-        <AnimatePresence mode="wait">
-          {isLogin ? (
-            <motion.div
-              key="login"
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: "0%", opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute md:hidden inset-0 p-2 flex flex-col justify-center"
-            >
-              <Login />
-              <div className="flex items-center my-6">
-                <div className="flex-grow h-px bg-gray-300 dark:bg-gray-600"></div>
-                <span className="px-2 text-gray-500 text-sm dark:text-gray-400">
-                  OR
-                </span>
-                <div className="flex-grow h-px bg-gray-300 dark:bg-gray-600"></div>
+    <main className="relative flex min-h-[calc(100vh-2rem)] items-center justify-center overflow-hidden bg-[#f4f8f8] px-4 py-8 text-slate-900 dark:bg-slate-950 dark:text-white sm:px-6 lg:px-10">
+      <div className="pointer-events-none absolute -left-32 top-12 h-72 w-72 rounded-full bg-cyan-200/60 blur-3xl dark:bg-cyan-900/20" />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-amber-100/80 blur-3xl dark:bg-amber-900/10" />
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_-32px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[0.9fr_1.1fr]">
+        <section className="relative hidden overflow-hidden bg-[#123b43] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[3rem] border-cyan-300/10" />
+          <div className="relative">
+            <div className="mb-16 flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-300 font-black text-[#123b43]">
+                T
               </div>
-
-              <div className="text-center">
-                <span className="text-gray-600 dark:text-gray-300">
-                  Don&apos;t have an account?
-                </span>
-                <Button
-                  onClick={() => setIsLogin(false)}
-                  className=" font-semibold hover:underline"
-                >
-                  Signup
-                </Button>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="signup"
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: "0%", opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute md:hidden inset-0 p-2 flex flex-col justify-center"
-            >
-              <SignUp />
-              <div className="flex items-center my-6">
-                <div className="flex-grow h-px bg-gray-300 dark:bg-gray-600"></div>
-                <span className="px-2 text-gray-500 text-sm dark:text-gray-400">
-                  OR
-                </span>
-                <div className="flex-grow h-px bg-gray-300 dark:bg-gray-600"></div>
-              </div>
-
-              <div className="text-center">
-                <span className="text-gray-600 dark:text-gray-300">
-                  Already have an account?
-                </span>
-                <Button
-                  variant="default"
-                  onClick={() => setIsLogin(true)}
-                  className="text-blue-600 font-semibold hover:underline"
-                >
-                  Login
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* For big devices */}
-        <div className="hidden md:flex">
-          <div className="text-lg absolute p-2 z-40 font-bold text-gray-300 dark:text-gray-100 hover:opacity-90">
-            TestPro
-          </div>
-          <div className="flex w-full h-full">
-            {/* Signup Form */}
-            <div className="w-1/2 flex items-center justify-center p-2 sm:p-4 md:p-8">
-              <SignUp />
+              <span className="text-xl font-bold tracking-tight">TestPro</span>
             </div>
-            {/* Login Form */}
-            <div className="w-1/2 flex items-center justify-center p-2 sm:p-4 md:p-8">
-              <Login />
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
+              Smarter preparation
+            </p>
+            <h1 className="max-w-sm text-4xl font-bold leading-tight xl:text-5xl">
+              Turn practice into progress.
+            </h1>
+            <p className="mt-6 max-w-sm leading-7 text-cyan-50/75">
+              Keep your attempts, results, and exam goals in one focused place.
+            </p>
+          </div>
+          <div className="relative space-y-4 text-sm text-cyan-50/85">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={18} className="text-cyan-300" /> Track every
+              attempt
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={18} className="text-cyan-300" /> Learn from
+              your results
+            </div>
+            <div className="flex items-center gap-3">
+              <ShieldCheck size={18} className="text-cyan-300" /> Your account
+              stays protected
             </div>
           </div>
-
-          {/* Sliding Overlay Content */}
-          <motion.div
-            initial={false}
-            animate={{ x: isLogin ? "0%" : "100%" }}
-            transition={{ type: "spring", stiffness: 80, damping: 20 }}
-            className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center text-white p-10 bg-gradient-to-br ${
-              isLogin
-                ? "from-primary to-primary"
-                : "from-green-500 to-green-700"
-            } bg-opacity-80 backdrop-blur-sm`}
-          >
-            {isLogin ? (
-              <>
-                <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-                <p className="mb-6 text-center">
-                  Log In to continue exploring our platform.
-                </p>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setIsLogin(false)}
-                  className=" hover:text-primary w-[12rem] rounded-full "
-                >
-                  Sign Up
-                </Button>
-              </>
-            ) : (
-              <>
-                <h2 className="text-3xl font-bold mb-4">Hello, Friend!</h2>
-                <p className="mb-6 text-center">
-                  Sign Up to start your journey with us.
-                </p>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setIsLogin(true)}
-                  className=" hover:text-green-600 w-[12rem] rounded-full "
-                >
-                  Log In
-                </Button>
-              </>
-            )}
-          </motion.div>
-        </div>
+        </section>
+        <section className="min-w-0 p-6 sm:p-10 lg:p-14">
+          <div className="mb-8 flex items-center justify-between lg:hidden">
+            <div className="flex items-center gap-2 text-lg font-bold">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white">
+                T
+              </span>{" "}
+              TestPro
+            </div>
+            <ShieldCheck className="text-primary" size={20} />
+          </div>
+          <div className="mx-auto max-w-md">
+            <div className="mb-8">
+              <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+                Your next score starts here
+              </p>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                {isLogin ? "Welcome back" : "Create your account"}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                {isLogin
+                  ? "Sign in to continue your preparation."
+                  : "Start building a consistent practice habit."}
+              </p>
+            </div>
+            <div className="mb-8 grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${isLogin ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "text-slate-500"}`}
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${!isLogin ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white" : "text-slate-500"}`}
+              >
+                Sign up
+              </button>
+            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLogin ? "login" : "signup"}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isLogin ? <Login /> : <SignUp />}
+              </motion.div>
+            </AnimatePresence>
+            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <ArrowRight size={14} /> Secure access to your preparation
+              dashboard
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

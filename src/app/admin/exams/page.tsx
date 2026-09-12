@@ -1,32 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import Link from "next/link";
-import { apiClient } from "@/lib/API/apiClient";
-import { Examresponse, Exams } from "@/Interfaces";
-
-function ExamsPage() {
-  const categories = useSelector((state: any) => state.category.categories);
-  const [activeCategory, setActiveCategory] = useState<string>(
-    categories[0].categoryID,
-  );
-  const [activeExam, setActiveExam] = useState<Exams | null>(null);
-  const [examsByCategory, setExamsByCategory] = useState<Exams[]>([]);
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const fetchExams = async (categoryID: string) => {
-    try {
-      setLoading(categoryID);
-      const res = await apiClient.get<Examresponse>(
-        `/category/${categoryID}/exams`,
-      );
-      setExamsByCategory([...res.data.exams]);
-      // auto-select first exam
-      if (res.data.exams.length > 0) {
-        setActiveExam(res.data.exams[0]);
-=======
 import React, { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/API/apiClient";
 import { Category, Examresponse, Exams } from "@/Interfaces";
@@ -67,7 +40,6 @@ function ExamsPage() {
         toast.error("Error while fetching exams");
       } finally {
         setLoading(false);
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
       }
     },
     [dispatch],
@@ -80,16 +52,6 @@ function ExamsPage() {
       setActiveCategory(firstCategoryId);
       fetchExams(firstCategoryId);
     }
-<<<<<<< HEAD
-  };
-  useEffect(() => {
-    fetchExams(activeCategory);
-  }, [activeCategory]);
-
-  const handleCategoryClick = (categoryID: string) => {
-    setActiveCategory(categoryID);
-    setActiveExam(null)
-=======
   }, [categories, fetchExams]);
 
   const handleCategoryClick = (categoryID: string) => {
@@ -99,7 +61,6 @@ function ExamsPage() {
       setActiveExam(null);
       fetchExams(categoryID);
     }
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
   };
   return (
     <div className="space-y-4">
@@ -120,17 +81,10 @@ function ExamsPage() {
           <button
             key={cat.categoryID}
             onClick={() => handleCategoryClick(cat.categoryID)}
-<<<<<<< HEAD
-            className={`px-4 py-1 text-sm cursor-pointer shadow(1px 1px 10px 2px, ring-black) rounded-full w-auto whitespace-nowrap ${
-              activeCategory === cat.categoryID
-                ? "bg-primary text-white"
-                : "bg-secondary"
-=======
             className={`px-4 py-2 rounded whitespace-nowrap hover:bg-green-600 hover:text-white ${
               activeCategory === cat.categoryID
                 ? "bg-green-600 text-white"
                 : "bg-gray-200"
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
             }`}
           >
             {cat.name}
@@ -146,17 +100,6 @@ function ExamsPage() {
           {!activeCategory && (
             <p className="text-sm text-gray-500">Select a category</p>
           )}
-<<<<<<< HEAD
-          {loading === activeCategory && (
-            <p className="text-sm text-gray-500">Loading exams...</p>
-          )}
-          {activeCategory && examsByCategory?.length === 0 && (
-            <p className="text-sm text-gray-500">No exams found</p>
-          )}
-          <ul className="space-y-2">
-            {examsByCategory?.map((exam) => (
-              <li
-=======
 
           {loading && <p className="text-sm text-gray-500">Loading exams...</p>}
 
@@ -167,7 +110,6 @@ function ExamsPage() {
           <div className="space-y-2">
             {exams?.map((exam) => (
               <div
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
                 key={exam.ExamID}
                 onClick={() => setActiveExam(exam)}
                 className={`p-2 rounded cursor-pointer flex justify-between items-center ${
@@ -195,9 +137,6 @@ function ExamsPage() {
             <p className="text-gray-500">Select an exam to view details</p>
           ) : (
             <>
-<<<<<<< HEAD
-              <h2 className="text-2xl font-semibold mb-2">{activeExam.name}</h2>
-=======
               <div className="flex gap-4 flex-wrap">
                 <InputField
                   label="Exam Name:"
@@ -237,7 +176,6 @@ function ExamsPage() {
                   className="w-full h-auto"
                 />
               </div>
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
               {activeExam.examDetails?.details && (
                 <>
                   {activeExam.examDetails.details.length > 0 ? (
@@ -280,3 +218,4 @@ function ExamsPage() {
 }
 
 export default ExamsPage;
+

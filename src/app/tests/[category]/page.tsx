@@ -53,20 +53,7 @@ const TestCard: React.FC<ExamCardProps> = ({
     <Button className="mt-4 flex gap-4">
       <Link
         href={`/tests/${categoryName}/${slug}`}
-<<<<<<< HEAD
         className="w-full text-center px-4 py-2 bg-primary text-white rounded-full hover:bg-accent hover:text-accent-foreground text-sm transition"
-        onClick={
-          () =>
-            onSelect?.({
-              ExamID,
-              name,
-              slug,
-              categoryID,
-              categoryName,
-              examDetails,
-            })
-        } // ✅ pass full exam object
-=======
         onClick={() =>
           onSelect?.({
             ExamID,
@@ -76,8 +63,7 @@ const TestCard: React.FC<ExamCardProps> = ({
             categoryName,
             examDetails,
           })
-        }
->>>>>>> f0404f9422ab0717e32ffe763a0e79637473c1c7
+        } // ✅ pass full exam object
       >
         Explore {name} Tests
       </Link>
