@@ -53,7 +53,7 @@ const TestCard: React.FC<ExamCardProps> = ({
     <Button className="mt-4 flex gap-4">
       <Link
         href={`/tests/${categoryName}/${slug}`}
-        className="w-full text-center px-4 py-2 bg-primary text-white rounded-full hover:bg-accent hover:text-accent-foreground text-sm transition"
+        className="w-full text-center px-4 py-2 text-white rounded-full hover:bg-primary/80 hover:text-accent-foreground text-sm transition"
         onClick={() =>
           onSelect?.({
             ExamID,
