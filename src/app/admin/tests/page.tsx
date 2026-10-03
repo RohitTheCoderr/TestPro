@@ -15,36 +15,106 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TestsResponse } from "@/Interfaces";
+import {
+  CategoryResponse,
+  Examresponse,
+  Exams,
+  TestsResponse,
+} from "@/Interfaces";
 import { Test } from "@/Interfaces/TestInterfaces";
 import { apiClient } from "@/lib/API/apiClient";
-import { useAppSelector } from "@/lib/redux/hooks";
 // import { SelectItem } from "@radix-ui/react-select";
 import { ArrowLeft, Edit } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 function TestsPage() {
   const [examIDstate, setExamIDstate] = useState<string>("");
-
-  const param = useSearchParams();
-  const paramExamID = param.get("examID");
-
-  const exams = useAppSelector((s) => s.exams.examsList);
-
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramExamID = searchParams.get("examID");
+  const queryString = searchParams.toString();
+  const [exams, setExams] = useState<Exams[]>([]);
+  const [loadingExams, setLoadingExams] = useState(true);
   const [loading, setloading] = useState(false);
   const [testList, setTestList] = useState<Test[]>([]);
 
   useEffect(() => {
-    if (paramExamID) {
-      setExamIDstate(paramExamID);
-    }
+    let cancelled = false;
 
-    if (examIDstate) {
-      fetchTestdata(examIDstate);
+    const fetchExams = async () => {
+      try {
+        setLoadingExams(true);
+        const categoriesResponse = await apiClient.get<CategoryResponse>(
+          "/admin/category/list",
+        );
+        const categoryList = categoriesResponse.data?.categories ?? [];
+        const examResponses = await Promise.all(
+          categoryList.map((category) =>
+            apiClient.get<Examresponse>(
+              `/admin/${category.categoryID}/exams/list`,
+            ),
+          ),
+        );
+        const allExams = examResponses.flatMap(
+          (response) => response.data?.exams ?? [],
+        );
+
+        if (cancelled) return;
+        setExams(allExams);
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(
+            error instanceof Error ? error.message : "Unable to load exams.",
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingExams(false);
+      }
+    };
+
+    void fetchExams();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loadingExams) return;
+
+    const selectedExam = exams.find((exam) => exam.ExamID === paramExamID);
+    const nextExamID = selectedExam?.ExamID ?? exams[0]?.ExamID ?? "";
+    setExamIDstate(nextExamID);
+
+    if (nextExamID !== paramExamID) {
+      const nextParams = new URLSearchParams(queryString);
+      if (nextExamID) nextParams.set("examID", nextExamID);
+      else nextParams.delete("examID");
+      router.replace(
+        nextParams.size
+          ? `/admin/tests?${nextParams.toString()}`
+          : "/admin/tests",
+        { scroll: false },
+      );
     }
-  }, [paramExamID, examIDstate]);
+  }, [exams, loadingExams, paramExamID, queryString, router]);
+
+  useEffect(() => {
+    if (examIDstate) {
+      void fetchTestdata(examIDstate);
+    } else {
+      setTestList([]);
+    }
+  }, [examIDstate]);
+
+  const handleExamChange = (value: string) => {
+    setExamIDstate(value);
+    const nextParams = new URLSearchParams(queryString);
+    nextParams.set("examID", value);
+    router.replace(`/admin/tests?${nextParams.toString()}`, { scroll: false });
+  };
 
   const fetchTestdata = async (ExamID: string) => {
     try {
@@ -89,12 +159,11 @@ function TestsPage() {
       </div>
 
       <div>
-        <Select
-          value={examIDstate}
-          onValueChange={(value) => setExamIDstate(value)}
-        >
+        <Select value={examIDstate} onValueChange={handleExamChange}>
           <SelectTrigger className="w-[15rem] mb-1">
-            <SelectValue placeholder="Select Exam Category" />
+            <SelectValue
+              placeholder={loadingExams ? "Loading exams..." : "Select exam"}
+            />
           </SelectTrigger>
           <SelectContent>
             {exams?.map((exam, index) => (
@@ -103,15 +172,15 @@ function TestsPage() {
               </SelectItem>
             ))}
           </SelectContent>
-          {!examIDstate && (
-            <p className="text-xs text-red-500">
-              Please choose any exam category
-            </p>
-          )}
         </Select>
+        {!loadingExams && exams.length === 0 && (
+          <p className="mt-1 text-xs text-zinc-500">No exams available.</p>
+        )}
       </div>
 
-      {testList?.length == 0 ? (
+      {loading ? (
+        <p className="my-12 text-center">Loading tests...</p>
+      ) : testList?.length == 0 ? (
         <p className="text-center my-12">
           No test found under this Exam Category
         </p>

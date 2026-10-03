@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {
-  const [contact, setContact] = useState(""); // email or mobile
+  const [contact, setContact] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
@@ -36,15 +36,14 @@ export default function SignUp() {
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
-    const isMobile = /^\d{10}$/.test(value);
-    return isEmail || isMobile;
+    return isEmail;
   };
 
   const validateForm = () => {
     const newErrors: any = {};
 
     if (!name) newErrors.name = "Name is required";
-    if (!contact) newErrors.contact = "Email or mobile is required";
+    if (!contact) newErrors.contact = "Email is required";
     if (!password) newErrors.password = "Password is required";
     if (!otp) newErrors.otp = "OTP is required";
 
@@ -63,16 +62,12 @@ export default function SignUp() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateContact(contact)) {
-      toast.warning("Enter a valid email or 10-digit mobile number");
+      toast.warning("Enter a valid email address.");
       return;
     }
 
     setIsLoading(true);
-    // Determine if contact is email or mobile
-    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
-    const bodyData = isEmail
-      ? { email: contact } // send only email
-      : { mobile: `+91${contact}` }; // send only mobile
+    const bodyData = { email: contact };
 
     try {
       const res = await fetch(
@@ -108,7 +103,7 @@ export default function SignUp() {
       return;
     }
     if (!contact) {
-      toast.warning("Please enter email or mobile");
+      toast.warning("Please enter your email");
       return;
     }
 
@@ -128,11 +123,7 @@ export default function SignUp() {
     }
 
     setIsLoading(true);
-    // Determine if contact is email or mobile
-    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
-    const bodyData = isEmail
-      ? { email: contact, otp, otpID, password } // send email
-      : { mobile: `+91${contact}`, otp, otpID, password }; // send mobile
+    const bodyData = { email: contact, otp, otpID, password };
 
     try {
       const res = await fetch(
@@ -175,8 +166,8 @@ export default function SignUp() {
           <h2 className="text-2xl font-bold mb-6 text-center">Generate OTP</h2>
           <div className="mb-2 ">
             <input
-              type="text"
-              placeholder=" Enter Email"
+              type="email"
+              placeholder="Email address"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className={`w-full rounded-xl border bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400
@@ -229,7 +220,7 @@ ${
               type="text"
               readOnly
               value={contact}
-              placeholder={contact ? contact : "Your email or mobile"}
+              placeholder={contact ? contact : "Your email"}
               className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
 ${

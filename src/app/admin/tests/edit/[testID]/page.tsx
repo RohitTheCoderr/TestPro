@@ -1,7 +1,3 @@
-import React from "react";
+import CreateTest from "../../create/page";
 
-function EditTest() {
-  return <div>page</div>;
-}
-
-export default EditTest;
+export default CreateTest;

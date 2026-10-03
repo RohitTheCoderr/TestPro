@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
 import { apiClient } from "@/lib/API/apiClient";
-import { ArrowLeft, Save, Tag } from "lucide-react";
+import { ArrowLeft, Delete, DeleteIcon, Save, Tag, Trash2 } from "lucide-react";
 import InputField from "@/components/shared/inputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -194,7 +194,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
       transition={{ duration: 0.4 }}
       className=" mx-auto rounded-2xl bg-white dark:bg-zinc-900
                  shadow-lg border border-zinc-200 dark:border-zinc-800
-                 p-6 space-y-6"
+                 p-6"
     >
       <div>
         {/* Header */}
@@ -346,12 +346,13 @@ function ExamForm({ exam, isEdit }: examFormProps) {
             {details.length > 1 && (
               <Button
                 type="button"
-                variant="outline"
+                variant="delete"
+                size="icon"
                 onClick={() =>
                   setDetails((prev) => prev.filter((_, i) => i !== index))
                 }
               >
-                ❌
+                <Trash2 size={15} />
               </Button>
             )}
           </div>
@@ -401,16 +402,17 @@ function ExamForm({ exam, isEdit }: examFormProps) {
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t dark:border-zinc-800">
-          <button
-            type="submit"
-            className={`inline-flex items-center gap-2 rounded-lg
-                    px-6 py-2 text-white
-                      transition ${exam ? " bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700"}`}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/exams")}
           >
+            Cancel
+          </Button>
+          <Button type="submit" variant="secondary">
             <Save size={16} />
-
             {exam ? "Update Category" : "Create Category"}
-          </button>
+          </Button>
         </div>
       </div>
     </motion.form>

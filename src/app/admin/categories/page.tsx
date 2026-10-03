@@ -13,9 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit } from "lucide-react";
+import { Edit, Edit2 } from "lucide-react";
 import TruncateTextTooltip from "@/components/shared/truncketTooltip";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 function CategoriesPage() {
   const dispatch = useAppDispatch();
@@ -93,16 +94,16 @@ function CategoriesPage() {
               >
                 <TableCell>{cat.categoryID}</TableCell>
                 <TableCell>{cat.name}</TableCell>
-                <TableCell className=" max-w-[800px]">
+                <TableCell className=" max-w-[400px]">
                   <TruncateTextTooltip
                     text={cat.categoryDetails?.details ?? ""}
-                    maxWidth="max-w-[800px]"
+                    maxWidth="max-w-[400px]"
                   />{" "}
                 </TableCell>
                 <TableCell>
                   <TruncateTextTooltip
                     text={cat.categoryDetails?.otherdetails ?? ""}
-                    maxWidth="max-w-[800px]"
+                    maxWidth="max-w-[400px]"
                   />{" "}
                 </TableCell>
                 <TableCell className="text-center">
@@ -117,12 +118,11 @@ function CategoriesPage() {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Link
-                    href={`/admin/categories/edit/${cat.categoryID}`}
-                    className="text-blue-600 flex justify-center items-center"
-                  >
-                    <Edit />
-                  </Link>
+                  <Button variant="edit" size="icon" className="p-2">
+                    <Link href={`/admin/categories/edit/${cat.categoryID}`}>
+                      <Edit2 size={16} />
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

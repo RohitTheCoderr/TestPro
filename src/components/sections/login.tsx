@@ -9,7 +9,7 @@ import ResetPassword from "./resetPassword";
 import { toast } from "sonner";
 
 export default function Login() {
-  const [contact, setContact] = useState(""); // email or mobile
+  const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,19 +23,20 @@ export default function Login() {
     setLoading(true);
     setError(""); // Clear previous error
 
+    if (!contact) {
+      toast.warning("Please provide your email");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(contact)) {
+      toast.warning("Please enter a valid email address.");
+      return;
+    }
     if (!password) {
       toast.warning("please provide Passwords");
       return;
     }
-    if (!contact) {
-      toast.warning("please provide Email or mobile");
-      return;
-    }
 
-    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
-    const bodyData = isEmail
-      ? { email: contact, password } // send email
-      : { mobile: `+91${contact}`, password }; // send mobile
+    const bodyData = { email: contact, password };
 
     try {
       const res = await fetch(
@@ -86,8 +87,8 @@ export default function Login() {
 
             {/* Email */}
             <input
-              type="text"
-              placeholder="Email or Mobile"
+              type="email"
+              placeholder="Email address"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"

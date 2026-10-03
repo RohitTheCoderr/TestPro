@@ -20,6 +20,7 @@ export interface Subject {
 
 export interface Test {
   title: string;
+  test_type?: string;
   type: string; // e.g., "free" or "paid"
   duration: number; // in minutes
   price: number; // 0 for free, >0 for paid

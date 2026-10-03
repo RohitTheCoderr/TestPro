@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
 import { setExamsList } from "@/lib/redux/slices/forAdminSlice/examsSlice";
+import { Button } from "@/components/ui/button";
 
 function ExamsPage() {
   const categories = useAppSelector((state) => state.category.categories);
@@ -69,33 +70,29 @@ function ExamsPage() {
         <h2 className="text-2xl font-semibold">Exams</h2>
         <Link
           href="/admin/exams/create"
-          className="bg-green-600 text-white px-4 py-2 rounded"
+          className="bg-green-600 text-white max-md:text-[14px] px-4 py-1  md:px-4 md:py-2 rounded hover:bg-green-700"
         >
           + Add Exam
         </Link>
       </div>
 
       {/* Categories (Top Horizontal) */}
-      <div className="flex gap-2 overflow-x-auto scroll-m-4 pb-2">
+      <div className="flex gap-2 overflow-x-auto scroll-m-4 p-2">
         {categories?.map((cat: Category) => (
-          <button
+          <Button
+            variant={activeCategory === cat.categoryID ? "default" : "outline"}
             key={cat.categoryID}
             onClick={() => handleCategoryClick(cat.categoryID)}
-            className={`px-4 py-2 rounded whitespace-nowrap hover:bg-green-600 hover:text-white ${
-              activeCategory === cat.categoryID
-                ? "bg-green-600 text-white"
-                : "bg-gray-200"
-            }`}
           >
             {cat.name}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* Main Layout */}
       <div className="grid grid-cols-12 gap-4 h-[65vh]">
         {/* LEFT – Exams List */}
-        <div className="col-span-3 bg-white rounded shadow p-4 overflow-y-auto">
+        <div className="col-span-3 bg-white dark:bg-zinc-600 rounded shadow p-4 overflow-y-auto">
           <h3 className="font-semibold mb-3">Exams</h3>
           {!activeCategory && (
             <p className="text-sm text-gray-500">Select a category</p>
@@ -114,8 +111,8 @@ function ExamsPage() {
                 onClick={() => setActiveExam(exam)}
                 className={`p-2 rounded cursor-pointer flex justify-between items-center ${
                   activeExam?.ExamID === exam.ExamID
-                    ? "bg-green-100 border-l-4 border-green-600"
-                    : "bg-gray-100"
+                    ? "bg-green-100 border-l-4 border-primary"
+                    : "bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
                 }`}
               >
                 <div>
@@ -132,7 +129,7 @@ function ExamsPage() {
           </div>
         </div>
         {/* RIGHT – Exam Details */}
-        <div className="col-span-9 bg-white rounded shadow p-6">
+        <div className="col-span-9 bg-white dark:bg-zinc-800 rounded shadow p-6">
           {!activeExam ? (
             <p className="text-gray-500">Select an exam to view details</p>
           ) : (
@@ -218,4 +215,3 @@ function ExamsPage() {
 }
 
 export default ExamsPage;
-

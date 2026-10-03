@@ -10,7 +10,7 @@ interface PropsForget {
   setForgetpass: (value: boolean) => void;
 }
 export default function ResetPassword({ setForgetpass }: PropsForget) {
-  const [contact, setContact] = useState(""); // email or mobile
+  const [contact, setContact] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
@@ -24,23 +24,18 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
-    const isMobile = /^\d{10}$/.test(value);
-    return isEmail || isMobile;
+    return isEmail;
   };
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateContact(contact)) {
-      toast.warning("Enter a valid email or 10-digit mobile number");
+      toast.warning("Enter a valid email address.");
       return;
     }
 
     setIsLoading(true);
-    // Determine if contact is email or mobile
-    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
-    const bodyData = isEmail
-      ? { email: contact } // send only email
-      : { mobile: `+91${contact}` }; // send only mobile
+    const bodyData = { email: contact };
 
     try {
       const res = await fetch(
@@ -75,11 +70,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
     }
 
     setIsLoading(true);
-    // Determine if contact is email or mobile
-    const isEmail = /^\S+@\S+\.\S+$/.test(contact);
-    const bodyData = isEmail
-      ? { email: contact, otp, otpID, password } // send email
-      : { mobile: `+91${contact}`, otp, otpID, password }; // send mobile
+    const bodyData = { email: contact, otp, otpID, password };
 
     try {
       const res = await fetch(
@@ -125,8 +116,8 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             Reset Password
           </h2>
           <input
-            type="text"
-            placeholder="Email or Mobile"
+            type="email"
+            placeholder="Email address"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
@@ -150,7 +141,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             type="text"
             readOnly
             value={contact}
-            placeholder={contact ? contact : "Your email or mobile"}
+            placeholder={contact ? contact : "Your email"}
             className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100"
           />
           <input
