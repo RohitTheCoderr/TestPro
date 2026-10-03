@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Edit2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import TruncateTextTooltip from "@/components/shared/truncketTooltip";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

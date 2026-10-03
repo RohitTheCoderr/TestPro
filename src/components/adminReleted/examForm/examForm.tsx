@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
 import { apiClient } from "@/lib/API/apiClient";
-import { ArrowLeft, Delete, DeleteIcon, Save, Tag, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Tag, Trash2 } from "lucide-react";
 import InputField from "@/components/shared/inputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
