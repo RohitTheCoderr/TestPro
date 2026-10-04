@@ -40,9 +40,9 @@ export interface TestCardProps {
   price?: number | string;
   testID: string;
   examID: string;
+  categoryID?: string;
   categoryName?: string;
   examName?: string;
-  onSelect?: (id: string) => void;
 }
 
 // export interface TestResponse {

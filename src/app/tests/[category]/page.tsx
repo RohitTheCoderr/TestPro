@@ -1,25 +1,13 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useMemo } from "react";
 import { apiClient } from "@/lib/API/apiClient";
 import Link from "next/link";
-import { useDispatch } from "react-redux";
-import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
-// import type { Exam } from "@/lib/redux/slices/examdetailsSlice.ts";
 import { ExamDetails, Examresponse, Exams } from "@/Interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-
-// Define the type for selected exam
-type ExamSelect = {
-  categoryID: string;
-  categoryName: string;
-  name: string;
-  slug: string;
-  examDetails: ExamDetails;
-  ExamID: string;
-};
+import { useQuery } from "@tanstack/react-query";
 
 // Props for TestCard
 type ExamCardProps = {
@@ -29,7 +17,6 @@ type ExamCardProps = {
   slug: string;
   examDetails: ExamDetails;
   ExamID: string;
-  onSelect?: (exam: ExamSelect) => void; // strongly typed
 };
 
 const TestCard: React.FC<ExamCardProps> = ({
@@ -39,7 +26,6 @@ const TestCard: React.FC<ExamCardProps> = ({
   slug,
   examDetails,
   ExamID,
-  onSelect,
 }) => (
   <div className="rounded-2xl border border-border shadow-sm p-6 flex flex-col justify-between bg-card hover:shadow-md transition">
     <div>
@@ -52,18 +38,11 @@ const TestCard: React.FC<ExamCardProps> = ({
     </div>
     <Button className="mt-4 flex gap-4">
       <Link
-        href={`/tests/${categoryName}/${slug}`}
+        href={{
+          pathname: `/tests/${categoryName}/${slug}`,
+          query: { categoryID, examID: ExamID },
+        }}
         className="w-full text-center px-4 py-2 text-white rounded-full hover:bg-primary/80 hover:text-accent-foreground text-sm transition"
-        onClick={() =>
-          onSelect?.({
-            ExamID,
-            name,
-            slug,
-            categoryID,
-            categoryName,
-            examDetails,
-          })
-        } // ✅ pass full exam object
       >
         Explore {name} Tests
       </Link>
@@ -78,70 +57,83 @@ export default function TestsPage({
 }) {
   // unwrap promise
   const { category } = params;
-  const dispatch = useDispatch();
-  const [examTypes, setExamTypes] = useState<ExamCardProps[]>([]);
   const router = useRouter();
   const decodedCategory = decodeURIComponent(category);
 
   const searchParams = useSearchParams();
-  const categoryID = searchParams.get("categoryID");
-  useEffect(() => {
-    const fetchExamData = async () => {
-      try {
-        const res = await apiClient.get<Examresponse>(
-          `/category/${categoryID}/exams`,
-        );
-
-        const categoryName = res?.data?.category[0]?.name;
-
-        const exams: ExamCardProps[] = res.data.exams.map((exam: Exams) => ({
-          name: exam.name,
-          slug: exam.slug,
-          ExamID: exam.ExamID,
-          categoryName: categoryName,
-          categoryID: exam.categoryID,
-          examDetails: exam.examDetails || { details: [] },
-        }));
-
-        setExamTypes(exams);
-      } catch (error) {
-        console.error("Error fetching exams:", error);
-      }
-    };
-
-    if (categoryID) fetchExamData();
-  }, [categoryID]);
-
-  const handleExamSelect = (exam: Exams) => {
-    dispatch(setCurrentExam(exam));
-  };
+  const categoryID = searchParams.get("categoryID") ?? "all";
+  const {
+    data: examResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["exams-by-category", categoryID],
+    queryFn: () => apiClient.get<Examresponse>(`/category/${categoryID}/exams`),
+  });
+  const examTypes = useMemo(() => {
+    const categoryName = examResponse?.data?.category?.name;
+    return (examResponse?.data?.exams ?? []).map((exam: Exams) => ({
+      name: exam.name,
+      slug: exam.slug,
+      ExamID: exam.ExamID,
+      categoryName: categoryName ?? decodedCategory,
+      categoryID: exam.categoryID,
+      examDetails: exam.examDetails || { details: [] },
+    }));
+  }, [decodedCategory, examResponse]);
 
   return (
     <main className=" px-8 md:px-16 py-12">
       {/* Header */}
-      <div className="w-full text-center ">
-        <div
-          className="flex items-center text-gray-600 hover:text-primary w-20 rounded-md py-1 cursor-pointer"
-          onClick={() => window.history.back()}
-        >
-          <ArrowLeft size={14} /> Back
+      <div className="w-full">
+        {/* Header */}
+        <div className="relative mb-6 flex items-center">
+          {/* Back */}
+          <Button
+            type="button"
+            variant="icon"
+            onClick={() => window.history.back()}
+            className="gap-1.5 rounded-[5px] px-2  hover:text-primary"
+          >
+            <ArrowLeft size={16} />
+            <span>Back</span>
+          </Button>
+
+          {/* Heading */}
+          <div className="w-full text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+              <span className="text-primary capitalize">{decodedCategory}</span>{" "}
+              Exams
+            </h1>
+          </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white drop-shadow-sm">
-          <span className="uppercase text-primary">{decodedCategory}</span>{" "}
-          Exams
-        </h1>
-        <p className="mt-4 text-xs sm:text-lg md:text-xl text-gray-500 dark:text-gray-300">
-          Sharpen your skills with practice tests specifically designed for{" "}
-          <span className="font-semibold">{decodedCategory}</span>. Attempt
-          these tests to improve your knowledge and boost your confidence.
-        </p>
+
+        {/* Description */}
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm leading-6 text-muted-foreground sm:text-base md:text-lg">
+            Sharpen your skills with practice tests designed specifically for{" "}
+            <span className="font-semibold text-foreground">
+              {decodedCategory}
+            </span>
+            . Test your knowledge, identify your strengths, and build confidence
+            for your exam.
+          </p>
+        </div>
       </div>
 
       {/* Exam Cards */}
-      {examTypes.length !== 0 ? (
-        <div className="mt-12 grid gap-8 sm:grid-cols-3 lg:grid-cols-4 ">
+      {isLoading ? (
+        <p className="mt-12 text-center text-muted-foreground">
+          Loading exams...
+        </p>
+      ) : error ? (
+        <p className="mt-12 text-center text-red-600">
+          {error instanceof Error ? error.message : "Unable to load exams."}
+        </p>
+      ) : examTypes.length !== 0 ? (
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 ">
           {examTypes.map((exam) => (
-            <TestCard key={exam.ExamID} {...exam} onSelect={handleExamSelect} />
+            <TestCard key={exam.ExamID} {...exam} />
           ))}
         </div>
       ) : (

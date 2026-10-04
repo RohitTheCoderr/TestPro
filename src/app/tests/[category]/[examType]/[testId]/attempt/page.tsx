@@ -1,14 +1,10 @@
 "use client";
 import { apiClient } from "@/lib/API/apiClient";
-import { RootState } from "@/lib/redux/store";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import { clearCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
-import { clearCurrentTest } from "@/lib/redux/slices/testSlice";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { SingleTestsResponse } from "@/Interfaces";
-import { Test } from "@/Interfaces/TestInterfaces";
 import { toast } from "sonner";
 
 interface Answer {
@@ -22,48 +18,71 @@ interface PostData {
   testID: string;
 }
 
+interface SubmitResponse {
+  success: boolean;
+  message: string;
+  score: number;
+}
+
 export default function AttemptPage() {
-  // const [testData, setTestData] = useState<TestData | null>(null);
-  const [testData, setTestData] = useState<Test | null>(null);
   const [currentSubjectIndex, setCurrentSubjectIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<string, string>
   >({});
   const [markedForReview, setMarkedForReview] = useState<string[]>([]);
-  const [timeLeft, setTimeLeft] = useState<number>(0); // in seconds
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const submissionStarted = useRef(false);
+  const timerReady = useRef(false);
 
   const router = useRouter();
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const examID = searchParams.get("examID");
+  const testID = searchParams.get("testID");
 
-  const currentExamdetails = useSelector(
-    (state: RootState) => state.exam.currentExam,
-  );
-  const testID = useSelector((state: RootState) => state.test.testID);
+  const {
+    data: testData,
+    error: testError,
+  } = useQuery({
+    queryKey: ["test-details", examID, testID],
+    enabled: Boolean(testID && examID),
+    queryFn: async () => {
+      const response = await apiClient.get<SingleTestsResponse>(
+        `/user/tests/${examID}/${testID}`,
+      );
+      if (!response.test) throw new Error("Test not found.");
+      return response.test;
+    },
+  });
 
   useEffect(() => {
-    const fetchTest = async () => {
-      try {
-        const res = await apiClient.get<SingleTestsResponse>(
-          `/user/tests/${currentExamdetails?.ExamID}/${testID}`,
-        );
-        const test = res?.test;
-        setTestData(test);
-        // ✅ Initialize timeLeft based on duration in minutes → seconds
-        if (test?.duration) setTimeLeft(test.duration * 60);
-      } catch (error) {
-        console.error("Error fetching test:", error);
-      }
-    };
-    if (testID) fetchTest();
-  }, [currentExamdetails?.ExamID, testID]);
+    if (!testData) return;
+
+    const duration = Number(testData.duration);
+    if (!Number.isFinite(duration) || duration <= 0) {
+      timerReady.current = false;
+      toast.error("This test has an invalid duration and cannot be started.");
+      return;
+    }
+
+    timerReady.current = true;
+    setTimeLeft(duration * 60);
+  }, [testData?.duration]);
+  useEffect(() => {
+    if (testError) {
+      toast.error(
+        testError instanceof Error ? testError.message : "Unable to load test.",
+      );
+    }
+  }, [testError]);
 
   // ✅ Countdown Timer
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (timeLeft === null || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => (prev === null || prev <= 0 ? prev : prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -128,28 +147,25 @@ export default function AttemptPage() {
     }
   };
 
-  // move this outside the handler if you call it from multiple places
-  const postSubmittedData = async (
-    submitdata: PostData,
-  ): Promise<ResponseType> => {
-    try {
-      const response = await apiClient.post<ResponseType>(
+  const submitTestMutation = useMutation({
+    mutationFn: async (submitdata: PostData) => {
+      const response = await apiClient.post<SubmitResponse>(
         "/user/tests/submit-test",
         submitdata,
       );
+      if (!response.success) {
+        throw new Error(response.message || "Failed to submit test.");
+      }
       return response;
-    } catch (error) {
-      console.error("Error while submit test:", error);
-      throw error; // re-throw so caller can react to failure
-    }
-  };
+    },
+  });
 
   const handleSubmit = useCallback(
-    async (auto = false) => {
+    async () => {
+      if (!testData || !timerReady.current || submissionStarted.current) return;
+      submissionStarted.current = true;
+
       try {
-        if (auto) {
-          toast.success("Test submitted successfully");
-        }
         // build payload
         const payload: {
           subjectId: string;
@@ -177,24 +193,29 @@ export default function AttemptPage() {
           });
         }
 
-        const finalTestID = testData?.testID || testID || "";
+        const finalTestID = testData.testID || testID || "";
+        if (!finalTestID) {
+          throw new Error("Test ID is missing. Unable to submit this test.");
+        }
         // IMPORTANT: await the async call
-        const apiResponse = await postSubmittedData({
+        const apiResponse = await submitTestMutation.mutateAsync({
           answers: payload,
           testID: finalTestID, // you said backend expects testID
         });
 
-        if (apiResponse) {
+        if (apiResponse.success) {
           toast.success("Test submitted successfully ");
         }
+        await queryClient.invalidateQueries({ queryKey: ["test-results"] });
 
         // post-submit logic (only after API resolves)
-        dispatch(clearCurrentExam());
-        dispatch(clearCurrentTest());
         router.push("/thankyou");
       } catch (error) {
+        submissionStarted.current = false;
         console.error("❌ Submit Failed:", error);
-        // optionally show user-facing error toast here
+        toast.error(
+          error instanceof Error ? error.message : "Failed to submit test.",
+        );
       }
     },
     // include testData/testID in deps if used; otherwise stale values can be captured
@@ -202,8 +223,8 @@ export default function AttemptPage() {
       subjects,
       selectedAnswers,
       // markedForReview,
-      dispatch,
       router,
+      queryClient,
       testData,
       testID,
     ],
@@ -212,7 +233,7 @@ export default function AttemptPage() {
   // auto submit
   useEffect(() => {
     if (timeLeft === 0 && testData) {
-      handleSubmit(true); // auto submit
+      handleSubmit(); // auto submit
     }
   }, [timeLeft, testData, handleSubmit]); // now handleSubmit included
 
@@ -223,7 +244,7 @@ export default function AttemptPage() {
         toast.message(
           "test submitted successfuly because you switched new tab",
         );
-        handleSubmit(true); // auto submit
+        handleSubmit(); // auto submit
       }
     };
 
@@ -236,8 +257,13 @@ export default function AttemptPage() {
 
   if (!testData)
     return (
-      <p className="p-6 text-center flex justify-center items-center font-semibold text-green-500 h-[100vh]">
-        Loading test...
+      <p
+        role={testError ? "alert" : undefined}
+        className={`p-6 text-center flex justify-center items-center font-semibold h-[100vh] ${
+          testError ? "text-red-500" : "text-green-500"
+        }`}
+      >
+        {testError instanceof Error ? testError.message : "Loading test..."}
       </p>
     );
 
@@ -251,12 +277,12 @@ export default function AttemptPage() {
         </h1>
         <span
           className={`font-mono text-lg px-3 py-1 rounded-lg shadow-sm ${
-            timeLeft <= 60
+            timeLeft !== null && timeLeft <= 60
               ? "bg-red-500 text-white animate-pulse"
               : "bg-muted text-red-500"
           }`}
         >
-          Time Left: {formatTime(timeLeft)}
+          Time Left: {timeLeft === null ? "--:--" : formatTime(timeLeft)}
         </span>
       </header>
 
@@ -408,7 +434,7 @@ export default function AttemptPage() {
       {/* Footer Submit */}
       <footer className="mt-10 flex justify-end">
         <button
-          onClick={() => handleSubmit(false)}
+          onClick={() => handleSubmit()}
           className="px-6 py-3 bg-red-600 text-white font-semibold rounded-xl shadow-md hover:bg-red-700 transition-colors"
         >
           Submit Test

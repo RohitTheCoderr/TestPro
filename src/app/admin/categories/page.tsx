@@ -1,10 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { apiClient } from "@/lib/API/apiClient";
 import { Category, CategoryResponse } from "@/Interfaces";
-import { setCategoriesList } from "@/lib/redux/slices/forAdminSlice/categoriesSlice";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import {
   Table,
   TableBody,
@@ -17,35 +15,32 @@ import { Edit2 } from "lucide-react";
 import TruncateTextTooltip from "@/components/shared/truncketTooltip";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+
+const EMPTY_CATEGORIES: Category[] = [];
 
 function CategoriesPage() {
-  const dispatch = useAppDispatch();
-  const categoriesList = useAppSelector(
-    (state) => state.categories.categoriesList,
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: categoriesList = EMPTY_CATEGORIES,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>(
+        "/admin/category/list",
+      );
+      return response.data?.categories ?? [];
+    },
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await apiClient.get<CategoryResponse>(
-          "/admin/category/list",
-        );
-        dispatch(setCategoriesList(res?.data?.categories));
-      } catch (error: unknown) {
-        let message = "An unexpected error occurred.";
-        if (error instanceof Error) message = error.message;
-        toast(message);
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [dispatch]); // ✅ only include real dependencies
+    if (error) {
+      toast(
+        error instanceof Error ? error.message : "Unable to load categories.",
+      );
+    }
+  }, [error]);
 
   return (
     <div className="space-y-6">
@@ -65,7 +60,11 @@ function CategoriesPage() {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-100 text-red-700 p-3 rounded">{error}</div>
+        <div className="bg-red-100 text-red-700 p-3 rounded">
+          {error instanceof Error
+            ? error.message
+            : "Unable to load categories."}
+        </div>
       )}
 
       {/* Table */}

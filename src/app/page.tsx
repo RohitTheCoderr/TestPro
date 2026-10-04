@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import CategoriesSection from "@/components/ui/cards/CategoriesSection";
 import { Category } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
-import { setCategories } from "@/lib/redux/slices/categorySlice";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   MdAnalytics,
   MdTimer,
@@ -14,7 +14,7 @@ import {
 } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { useAppSelector } from "@/lib/redux/hooks";
 import { toast } from "sonner";
 // Define the API response structure
 interface CategoryResponse {
@@ -25,31 +25,20 @@ interface CategoryResponse {
 
 export default function HomePage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const [error, setError] = useState<string | null>(null);
-
   const { token } = useAppSelector((state) => state.auth);
+  const { data: categories, error } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>("/category");
+      return response.data?.categories ?? [];
+    },
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await apiClient.get<CategoryResponse>("/category");
-        dispatch(setCategories(data?.data?.categories));
-      } catch (error: unknown) {
-        let message = "An unexpected error occurred.";
-
-        if (error instanceof Error) {
-          message = error.message;
-        }
-
-        toast(message);
-        setError(message);
-      }
-    };
-
-    fetchData();
-  }, [dispatch]);
-
+    if (error) {
+      toast(error instanceof Error ? error.message : "Unable to load categories.");
+    }
+  }, [error]);
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       {/* Hero Section */}
@@ -107,7 +96,7 @@ export default function HomePage() {
         </div>
         {error ? (
           <div className="text-red-600 text-center my-6 p-3 rounded">
-            ⚠️ {error}
+            ⚠️ {error instanceof Error ? error.message : "Unable to load categories."}
           </div>
         ) : (
           <CategoriesSection />

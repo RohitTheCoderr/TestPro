@@ -2,42 +2,39 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { RootState } from "@/lib/redux/store";
-import { useParams, useRouter } from "next/navigation";
+import { apiClient } from "@/lib/API/apiClient";
+import { Examresponse } from "@/Interfaces";
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { IoArrowBackCircle } from "react-icons/io5";
-import { useSelector } from "react-redux";
 import { toast } from "sonner";
-
-interface ExamDetails {
-  details: string[];
-  negativeMark: number;
-  permark: number;
-  totalQuestion: number;
-  totalmarks: number;
-  otherdetails?: string;
-}
-interface currentExamdetails {
-  ExamID: string;
-  categoryID: string;
-  categoryName: string;
-  name: string;
-  slug: string;
-  examDetails: ExamDetails;
-}
 
 export default function StartTestPage() {
   const { category, examType, testId } = useParams();
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedMsg, setIsCheckedMsg] = useState("");
   const router = useRouter();
-  const currentExamdetails = useSelector(
-    (state: RootState) => state.exam.currentExam,
-  ) as currentExamdetails | null;
-
-  const { examDetails } = {
-    ...currentExamdetails,
-  };
+  const searchParams = useSearchParams();
+  const categoryID = searchParams.get("categoryID");
+  const examID = searchParams.get("examID");
+  const testID = searchParams.get("testID");
+  const { data: exam, isLoading, error } = useQuery({
+    queryKey: ["exam-by-id", categoryID, examID],
+    enabled: Boolean(categoryID && examID),
+    queryFn: async () => {
+      const response = await apiClient.get<Examresponse>(
+        `/category/${categoryID}/exams`,
+      );
+      const selectedExam = response.data.exams.find(
+        (item) => item.ExamID === examID,
+      );
+      if (!selectedExam) throw new Error("Exam not found.");
+      return selectedExam;
+    },
+  });
+  const examDetails = exam?.examDetails;
+  const routeQuery = searchParams.toString();
 
   const handleStart = () => {
     if (!isChecked) {
@@ -46,22 +43,33 @@ export default function StartTestPage() {
       return;
     }
     // In real app: enforce full screen & API start call
-    router.push(`/tests/${category}/${examType}/${testId}/attempt`);
+    router.push(
+      `/tests/${category}/${examType}/${testId}/attempt?${routeQuery}`,
+    );
   };
 
   const handlePrevious = () => {
     // In real app: enforce full screen & API start call
-    router.push(`/tests/${category}/${examType}/${testId}`);
+    router.push(`/tests/${category}/${examType}/${testId}?${routeQuery}`);
   };
-  const testID = useSelector((state: RootState) => state.test.testID);
 
-  if (!currentExamdetails) {
+  if (isLoading) {
+    return <p className="p-6 text-center">Loading exam details...</p>;
+  }
+
+  if (error || !exam || !testID) {
     return (
-      <div className="p-6 text-center text-red-600">
-        ⚠️ No exam details found. Please go back and select the test again.
+      <div role="alert" className="p-6 text-center text-red-600">
+        {error instanceof Error
+          ? error.message
+          : "Exam or test details are missing. Please select the test again."}
         <div className="mt-4">
           <button
-            onClick={() => router.push(`/tests/${category}/${examType}`)}
+            onClick={() =>
+              router.push(
+                `/tests/${category}/${examType}${routeQuery ? `?${routeQuery}` : ""}`,
+              )
+            }
             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80"
           >
             Go Back
@@ -81,10 +89,12 @@ export default function StartTestPage() {
       <div className="bg-card border rounded-2xl shadow-sm p-6 space-y-6">
         {/* Overview */}
         <div className="grid sm:grid-cols-3 gap-4 text-center">
-          <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
+          {/* <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
             <p className="text-sm text-muted-foreground">Duration</p>
-            <p className="text-lg font-semibold">60 mins</p>
-          </div>
+            <p className="text-lg font-semibold">
+              {examDetails?.totalQuestion} mins
+            </p>
+          </div> */}
           <div className="p-4 rounded-[10px] bg-muted dark:bg-gray-700">
             <p className="text-sm text-muted-foreground"> Total Questions</p>
             <p className="text-lg font-semibold">

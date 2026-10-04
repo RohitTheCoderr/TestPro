@@ -3,45 +3,47 @@
 import CategoryForm from "@/components/adminReleted/categoryForm/categoryForm";
 import { SingleCategoryResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
-import { useAppSelector } from "@/lib/redux/hooks";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function EditCategoryPage() {
   const params = useParams<{ categoryID: string }>();
   const categoryID = params.categoryID;
 
-  const categoryFromStore = useAppSelector((state) =>
-    state.categories.categoriesList.find(
-      (cat) => cat.categoryID === categoryID,
-    ),
-  );
-  const [category, setCategory] = useState(categoryFromStore);
+  const {
+    data: category,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["admin-category", categoryID],
+    enabled: Boolean(categoryID),
+    queryFn: async () => {
+      const response = await apiClient.get<SingleCategoryResponse>(
+        `/admin/category/${categoryID}`,
+      );
+      return response.data.category;
+    },
+  });
 
   useEffect(() => {
-    if (!categoryFromStore && categoryID) {
-      const fetchData = async () => {
-        try {
-          const data = await apiClient.get<SingleCategoryResponse>(
-            `/admin/category/${categoryID}`,
-          );
-          setCategory(data.data.category);
-        } catch (error: unknown) {
-          let message = "An unexpected error occurred.";
-
-          if (error instanceof Error) {
-            message = error.message;
-          }
-
-          console.error("Error fetching categories:", message);
-          alert(message);
-        }
-      };
-      fetchData();
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to load category.",
+      );
     }
-  }, [categoryFromStore, categoryID]);
+  }, [error]);
 
-  if (!category) return <p>Loading...</p>;
+  if (isLoading) return <p>Loading...</p>;
+  if (error) {
+    return (
+      <p role="alert" className="text-center text-red-600">
+        {error instanceof Error ? error.message : "Unable to load category."}
+      </p>
+    );
+  }
+  if (!category) return <p>Category not found.</p>;
   return <CategoryForm category={category} />;
 }
 

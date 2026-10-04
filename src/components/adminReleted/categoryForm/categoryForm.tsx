@@ -9,6 +9,7 @@ import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
 import { apiClient } from "@/lib/API/apiClient";
 import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface EditCategoryFormProps {
   category?: Category;
@@ -16,6 +17,7 @@ interface EditCategoryFormProps {
 
 export default function CategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     name: category?.name || "",
@@ -31,7 +33,6 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
     details: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (
@@ -50,53 +51,45 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
     }));
   };
 
-  const updatecategoryHandle = async (payload: Category) => {
-    try {
-      setLoading(true);
-      const res = await apiClient.patch<CategoryResponse>(
-        "/admin/category/update",
-        payload,
-      );
-      toast.success(res.message);
-      if (res) {
-        router.push("/admin/categories");
+  const saveCategoryMutation = useMutation({
+    mutationFn: async (payload: Category | createCategory) => {
+      const response =
+        "categoryID" in payload
+          ? await apiClient.patch<CategoryResponse>(
+              "/admin/category/update",
+              payload,
+            )
+          : await apiClient.post<CategoryResponse>(
+            "/admin/category/create",
+            payload,
+          );
+      if (!response.success) {
+        throw new Error(response.message || "Unable to save category.");
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-        toast.error(err.message);
-      } else {
-        setError("Failed to Update category");
-        toast.error("Failed to Update category");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const CreatecategoryHandle = async (payload: createCategory) => {
-    try {
-      setLoading(true);
-      const res = await apiClient.post<CategoryResponse>(
-        "/admin/category/create",
-        payload,
-      );
-      toast.success(res.message);
-      if (res) {
-        router.push("/admin/categories");
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-        toast.error(err.message);
-      } else {
-        setError("Failed to create new category");
-        toast.error("Failed to create new category");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response;
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+      void queryClient.invalidateQueries({ queryKey: ["categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-category"] });
+      void queryClient.invalidateQueries({ queryKey: ["exams-by-category"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["admin-test-exam-options"],
+      });
+      router.push("/admin/categories");
+    },
+    onError: (mutationError) => {
+      const message =
+        mutationError instanceof Error
+          ? mutationError.message
+          : category
+            ? "Failed to update category."
+            : "Failed to create category.";
+      setError(message);
+      toast.error(message);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,7 +118,7 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
 
     if (category?.categoryID) {
       // UPDATE
-      updatecategoryHandle({
+      saveCategoryMutation.mutate({
         categoryID: category.categoryID,
         name: formData.name,
         slug: formData.name,
@@ -137,7 +130,7 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
       });
     } else {
       // CREATE
-      CreatecategoryHandle({
+      saveCategoryMutation.mutate({
         name: formData.name,
         slug: formData.name,
         categoryDetails: {
@@ -149,7 +142,7 @@ export default function CategoryForm({ category }: EditCategoryFormProps) {
     }
   };
 
-  if (loading) return <p>Loading...!</p>;
+  if (saveCategoryMutation.isPending) return <p>Loading...!</p>;
   if (error) return <p className="text-red-400 text-center">{error}</p>;
 
   return (

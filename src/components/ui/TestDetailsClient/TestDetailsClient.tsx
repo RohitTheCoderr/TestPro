@@ -1,11 +1,11 @@
 "use client";
-// import { useSelector } from "react-redux";
-// import { RootState } from "@/lib/redux/store";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Exams } from "@/Interfaces";
+
+import { apiClient } from "@/lib/API/apiClient";
+import { Examresponse, SingleTestsResponse } from "@/Interfaces";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MdOutlineNavigateNext } from "react-icons/md";
-import { useAppSelector } from "@/lib/redux/hooks";
+
 interface Props {
   category: string;
   examType: string;
@@ -18,43 +18,80 @@ export default function TestDetailsClient({
   testId,
 }: Props) {
   const router = useRouter();
-  const currentExam = useAppSelector(
-    (state) => state.exam.currentExam,
-  ) as Exams | null;
+  const searchParams = useSearchParams();
+  const categoryID = searchParams.get("categoryID");
+  const examID = searchParams.get("examID");
+  const testID = searchParams.get("testID");
+  const decodedTestName = decodeURIComponent(testId);
 
-  // const token = useSelector((state: RootState) => state.auth.token) || "";
-  const testID = useAppSelector((state) => state.test.testID);
-  const decodedTestName = decodeURIComponent(testId as string);
-  const { name, examDetails } = { ...currentExam };
+  const {
+    data: exam,
+    isLoading: isLoadingExam,
+    error: examError,
+  } = useQuery({
+    queryKey: ["exam-by-id", categoryID, examID],
+    enabled: Boolean(categoryID && examID),
+    queryFn: async () => {
+      const response = await apiClient.get<Examresponse>(
+        `/category/${categoryID}/exams`,
+      );
+      const selectedExam = response.data.exams.find(
+        (item) => item.ExamID === examID,
+      );
+      if (!selectedExam) throw new Error("Exam not found.");
+      return selectedExam;
+    },
+  });
 
-  useEffect(() => {
-    // if (!token) {
-    //   alert("please login/Register before starting Test");
-    //   router.push("/auth");
-    // }
-    if (!currentExam) router.push(`/tests/${category}`);
-  }, [currentExam, category, router]);
-
-  if (!currentExam) return <div>Loading...</div>;
+  const {
+    data: test,
+    isLoading: isLoadingTest,
+    error: testError,
+  } = useQuery({
+    queryKey: ["test-details", examID, testID],
+    enabled: Boolean(examID && testID),
+    queryFn: async () => {
+      const response = await apiClient.get<SingleTestsResponse>(
+        `/user/tests/${examID}/${testID}`,
+      );
+      if (!response.test) throw new Error("Test not found.");
+      return response.test;
+    },
+  });
 
   const handleStart = () => {
-    // In real app: enforce full screen & API start call
-    router.push(`/tests/${category}/${examType}/${testId}/start`);
+    router.push(
+      `/tests/${category}/${examType}/${testId}/start?${searchParams.toString()}`,
+    );
   };
+
+  const error = examError ?? testError;
+  if (error) {
+    return (
+      <div role="alert" className="p-6 text-center text-red-600">
+        {error instanceof Error ? error.message : "Unable to load test details."}
+      </div>
+    );
+  }
+
+  if (isLoadingExam || isLoadingTest || !exam || !test) {
+    return <div className="p-6 text-center">Loading test details...</div>;
+  }
+
+  const examDetails = exam.examDetails;
 
   return (
     <div className="p-6 md:p-10 mx-auto min-h-screen bg-background text-foreground">
       <h1 className="text-2xl font-bold mb-4">
-        {name} - {decodedTestName}
+        {exam.name} - {decodedTestName}
       </h1>
       <div className="font-bold">
         Test ID:{" "}
         <span className="text-primary font-bold font-mono text-xl">
-          {testID}
+          {test.testID}
         </span>
       </div>
 
-      {/* Instructions */}
       <div className="mt-4 space-y-2">
         {examDetails?.details.map((item: string, idx: number) => (
           <p key={idx} className="text-sm text-muted-foreground">
@@ -63,21 +100,18 @@ export default function TestDetailsClient({
         ))}
       </div>
 
-      {/* Optionally: show other info */}
       <div>
         <h2 className="text-xl font-semibold mb-2">Important Instructions</h2>
         <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
           <li>
             Total Questions:{" "}
             <span className="font-bold text-lg">
-              {" "}
-              {examDetails?.totalQuestion}.{" "}
+              {examDetails?.totalQuestion}.
             </span>
           </li>
-          <li> Timer will start once you begin.</li>
+          <li>Timer will start once you begin.</li>
           <li>Total Marks: {examDetails?.totalmarks}</li>
           <li>
-            {" "}
             <span className="text-md font-bold text-green-600">
               +{examDetails?.permark}
             </span>{" "}
@@ -91,10 +125,10 @@ export default function TestDetailsClient({
           <li>You must attempt the questions in the given order.</li>
           <li>Once submitted, you cannot reattempt the test.</li>
           {examDetails?.otherdetails && (
-            <p>
+            <li>
               <span className="text-md font-bold">Other Details:</span>{" "}
-              {examDetails?.otherdetails}
-            </p>
+              {examDetails.otherdetails}
+            </li>
           )}
         </ul>
       </div>

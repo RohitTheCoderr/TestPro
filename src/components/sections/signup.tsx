@@ -8,6 +8,23 @@ import { useAppDispatch } from "@/lib/redux/hooks";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { apiClient } from "@/lib/API/apiClient";
+import { useMutation } from "@tanstack/react-query";
+
+interface SignupResponse {
+  success: boolean;
+  message: string;
+  data: {
+    otpID?: string;
+    user?: {
+      userId: string;
+      name: string;
+      email: string;
+      role: "admin" | "student";
+    };
+    token?: string;
+  };
+}
 
 export default function SignUp() {
   const [contact, setContact] = useState("");
@@ -16,7 +33,6 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
   const [showPassword, setShowPassword] = useState(false);
   const [showConPassword, setShowConPassword] = useState(false);
@@ -33,6 +49,50 @@ export default function SignUp() {
   const dispatch = useAppDispatch();
   //  const navigate=useNavigate()
   const router = useRouter();
+  const sendOtpMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await apiClient.post<SignupResponse>(
+        "/user/auth/send_opt",
+        { email },
+      );
+      if (!response.success) {
+        throw new Error(response.message || "Error sending OTP.");
+      }
+      return response;
+    },
+    onSuccess: (response) => {
+      setOtpSent(true);
+      setOtpID(response.data?.otpID ?? "");
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Server error"),
+  });
+  const registerMutation = useMutation({
+    mutationFn: async (bodyData: {
+      email: string;
+      otp: string;
+      otpID: string;
+      password: string;
+    }) => {
+      const response = await apiClient.post<SignupResponse>(
+        "/user/auth/register",
+        bodyData,
+      );
+      if (!response.success || !response.data.user || !response.data.token) {
+        throw new Error(response.message || "OTP verification failed.");
+      }
+      return { user: response.data.user, token: response.data.token };
+    },
+    onSuccess: ({ user, token }) => {
+      dispatch(setAuthToken(token));
+      dispatch(setUser(user));
+      toast.success("Registration successful");
+      router.push(user.role === "admin" ? "/admin" : "/");
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Server error"),
+  });
+  const isLoading = sendOtpMutation.isPending || registerMutation.isPending;
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
@@ -66,32 +126,7 @@ export default function SignUp() {
       return;
     }
 
-    setIsLoading(true);
-    const bodyData = { email: contact };
-
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/send_opt`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyData),
-        },
-      );
-
-      const data = await res.json();
-      if (data.success) {
-        setOtpSent(true);
-        setOtpID(data?.data?.otpID); // save otpID returned from backend
-      } else {
-        toast.error(data.message || "Error sending OTP");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error");
-    } finally {
-      setIsLoading(false);
-    }
+    sendOtpMutation.mutate(contact);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -122,41 +157,7 @@ export default function SignUp() {
       return;
     }
 
-    setIsLoading(true);
-    const bodyData = { email: contact, otp, otpID, password };
-
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyData),
-        },
-      );
-
-      const data = await res.json();
-      if (res.ok) {
-        const isAdmin = data?.data?.user;
-        dispatch(setAuthToken(data?.data?.token));
-        dispatch(setUser(isAdmin));
-
-        toast.success("Registration successful");
-        if (isAdmin.role === "admin") {
-          router.push("/admin");
-        } else {
-          // redirect or reset form
-          router.push("/");
-        }
-      } else {
-        toast.error(data.message || "OTP verification failed");
-      }
-    } catch (err) {
-      console.error("error>>", err);
-      toast.error("Server error");
-    } finally {
-      setIsLoading(false);
-    }
+    registerMutation.mutate({ email: contact, otp, otpID, password });
   };
 
   return (

@@ -7,20 +7,60 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import ResetPassword from "./resetPassword";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/API/apiClient";
+import { useMutation } from "@tanstack/react-query";
+
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: {
+      userId: string;
+      name: string;
+      email: string;
+      role: "admin" | "student";
+    };
+    token: string;
+  };
+}
 
 export default function Login() {
   const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [forgetpass, setForgetpass] = useState(false);
 
   // const dispatch = useDispatch<AppDispatch>();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      const response = await apiClient.post<LoginResponse>(
+        "/user/auth/login",
+        credentials,
+      );
+      if (!response.success) {
+        throw new Error(response.message || "Login failed.");
+      }
+      return response;
+    },
+    onSuccess: (response) => {
+      const user = response.data.user;
+      dispatch(setAuthToken(response.data.token));
+      dispatch(setUser(user));
+      toast.success(`Welcome back, ${user.name || "User"}!`);
+      router.push(user.role === "admin" ? "/admin" : "/");
+    },
+    onError: (mutationError) => {
+      const message =
+        mutationError instanceof Error ? mutationError.message : "Server error";
+      setError(message);
+      toast.error(message);
+    },
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(""); // Clear previous error
 
     if (!contact) {
@@ -38,36 +78,7 @@ export default function Login() {
 
     const bodyData = { email: contact, password };
 
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bodyData),
-        },
-      );
-
-      const data = await res.json();
-      if (res.ok) {
-        const isAdmin = data?.data?.user;
-        dispatch(setAuthToken(data?.data?.token));
-        dispatch(setUser(isAdmin));
-        toast.success(`Welcome back, ${data?.data?.user.name || "User"}!`);
-        if (isAdmin.role === "admin") {
-          router.push("/admin");
-        } else {
-          router.push("/");
-        }
-      } else {
-        toast.error(data.message || "OTP verification failed");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error");
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate(bodyData);
   };
 
   return (
@@ -109,7 +120,7 @@ export default function Login() {
               type="submit"
               className="w-full rounded-xl text-base font-semibold shadow-md"
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loginMutation.isPending ? "Logging in..." : "Log In"}
             </Button>
 
             <div

@@ -12,16 +12,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  CategoryResponse,
   Examresponse,
   Exams,
   SingleTestsResponse,
   TestsResponse,
 } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { ArrowLeft } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Question {
@@ -63,45 +64,37 @@ function CreateTest() {
   const params = useParams<{ testID?: string }>();
   const testID = params?.testID;
   const isEditing = Boolean(testID);
-  const categories = useAppSelector((state) => state.category.categories);
-  useAppDispatch();
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin-categories", { status: true }],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>(
+        "/admin/category/list",
+        { status: true },
+      );
+      return response.data?.categories ?? [];
+    },
+  });
 
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [exams, setExams] = useState<Exams[]>([]);
   const [entryMode, setEntryMode] = useState<"manual" | "json">("manual");
   const [subjectsJson, setSubjectsJson] = useState('{\n  "subjects": []\n}');
 
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  const fetchExams = useCallback(async (categoryID: string) => {
-    try {
-      setLoading(true);
-
-      const res = await apiClient.get<Examresponse>(
-        `/admin/${categoryID}/exams/list`,
+  const queryClient = useQueryClient();
+  const {
+    data: exams = [],
+    isLoading: loadingExams,
+    error: examsError,
+  } = useQuery({
+    queryKey: ["admin-exams", selectedCategory],
+    enabled: Boolean(selectedCategory),
+    queryFn: async () => {
+      const response = await apiClient.get<Examresponse>(
+        `/admin/${selectedCategory}/exams/list`,
       );
-
-      const examsData: Exams[] = res?.data?.exams || [];
-
-      setExams(examsData);
-    } catch (error) {
-      console.error("Error fetching exams:", error);
-
-      toast.error("Error while fetching exams");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch Exams On Category Change
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchExams(selectedCategory);
-    } else {
-      setExams([]);
-    }
-  }, [selectedCategory, fetchExams]);
+      return response.data?.exams ?? [];
+    },
+  });
 
   const [testData, setTestData] = useState<TestFormData>({
     examID: "",
@@ -114,47 +107,88 @@ function CreateTest() {
     subjects: [],
   });
 
+  const {
+    data: loadedTest,
+    isLoading: loadingTest,
+    error: testError,
+  } = useQuery({
+    queryKey: ["admin-test", testID],
+    enabled: Boolean(testID),
+    queryFn: () => apiClient.get<AdminTestResponse>(`/admin/test/${testID}`),
+  });
+
   useEffect(() => {
-    if (!testID) return;
-
-    const loadTest = async () => {
-      try {
-        setLoading(true);
-        const response = await apiClient.get<AdminTestResponse>(
-          `/admin/test/${testID}`,
-        );
-        const test = response.test;
-        const loadedData: TestFormData = {
-          examID: test.examID,
-          title: test.title,
-          test_type: test.test_type ?? "mock",
-          type: test.type,
-          status: test.status,
-          duration: test.duration,
-          price: test.price,
-          subjects: (test.subjects ?? []) as unknown as Subject[],
-        };
-
-        setSelectedCategory(response.categoryID);
-        setTestData(loadedData);
-        setSubjectsJson(
-          JSON.stringify(
-            { categoryID: response.categoryID, ...loadedData },
-            null,
-            2,
-          ),
-        );
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Unable to load test.",
-        );
-      } finally {
-        setLoading(false);
-      }
+    if (!loadedTest) return;
+    const test = loadedTest.test;
+    const loadedData: TestFormData = {
+      examID: test.examID,
+      title: test.title,
+      test_type: test.test_type ?? "mock",
+      type: test.type,
+      status: test.status,
+      duration: test.duration,
+      price: test.price,
+      subjects: (test.subjects ?? []) as unknown as Subject[],
     };
 
-    void loadTest();
-  }, [testID]);
+    setSelectedCategory(loadedTest.categoryID);
+    setTestData(loadedData);
+    setSubjectsJson(
+      JSON.stringify(
+        { categoryID: loadedTest.categoryID, ...loadedData },
+        null,
+        2,
+      ),
+    );
+  }, [loadedTest]);
+
+  useEffect(() => {
+    const error = examsError ?? testError;
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to load test data.",
+      );
+    }
+  }, [examsError, testError]);
+
+  const saveTestMutation = useMutation({
+    mutationFn: async (payload: TestFormData) => {
+      const response = isEditing
+        ? await apiClient.patch<TestsResponse>(`/admin/test/${testID}`, payload)
+        : await apiClient.post<TestsResponse>("/admin/test/create", payload);
+      if (!response.success) {
+        throw new Error(response.message || "Unable to save test.");
+      }
+      return response;
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+      void queryClient.invalidateQueries({ queryKey: ["admin-tests"] });
+      void queryClient.invalidateQueries({ queryKey: ["tests-by-exam"] });
+      void queryClient.invalidateQueries({ queryKey: ["test-details"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-test", testID] });
+      router.push("/admin/tests");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : `Unable to ${isEditing ? "update" : "create"} test.`,
+      );
+    },
+  });
+  const loading = loadingExams || loadingTest;
+  const submitting = saveTestMutation.isPending;
+
+  if (testID && testError) {
+    return (
+      <p role="alert" className="text-center text-red-600">
+        {testError instanceof Error
+          ? testError.message
+          : "Unable to load test."}
+      </p>
+    );
+  }
 
   const updateTestField = <K extends keyof TestFormData>(
     field: K,
@@ -315,7 +349,7 @@ function CreateTest() {
   };
 
   // Submit
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     let submissionData = testData;
     if (entryMode === "json") {
       try {
@@ -386,30 +420,11 @@ function CreateTest() {
       return;
     }
 
-    try {
-      setSubmitting(true);
-      const payload = { ...submissionData, subjects };
-      const res = isEditing
-        ? await apiClient.patch<TestsResponse>(`/admin/test/${testID}`, payload)
-        : await apiClient.post<TestsResponse>(`/admin/test/create`, payload);
-
-      if (res.success) {
-        toast.success(res.message);
-        router.push("/admin/tests");
-      }
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : `Unable to ${isEditing ? "update" : "create"} test.`,
-      );
-    } finally {
-      setSubmitting(false);
-    }
+    saveTestMutation.mutate({ ...submissionData, subjects });
   };
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-7xl text-foreground">
       <div className="mb-6 flex items-center gap-4">
         <button
           type="button"
@@ -426,23 +441,6 @@ function CreateTest() {
 
       {/* Top Section */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* <div>
-            <label className="mb-2 block font-semibold">Select Category</label>
-
-            <select
-              className="w-full rounded-lg border p-3"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">Select Category</option>
-
-              {categories?.map((category: Category) => (
-                <option key={category.categoryID} value={category.categoryID}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div> */}
         <div>
           <SelectGroup>
             <SelectLabel className="font-normal ">Select Category</SelectLabel>
@@ -475,10 +473,10 @@ function CreateTest() {
               }
             }}
           >
-            <SelectTrigger className="">
+            <SelectTrigger className="bg-background text-foreground">
               <SelectValue placeholder="Select Category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background text-foreground">
               {categories.map((cat, index) => (
                 <SelectItem key={index} value={String(cat?.categoryID)}>
                   {cat.name}
@@ -497,11 +495,11 @@ function CreateTest() {
             value={testData.examID}
             onValueChange={(value) => updateTestField("examID", value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background text-foreground">
               <SelectValue placeholder="Select Exam" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="bg-background text-foreground">
               {exams.map((exam) => (
                 <SelectItem key={exam.ExamID} value={exam.ExamID}>
                   {exam.name}
@@ -549,11 +547,11 @@ function CreateTest() {
             value={testData.test_type}
             onValueChange={(value) => updateTestField("test_type", value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background text-foreground">
               <SelectValue placeholder="Select Test Type" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="bg-background text-foreground">
               <SelectItem value={"mock"}>Mock</SelectItem>{" "}
               <SelectItem value={"practice"}>Practice</SelectItem>
               <SelectItem value={"previous year"}>Previous year</SelectItem>
@@ -571,11 +569,11 @@ function CreateTest() {
             value={testData.type}
             onValueChange={(value) => updateTestField("type", value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background text-foreground">
               <SelectValue placeholder="Select Access Type" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="bg-background text-foreground">
               <SelectItem value={"free"}>Free</SelectItem>{" "}
               <SelectItem value={"paid"}>Paid</SelectItem>
             </SelectContent>
@@ -642,14 +640,14 @@ function CreateTest() {
             {testData.subjects.map((subject, subjectIndex) => (
               <div
                 key={subjectIndex}
-                className="rounded-xl border bg-gray-50 p-5"
+                className="rounded-xl border border-border bg-muted/40 p-5"
               >
                 {/* Subject Header */}
                 <div className="mb-4 flex items-center justify-between">
                   <input
                     type="text"
                     placeholder="Subject Name"
-                    className="w-full rounded-lg border p-3"
+                    className="w-full rounded-lg border border-input bg-background p-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={subject.name}
                     onChange={(e) =>
                       updateSubjectName(subjectIndex, e.target.value)
@@ -670,7 +668,7 @@ function CreateTest() {
                   {subject.questions.map((question, questionIndex) => (
                     <div
                       key={questionIndex}
-                      className="rounded-xl border bg-white p-5"
+                      className="rounded-xl border border-border bg-card p-5 text-card-foreground"
                     >
                       <h2 className="mb-4 text-lg font-bold">
                         Question {questionIndex + 1}
@@ -679,7 +677,7 @@ function CreateTest() {
                       {/* Question */}
                       <textarea
                         placeholder="Enter Question"
-                        className="mb-4 w-full rounded-lg border p-3"
+                        className="mb-4 w-full rounded-lg border border-input bg-background p-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         rows={4}
                         value={question.question}
                         onChange={(e) =>
@@ -695,11 +693,14 @@ function CreateTest() {
                       {/* Options */}
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {question.options.map((option, optionIndex) => (
-                          <div key={optionIndex} className="flex gap-2">
+                          <div
+                            key={optionIndex}
+                            className="flex gap-2 items-center"
+                          >
                             <input
                               type="text"
                               placeholder={`Option ${optionIndex + 1}`}
-                              className="min-w-0 flex-1 rounded-lg border p-3"
+                              className="min-w-0 flex-1 rounded-lg border border-input bg-background p-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                               value={option}
                               onChange={(e) =>
                                 updateOption(
@@ -713,7 +714,7 @@ function CreateTest() {
                             {question.options.length > 2 && (
                               <Button
                                 type="button"
-                                variant="outline"
+                                variant="delete"
                                 onClick={() =>
                                   removeOption(
                                     subjectIndex,
@@ -723,7 +724,7 @@ function CreateTest() {
                                 }
                                 aria-label={`Remove option ${optionIndex + 1}`}
                               >
-                                Remove
+                                <Trash2 size={15} />
                               </Button>
                             )}
                           </div>
@@ -757,11 +758,11 @@ function CreateTest() {
                             )
                           }
                         >
-                          <SelectTrigger className="w-full mb-1">
+                          <SelectTrigger className="mb-1 w-full bg-background text-foreground">
                             <SelectValue placeholder="Select Correct Answer" />
                           </SelectTrigger>
 
-                          <SelectContent>
+                          <SelectContent className="bg-background text-foreground">
                             {question.options.map((_, optionIndex) => (
                               <SelectItem
                                 key={optionIndex}
@@ -778,7 +779,7 @@ function CreateTest() {
                       <div className="mt-4">
                         <textarea
                           placeholder="Explanation / Details"
-                          className="w-full rounded-lg border p-3"
+                          className="w-full rounded-lg border border-input bg-background p-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                           rows={3}
                           value={question.details}
                           onChange={(e) =>
@@ -831,14 +832,14 @@ function CreateTest() {
           <label htmlFor="subjects-json" className="mb-2 block font-semibold">
             Test JSON
           </label>
-          <p className="mb-3 text-sm text-gray-600">
+          <p className="mb-3 text-sm text-muted-foreground">
             This object includes the selected category, exam, test details, and
             the <code>subjects</code> question array. Correct answers use a
             zero-based option index.
           </p>
           <textarea
             id="subjects-json"
-            className="min-h-[28rem] w-full rounded-lg border bg-gray-950 p-4 font-mono text-sm text-green-300"
+            className="min-h-[28rem] w-full rounded-lg border border-border bg-slate-950 p-4 font-mono text-sm text-green-300"
             value={subjectsJson}
             onChange={(event) => setSubjectsJson(event.target.value)}
             spellCheck={false}

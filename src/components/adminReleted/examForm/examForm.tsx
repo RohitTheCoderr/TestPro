@@ -1,4 +1,4 @@
-import { Exams, SingleExamResponse } from "@/Interfaces";
+import { CategoryResponse, Exams, SingleExamResponse } from "@/Interfaces";
 import React, { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
@@ -8,7 +8,7 @@ import InputField from "@/components/shared/inputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -25,8 +25,18 @@ type examFormProps = {
 
 function ExamForm({ exam, isEdit }: examFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const categories = useAppSelector((state) => state.categories) || [];
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin-categories", { status: true }],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>(
+        "/admin/category/list",
+        { status: true },
+      );
+      return response.data?.categories ?? [];
+    },
+  });
 
   const [formdata, setFormdata] = useState({
     name: exam?.name ?? "",
@@ -73,41 +83,36 @@ function ExamForm({ exam, isEdit }: examFormProps) {
     });
   };
 
-  const handleCreateAPI = async (payload: Exams) => {
-    try {
-      const res = await apiClient.post<SingleExamResponse>(
-        `admin/exam/create`,
-        payload,
-      );
-
-      if (res.success) {
-        toast.success(res.message);
-        if (res) {
-          router.push("/admin/exams");
-        }
+  const saveExamMutation = useMutation({
+    mutationFn: async (payload: Exams) => {
+      const response = payload.ExamID
+        ? await apiClient.patch<SingleExamResponse>(
+            "admin/exam/update",
+            payload,
+          )
+        : await apiClient.post<SingleExamResponse>(
+            "admin/exam/create",
+            payload,
+          );
+      if (!response.success) {
+        throw new Error(response.message || "Unable to save exam.");
       }
-    } catch (error) {
-      console.log("errorr", error);
-    }
-  };
-
-  const handleEditAPI = async (payload: Exams) => {
-    try {
-      const res = await apiClient.patch<SingleExamResponse>(
-        `admin/exam/update`,
-        payload,
-      );
-
-      if (res.success) {
-        toast.success(res.message);
-        if (res) {
-          router.push("/admin/exams");
-        }
-      }
-    } catch (error) {
-      console.log("errorr", error);
-    }
-  };
+      return response;
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+      void queryClient.invalidateQueries({ queryKey: ["admin-exams"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-exam"] });
+      void queryClient.invalidateQueries({
+        queryKey: ["admin-test-exam-options"],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["exams-by-category"] });
+      router.push("/admin/exams");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Unable to save exam.");
+    },
+  });
 
   const hanglesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -179,11 +184,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
       },
     };
 
-    if (payload.ExamID) {
-      handleEditAPI(payload);
-    } else {
-      handleCreateAPI(payload);
-    }
+    saveExamMutation.mutate(payload);
   };
 
   return (
@@ -243,7 +244,7 @@ function ExamForm({ exam, isEdit }: examFormProps) {
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.categoriesList.map((cat, index) => (
+                  {categories.map((cat, index) => (
                     <SelectItem key={index} value={String(cat?.categoryID)}>
                       {cat.name}
                     </SelectItem>

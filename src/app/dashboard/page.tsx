@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -10,8 +11,10 @@ import {
 } from "@/components/ui/table";
 import { apiClient } from "@/lib/API/apiClient";
 import { useAppSelector } from "@/lib/redux/hooks";
-import { EyeIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import TruncateTextTooltip from "@/components/shared/truncketTooltip";
+import { ChartBar, EyeIcon, Trash2 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -26,6 +29,7 @@ import {
   Tooltip,
 } from "recharts";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 // 🧩 Define updated TypeScript interfaces
 interface SubjectWiseResult {
@@ -40,8 +44,10 @@ interface SubjectWiseResult {
 }
 
 interface TestResult {
+  attemptID: string;
   testID: string;
   testTitle: string;
+  examName: string;
   totalScore: number;
   submittedAt: string;
   subjectWiseResult: SubjectWiseResult[];
@@ -54,38 +60,105 @@ interface ApiResponse {
 }
 
 export default function DashboardPage() {
-  const [testResults, setTestResults] = useState<TestResult[]>([]);
-  // const [selectedTest, setSelectedTest] = useState<TestResult | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [viewType, setViewType] = useState<"bar" | "circular">("bar");
-  const [load, setLoad] = useState<boolean>(false);
-  const selectedTest = testResults[selectedIndex];
+  const [deletingAttemptId, setDeletingAttemptId] = useState<string | null>(
+    null,
+  );
+  const [pendingDelete, setPendingDelete] = useState<{
+    test: TestResult;
+    index: number;
+  } | null>(null);
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
 
   const user = useAppSelector((state) => state.auth.user) || null;
-  // ✅ Fetch test data from backend
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoad(true);
-        const res = await apiClient.get<ApiResponse>("/user/tests/testsresult");
-        if (res?.success && Array.isArray(res.data)) {
-          setTestResults(res.data);
-          setLoad(false);
-          if (res.data.length > 0) setSelectedIndex(0); // default to first test
-        }
-      } catch (error: unknown) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred.";
-        toast.error(message);
-      } finally {
-        setLoad(false);
+  const queryClient = useQueryClient();
+  const deleteResultMutation = useMutation({
+    mutationFn: async (attemptID: string) => {
+      const response = await apiClient.delete<{
+        success: boolean;
+        message: string;
+      }>(`/user/tests/testsresult/${attemptID}`);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to delete test result.");
       }
-    };
+      return response;
+    },
+  });
+  const {
+    data: testResults = [],
+    isLoading: load,
+    error: resultsError,
+  } = useQuery({
+    queryKey: ["test-results", user?.userId],
+    enabled: Boolean(user?.userId),
+    queryFn: async () => {
+      const response =
+        await apiClient.get<ApiResponse>("/user/tests/testsresult");
+      if (!response.success || !Array.isArray(response.data)) {
+        throw new Error(response.message || "Failed to load test results.");
+      }
+      return response.data;
+    },
+  });
+  const selectedTest = testResults[selectedIndex];
 
-    fetchData();
-  }, []);
+  useEffect(() => {
+    const dialog = deleteDialogRef.current;
+    if (pendingDelete && dialog && !dialog.open) {
+      dialog.showModal();
+    }
+  }, [pendingDelete]);
+
+  const handleDeleteResult = async (test: TestResult, index: number) => {
+    setDeletingAttemptId(test.attemptID);
+    try {
+      const response = await deleteResultMutation.mutateAsync(test.attemptID);
+
+      const remainingResults =
+        testResults.filter((result) => result.attemptID !== test.attemptID);
+      queryClient.setQueryData<TestResult[]>(
+        ["test-results", user?.userId],
+        (currentResults) =>
+          currentResults?.filter(
+            (result) => result.attemptID !== test.attemptID,
+          ),
+      );
+      queryClient.removeQueries({
+        queryKey: ["test-result-details", user?.userId, test.attemptID],
+      });
+      setSelectedIndex((currentIndex) => {
+        if (index < currentIndex) return currentIndex - 1;
+        if (index === currentIndex) {
+          return Math.max(
+            0,
+            Math.min(currentIndex, remainingResults.length - 1),
+          );
+        }
+        return currentIndex;
+      });
+      setPendingDelete(null);
+      toast.success(response.message);
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete test result.",
+      );
+    } finally {
+      setDeletingAttemptId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (resultsError) {
+      toast.error(
+        resultsError instanceof Error
+          ? resultsError.message
+          : "An unexpected error occurred.",
+      );
+    }
+  }, [resultsError]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -93,7 +166,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8 rounded-full bg-gradient-to-r text-center from-primary to-accent p-2 sm:p-8 text-card shadow-lg">
           <h1 className="mb-2 text-xl sm:text-4xl font-bold lg:text-5xl">
-            Welcome back {user?.name}
+            Welcome to your results dashboard, {user?.name || "User"}!
           </h1>
           <p className="text-xs sm:text-base leading-relaxed text-gray-400">
             Your personalized dashboard to track progress and stay ahead.
@@ -126,92 +199,166 @@ export default function DashboardPage() {
             // Table Data
             <>
               <h2 className="mb-4 text-2xl font-semibold">Your Test Results</h2>
-
-              <div className="overflow-x-auto rounded-xl border">
+              <div className="overflow-x-auto rounded-xl border bg-card">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead rowSpan={3}>Test Title</TableHead>
-
-                      <TableHead colSpan={8} className="text-center">
-                        Subjects Wise
-                      </TableHead>
-
-                      <TableHead rowSpan={3}>Total Score</TableHead>
-                      <TableHead rowSpan={3}>Submitted At</TableHead>
-                      <TableHead rowSpan={3}>Actions</TableHead>
-                    </TableRow>
-
-                    <TableRow>
-                      {testResults[0]?.subjectWiseResult?.map(
-                        (subHead, ind) => (
-                          <TableHead
-                            key={ind}
-                            colSpan={2}
-                            className="text-center"
-                          >
-                            {subHead?.subjectName}
-                          </TableHead>
-                        ),
-                      )}
-                    </TableRow>
-
-                    <TableRow>
-                      {testResults[0]?.subjectWiseResult?.map((_, index) => (
-                        <React.Fragment key={index}>
-                          <TableHead className="text-center">Attempt</TableHead>
-
-                          <TableHead className="text-center">Correct</TableHead>
-                        </React.Fragment>
-                      ))}
+                      <TableHead>SR</TableHead>
+                      <TableHead>Test</TableHead>
+                      <TableHead>Subjects</TableHead>
+                      <TableHead className="text-center">Attempted</TableHead>
+                      <TableHead className="text-center">Correct</TableHead>
+                      <TableHead className="text-center">Score</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead className="text-center">Action</TableHead>
                     </TableRow>
                   </TableHeader>
 
                   <TableBody>
-                    {testResults.map((test, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">
-                          {test.testTitle}
-                        </TableCell>
+                    {testResults.map((test, index) => {
+                      const totalQuestions = test.subjectWiseResult.reduce(
+                        (total, subject) => total + subject.totalQuestions,
+                        0,
+                      );
 
-                        {test?.subjectWiseResult?.map((sub, index) => {
-                          return (
-                            <React.Fragment key={index}>
-                              <TableCell className="text-center">
-                                <span className="font-semibold">
-                                  {sub ? sub.attempted : "-"}
-                                </span>
-                                /{sub ? sub.totalQuestions : "-"}
-                              </TableCell>
+                      const totalAttempted = test.subjectWiseResult.reduce(
+                        (total, subject) => total + subject.attempted,
+                        0,
+                      );
 
-                              <TableCell className="text-center">
-                                <span className="font-semibold text-green-600">
-                                  {sub ? sub.correct : "-"}
-                                </span>
-                                /{sub ? sub.attempted : "-"}
-                              </TableCell>
-                            </React.Fragment>
-                          );
-                        })}
+                      const totalCorrect = test.subjectWiseResult.reduce(
+                        (total, subject) => total + subject.correct,
+                        0,
+                      );
 
-                        <TableCell className="text-center font-semibold">
-                          {test.totalScore}
-                        </TableCell>
+                      const totalWrong = test.subjectWiseResult.reduce(
+                        (total, subject) => total + subject.wrong,
+                        0,
+                      );
 
-                        <TableCell className="text-sm">
-                          {new Date(test.submittedAt).toLocaleString()}
-                        </TableCell>
+                      const percentage =
+                        totalQuestions > 0
+                          ? Math.round((totalCorrect / totalQuestions) * 100)
+                          : 0;
 
-                        <TableCell className="text-center">
-                          <EyeIcon
-                            className={`mx-auto cursor-pointer hover:text-primary ${
-                              selectedIndex === index ? "text-primary" : ""
-                            }`}
-                            onClick={() => setSelectedIndex(index)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                      return (
+                        <TableRow key={test.attemptID}>
+                          {/* SR */}
+                          <TableCell>
+                            <span className="font-semibold">{index + 1}</span>
+                          </TableCell>
+
+                          {/* Test */}
+                          <TableCell>
+                            <div>
+                              <p className="font-semibold">{test.testTitle}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {test.examName}
+                              </p>
+                            </div>
+                          </TableCell>
+
+                          {/* Subjects */}
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1.5 max-w-[400px]">
+                              <TruncateTextTooltip
+                                text={test.subjectWiseResult
+                                  .map((subject) => subject.subjectName)
+                                  .join(", ")}
+                                maxWidth="max-w-[440px]"
+                                className=" bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                              />
+                            </div>
+                          </TableCell>
+
+                          {/* Attempted */}
+                          <TableCell className="text-center">
+                            <span className="font-semibold">
+                              {totalAttempted}
+                            </span>
+                            <span className="text-muted-foreground">
+                              /{totalQuestions}
+                            </span>
+                          </TableCell>
+
+                          {/* Correct */}
+                          <TableCell className="text-center">
+                            <span className="font-semibold text-green-600">
+                              {totalCorrect}
+                            </span>
+                            <span className="text-muted-foreground">
+                              /{totalAttempted}
+                            </span>
+
+                            {totalWrong > 0 && (
+                              <p className="text-xs text-red-500">
+                                {totalWrong} wrong
+                              </p>
+                            )}
+                          </TableCell>
+
+                          {/* Score */}
+                          <TableCell className="text-center">
+                            <div className="flex flex-col items-center">
+                              <span className="font-bold">
+                                {test.totalScore}
+                              </span>
+
+                              <span
+                                className={`text-xs font-semibold ${
+                                  percentage >= 75
+                                    ? "text-green-600"
+                                    : percentage >= 50
+                                      ? "text-yellow-600"
+                                      : "text-red-600"
+                                }`}
+                              >
+                                {percentage}%
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          {/* Submitted */}
+                          <TableCell className="text-sm text-center whitespace-nowrap">
+                            {new Date(test.submittedAt).toLocaleDateString()}
+                          </TableCell>
+
+                          {/* Action */}
+                          <TableCell>
+                            <div className="flex items-center justify-center gap-1">
+                              <Link
+                                href={`/dashboard/results/${test.attemptID}`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded bg-green-50 p-0 text-green-600 transition-colors hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                                aria-label={`View detailed result for ${test.testTitle}`}
+                                title="View detailed result"
+                              >
+                                <EyeIcon size={15} />
+                              </Link>
+                              <Button
+                                variant="edit"
+                                onClick={() => setSelectedIndex(index)}
+                                aria-label={`View chart for ${test.testTitle}`}
+                                title="View result on chart"
+                                className={`${selectedIndex === index ? "bg-primary" : ""}`}
+                              >
+                                <ChartBar size={15} />
+                              </Button>
+                              <Button
+                                variant="delete"
+                                onClick={() =>
+                                  setPendingDelete({ test, index })
+                                }
+                                aria-label={`Delete result for ${test.testTitle}`}
+                                title="Delete result"
+                                disabled={deletingAttemptId !== null}
+                              >
+                                <Trash2 size={15} />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -319,6 +466,55 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+      {pendingDelete && (
+        <dialog
+          ref={deleteDialogRef}
+          aria-labelledby="delete-result-title"
+          aria-describedby="delete-result-description"
+          onCancel={(event) => {
+            event.preventDefault();
+            if (deletingAttemptId !== pendingDelete.test.attemptID) {
+              setPendingDelete(null);
+            }
+          }}
+          className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-border bg-card p-0 text-foreground shadow-xl backdrop:bg-black/50"
+        >
+          <div className="p-6">
+            <h2 id="delete-result-title" className="text-lg font-semibold">
+              Delete test result?
+            </h2>
+            <p
+              id="delete-result-description"
+              className="mt-2 text-sm text-muted-foreground"
+            >
+              Delete the result for &quot;{pendingDelete.test.testTitle}
+              &quot;? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deletingAttemptId === pendingDelete.test.attemptID}
+                onClick={() => setPendingDelete(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="delete"
+                disabled={deletingAttemptId === pendingDelete.test.attemptID}
+                onClick={() =>
+                  handleDeleteResult(pendingDelete.test, pendingDelete.index)
+                }
+              >
+                {deletingAttemptId === pendingDelete.test.attemptID
+                  ? "Deleting..."
+                  : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </dialog>
+      )}
     </div>
   );
 }

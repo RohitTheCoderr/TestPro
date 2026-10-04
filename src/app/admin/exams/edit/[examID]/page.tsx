@@ -1,36 +1,43 @@
 "use client";
 import ExamForm from "@/components/adminReleted/examForm/examForm";
 import { Loader } from "@/components/shared/loader";
-import { Exams, SingleExamResponse } from "@/Interfaces";
+import { SingleExamResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function EditExamPage() {
   const param = useParams<{ examID: string }>();
   const ExamID = param.examID;
-  const [examData, setExamData] = useState<Exams>();
-
-  const fetchExamdetails = async (examID: string) => {
-    try {
-      const res = await apiClient.get<SingleExamResponse>(
-        `/admin/exam/${examID}`,
+  const { data: examData, error, isLoading } = useQuery({
+    queryKey: ["admin-exam", ExamID],
+    enabled: Boolean(ExamID),
+    queryFn: async () => {
+      const response = await apiClient.get<SingleExamResponse>(
+        `/admin/exam/${ExamID}`,
       );
-      setExamData(res.data.exam);
-    } catch (error) {
-      console.log("errrrr", error);
-    } finally {
-      console.log("finally");
-    }
-  };
+      return response.data.exam;
+    },
+  });
 
   useEffect(() => {
-    if (ExamID) {
-      fetchExamdetails(ExamID);
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to load exam.",
+      );
     }
-  }, [ExamID]);
+  }, [error]);
 
-  if (!examData) {
+  if (isLoading || !examData) {
+    if (error) {
+      return (
+        <p role="alert" className="text-center text-red-600">
+          {error instanceof Error ? error.message : "Unable to load exam."}
+        </p>
+      );
+    }
     return <Loader />;
   }
 

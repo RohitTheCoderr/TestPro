@@ -1,12 +1,11 @@
 "use client";
 
 import { apiClient } from "@/lib/API/apiClient";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { use, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/lib/redux/store";
-import { setCurrentTest } from "@/lib/redux/slices/testSlice";
-import { Exams, TestsResponse } from "@/Interfaces";
+import React from "react";
+import { useSearchParams } from "next/navigation";
+import { TestsResponse } from "@/Interfaces";
 import { Test, TestCardProps } from "@/Interfaces/TestInterfaces";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -18,9 +17,9 @@ const Testcard: React.FC<TestCardProps> = ({
   duration,
   price,
   testID,
-  // examID,
+  examID,
+  categoryID,
   categoryName,
-  onSelect,
 }) => (
   <div className="rounded-xl border border-border bg-card shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
     <div>
@@ -54,8 +53,10 @@ const Testcard: React.FC<TestCardProps> = ({
     {/* Button */}
     <Button className="mt-4 ">
       <Link
-        href={`/tests/${categoryName}/${examName}/${title}`}
-        onClick={() => onSelect?.(testID)}
+        href={{
+          pathname: `/tests/${categoryName}/${examName}/${title}`,
+          query: { categoryID, examID, testID },
+        }}
       >
         View Details
       </Link>
@@ -70,64 +71,62 @@ export default function ExamTypeTests({
 }) {
   const { category, examType } = params;
 
-  const [examList, setExamList] = useState<TestCardProps[]>([]);
+  const decodedCategory = decodeURIComponent(category);
+  const decodedExamType = decodeURIComponent(examType);
+  const searchParams = useSearchParams();
+  const examID = searchParams.get("examID");
+  const categoryID = searchParams.get("categoryID");
 
-  const currentExam = useSelector(
-    (state: RootState) => state.exam.currentExam,
-  ) as Exams | null;
-
-  const dispatch = useDispatch();
-  const handleTestSelect = (testID: string) => {
-    dispatch(setCurrentTest(testID));
-  };
-
-  useEffect(() => {
-    const fetchAllExams = async () => {
-      try {
-        const res = await apiClient.get<TestsResponse>(
-          `/user/tests/${currentExam?.ExamID}`,
-        );
-        const exams: TestCardProps[] = res.tests.map((exam: Test) => ({
-          title: exam.title,
-          type: exam.type,
-          duration: Number(exam.duration),
-          price: exam.price !== undefined ? Number(exam.price) : undefined,
-          testID: exam.testID,
-          examID: exam.examID,
-          categoryName: category,
-          examName: currentExam?.name,
-        }));
-        setExamList(exams);
-      } catch (error) {
-        console.error("Error fetching exams:", error);
-      }
-    };
-
-    fetchAllExams();
-  }, [currentExam?.ExamID, currentExam?.name, category, examType]);
+  const { data: examList = [], isLoading, error } = useQuery({
+    queryKey: ["tests-by-exam", examID],
+    enabled: Boolean(examID),
+    queryFn: async () =>
+      (await apiClient.get<TestsResponse>(
+        `/user/tests/${examID}`,
+      )).tests.map((test) => ({
+        title: test.title,
+        type: test.type,
+        duration: Number(test.duration),
+        price: Number(test.price),
+        testID: test.testID,
+        examID: test.examID,
+        categoryID: categoryID ?? undefined,
+        categoryName: category,
+        examName: decodedExamType,
+      })),
+  });
 
   return (
     <div className="px-8 md:px-16 py-12 text-foreground">
-      <div className="flex mb-6">
-        <div
-          className="flex items-center text-gray-600 hover:text-primary w-20 rounded-md py-1 cursor-pointer"
-          onClick={() => window.history.back()}
-        >
-          <ArrowLeft size={14} /> Back
-        </div>
-        {/* Header */}
+      <div className="flex items-start gap-4 mb-6">
+        <Button variant="icon" onClick={() => window.history.back()}>
+          <ArrowLeft size={16} />
+        </Button>
 
-        <h1 className="text-2xl md:text-3xl font-bold capitalize">
-          <span className="uppercase text-primary">{category} </span>
-          {examType} Tests
-        </h1>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold capitalize leading-tight">
+            {decodedExamType}
+          </h1>
+
+          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-primary">
+            {decodedCategory}
+          </p>
+        </div>
       </div>
 
       {/* Grid of Tests */}
-      {examList.length > 0 ? (
+      {isLoading ? (
+        <p className="py-12 text-center text-muted-foreground">
+          Loading tests...
+        </p>
+      ) : error ? (
+        <p className="py-12 text-center text-red-600">
+          {error instanceof Error ? error.message : "Unable to load tests."}
+        </p>
+      ) : examList.length > 0 ? (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4">
           {examList.map((test) => (
-            <Testcard key={test.testID} {...test} onSelect={handleTestSelect} />
+            <Testcard key={test.testID} {...test} />
           ))}
         </div>
       ) : (

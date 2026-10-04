@@ -1,66 +1,74 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiClient } from "@/lib/API/apiClient";
-import { Category, Examresponse, Exams } from "@/Interfaces";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { Category, CategoryResponse, Examresponse, Exams } from "@/Interfaces";
 import Link from "next/link";
 import { toast } from "sonner";
 import InputField from "@/components/shared/inputField";
 import TextAreaField from "@/components/shared/textareaField";
-import { setExamsList } from "@/lib/redux/slices/forAdminSlice/examsSlice";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 function ExamsPage() {
-  const categories = useAppSelector((state) => state.category.categories);
-  const exams = useAppSelector((state) => state.exams.examsList);
-  const dispatch = useAppDispatch();
-  const [activeCategory, setActiveCategory] = useState<string>();
-  // const [examsByCategory, setExamsByCategory] = useState<Exams[]>([]);
-  const [activeExam, setActiveExam] = useState<Exams | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const fetchExams = useCallback(
-    async (categoryID: string) => {
-      try {
-        setLoading(true);
-        const res = await apiClient.get<Examresponse>(
-          `/admin/${categoryID}/exams/list`,
-        );
-
-        const exams: Exams[] = res?.data?.exams;
-
-        // setExamsByCategory(exams);
-        dispatch(setExamsList(exams));
-
-        if (exams.length > 0) {
-          setActiveExam(exams[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching exams:", error);
-        toast.error("Error while fetching exams");
-      } finally {
-        setLoading(false);
-      }
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin-categories", { status: true }],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>(
+        "/admin/category/list",
+        { status: true },
+      );
+      return response.data?.categories ?? [];
     },
-    [dispatch],
-  );
+  });
+  const [activeCategory, setActiveCategory] = useState<string>();
+  const [activeExam, setActiveExam] = useState<Exams | null>(null);
+  const {
+    data: exams = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ["admin-exams", activeCategory],
+    enabled: Boolean(activeCategory),
+    queryFn: async () => {
+      const response = await apiClient.get<Examresponse>(
+        `/admin/${activeCategory}/exams/list`,
+      );
+      return response.data?.exams ?? [];
+    },
+  });
 
   useEffect(() => {
     if (categories.length > 0) {
       const firstCategoryId = categories[0].categoryID;
       if (!firstCategoryId) return; // type guard
       setActiveCategory(firstCategoryId);
-      fetchExams(firstCategoryId);
     }
-  }, [categories, fetchExams]);
+  }, [categories]);
+
+  useEffect(() => {
+    if (!loading && activeCategory) {
+      setActiveExam((current) =>
+        exams.some((exam) => exam.ExamID === current?.ExamID)
+          ? current
+          : (exams[0] ?? null),
+      );
+    }
+  }, [activeCategory, exams, loading]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to load exams.",
+      );
+    }
+  }, [error]);
 
   const handleCategoryClick = (categoryID: string) => {
     setActiveCategory(categoryID);
 
     if (!activeExam || activeExam.categoryID !== categoryID) {
       setActiveExam(null);
-      fetchExams(categoryID);
     }
   };
   return (
@@ -120,9 +128,9 @@ function ExamsPage() {
                   <p className="text-xs text-gray-500">{exam.slug}</p>
                 </div>
                 <div
-                  className={` rounded-full px-3 py-[.5px] text-xs ${exam.status ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+                  className={` rounded-full px-3 py-[.5px] text-xs ${exam.status !== false ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
                 >
-                  {exam.status ? "Active" : "InActive"}
+                  {exam.status !== false ? "Active" : "InActive"}
                 </div>
               </div>
             ))}

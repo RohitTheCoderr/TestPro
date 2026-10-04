@@ -2,8 +2,9 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button"; // adjust path
 import Link from "next/link";
-import { Category } from "@/Interfaces";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { Category, CategoryResponse } from "@/Interfaces";
+import { apiClient } from "@/lib/API/apiClient";
+import { useQuery } from "@tanstack/react-query";
 
 const CategoryCard: React.FC<Category> = ({
   name,
@@ -61,7 +62,13 @@ export default function TestsPage() {
     },
   ];
 
-  const categoriesss = useAppSelector((state) => state.category.categories);
+  const { data: categoriesss = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>("/category");
+      return response.data?.categories ?? [];
+    },
+  });
 
   return (
     <main className="py-12 px-8 md:px-16  ">

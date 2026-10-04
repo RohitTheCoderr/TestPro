@@ -1,73 +1,38 @@
-"use-client";
-import { Category, Examresponse, Exams } from "@/Interfaces";
+"use client";
+import { Category, Examresponse, Exams, CategoryResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
-import { useAppSelector } from "@/lib/redux/hooks";
-import { setCurrentExam } from "@/lib/redux/slices/examdetailsSlice";
-import axios from "axios";
 import Link from "next/link";
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  FaArrowRight,
-  FaArrowsAlt,
-  FaBookOpen,
-  FaRegFolderOpen,
-} from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { FaArrowRight, FaBookOpen, FaRegFolderOpen } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "../button";
 
 function CategoriesSection() {
-  const [examdata, setExamdata] = useState<Exams[]>([]);
-  const dispatch = useDispatch();
+  const { data: categoriesss = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await apiClient.get<CategoryResponse>("/category");
+      return response.data?.categories ?? [];
+    },
+  });
 
-  const categoriesss = useAppSelector(
-    (state) => state.category.categories,
-  ) as Category[];
+  const [categoryname, setCategoryname] = useState("all");
+  const [cateID, setCateID] = useState("all");
 
-  const firstCategory = categoriesss[0];
-
-  const [categoryname, setCategoryname] = useState<string | undefined>(
-    firstCategory?.slug,
-  );
-  const [cateID, setCateID] = useState<string | undefined>(
-    firstCategory?.categoryID,
-  );
-
-  const fetchExamData = useCallback(async () => {
-    try {
-      const result = await apiClient.get<Examresponse>(
+  const {
+    data: examdata = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["exams-by-category", cateID],
+    enabled: Boolean(cateID),
+    queryFn: async () => {
+      const response = await apiClient.get<Examresponse>(
         `/category/${cateID}/exams`,
       );
-
-      setExamdata(result?.data?.exams || []);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "Error fetching Exams:",
-          error.response?.data || error.message,
-        );
-      } else if (error instanceof Error) {
-        console.error("Error fetching Exams:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-    }
-  }, [cateID]); // ✅ stable & correct
-
-  useEffect(() => {
-    if (cateID) {
-      fetchExamData();
-    }
-  }, [cateID, fetchExamData]);
-
-  useEffect(() => {
-    if (!cateID && categoriesss.length > 0) {
-      setCategoryname(categoriesss[0].slug);
-      setCateID(categoriesss[0].categoryID);
-    }
-  }, [categoriesss, cateID]);
-
-  const handleExamSelect = (exam: Exams) => {
-    dispatch(setCurrentExam(exam));
-  };
+      return response.data?.exams ?? [];
+    },
+  });
 
   return (
     <section id="category" className=" bg-background">
@@ -84,58 +49,80 @@ function CategoriesSection() {
       </div>
 
       {/* Categories */}
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-4">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar py-2 px-4">
+        <Button
+          variant={cateID === "all" ? "default" : "outline"}
+          key={"all"}
+          onClick={() => {
+            setCategoryname("all");
+            setCateID("all");
+          }}
+          className={`relative px-6 py-3 rounded-2xl border transition-all duration-300 whitespace-nowrap font-medium text-sm md:text-base
+
+              ${cateID === "all" ? "" : " hover:text-primary hover:shadow-md"}`}
+        >
+          <span>All</span>
+
+          {cateID === "all" && (
+            <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/30 animate-pulse" />
+          )}
+        </Button>
         {categoriesss.map((cat, index) => {
           const active = categoryname === cat.slug;
 
           return (
-            <button
+            <Button
+              variant={active ? "default" : "outline"}
               key={cat.categoryID || index}
               onClick={() => {
-                setCategoryname(cat.slug);
+                setCategoryname(cat.slug ?? cat.name);
                 setCateID(cat.categoryID);
               }}
               className={`relative px-6 py-3 rounded-2xl border transition-all duration-300 whitespace-nowrap font-medium text-sm md:text-base
-          
-          ${
-            active
-              ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105"
-              : "bg-card border-border text-foreground hover:border-primary hover:text-primary hover:shadow-md"
-          }`}
+
+              ${active ? "" : " hover:text-primary hover:shadow-md"}`}
             >
               <span>{cat.name}</span>
 
               {active && (
                 <div className="absolute inset-0 rounded-2xl ring-2 ring-primary/30 animate-pulse" />
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
 
       {/* Exams Grid */}
       <div className="mt-12">
-        {examdata.length !== 0 ? (
+        {isLoading ? (
+          <p className="py-12 text-center text-muted-foreground">
+            Loading exams...
+          </p>
+        ) : error ? (
+          <p className="py-12 text-center text-red-600">
+            {error instanceof Error ? error.message : "Unable to load exams."}
+          </p>
+        ) : examdata.length !== 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {examdata.map((exam, index) => (
               <Link
-                key={index}
-                href={`/tests/${categoryname}/${exam.slug}`}
-                onClick={() =>
-                  handleExamSelect({
-                    ...exam,
-                    categoryName: categoryname,
-                  })
-                }
-                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-primary"
+                key={exam.ExamID || index}
+                href={{
+                  pathname: `/tests/${categoryname}/${exam.slug}`,
+                  query: {
+                    categoryID: exam.categoryID,
+                    examID: exam.ExamID,
+                  },
+                }}
+                className="group relative overflow-hidden rounded-3xl border border-border bg-card  transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary"
               >
                 {/* Glow Effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
 
                 {/* Content */}
-                <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="relative p-4 z-10 flex flex-col h-full justify-between">
                   <div>
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition">
+                    <div className="w-10 h-10 bg-primary/10 text-primary flex items-center justify-center mb-3 text-2xl group-hover:scale-110 transition">
                       <FaBookOpen />
                     </div>
 
@@ -144,7 +131,7 @@ function CategoriesSection() {
                     </h3>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between">
+                  <div className="mt-4 flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Explore Exam
                     </span>
