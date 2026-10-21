@@ -1,11 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import CategoriesSection from "@/components/ui/cards/CategoriesSection";
-import { Category } from "@/Interfaces";
-import { apiClient } from "@/lib/API/apiClient";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useEffect } from "react";
 import {
   MdAnalytics,
   MdTimer,
@@ -15,30 +11,10 @@ import {
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/redux/hooks";
-import { toast } from "sonner";
-// Define the API response structure
-interface CategoryResponse {
-  data: {
-    categories: Category[];
-  };
-}
 
 export default function HomePage() {
   const router = useRouter();
   const { token } = useAppSelector((state) => state.auth);
-  const { data: categories, error } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await apiClient.get<CategoryResponse>("/category");
-      return response.data?.categories ?? [];
-    },
-  });
-
-  useEffect(() => {
-    if (error) {
-      toast(error instanceof Error ? error.message : "Unable to load categories.");
-    }
-  }, [error]);
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       {/* Hero Section */}
@@ -94,13 +70,7 @@ export default function HomePage() {
             needs.
           </p>
         </div>
-        {error ? (
-          <div className="text-red-600 text-center my-6 p-3 rounded">
-            ⚠️ {error instanceof Error ? error.message : "Unable to load categories."}
-          </div>
-        ) : (
-          <CategoriesSection />
-        )}
+        <CategoriesSection />
       </section>
 
       <section className="py-16 px-8 md:px-16 ">
@@ -169,16 +139,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-gradient-to-r from-primary to-primary/80 dark:from-accent/90 dark:to-accent/80 text-white rounded-t-3xl py-20 px-6 md:px-16 my-12  text-center shadow-lg relative overflow-hidden">
-        {/* Optional decorative shapes */}
-        <div className="absolute -top-16 -left-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-16 -right-16 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-
-        <div className="relative max-w-3xl mx-auto">
-          <h2 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 drop-shadow-lg">
+      <section className="mt-12 rounded-t-3xl bg-primary px-6 py-20 text-center text-white md:px-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="mb-6 text-5xl font-extrabold tracking-tight drop-shadow-lg md:text-6xl">
             Start Your Exam Preparation Today
           </h2>
-          <p className="text-lg md:text-xl text-white/90 mb-10 drop-shadow">
+          <p className="mb-10 text-lg opacity-90 drop-shadow md:text-xl">
             Join <span className="font-semibold">TestPro</span> and take the
             first step towards achieving your career goals.
           </p>

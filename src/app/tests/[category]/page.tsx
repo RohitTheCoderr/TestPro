@@ -6,8 +6,9 @@ import Link from "next/link";
 import { ExamDetails, Examresponse, Exams } from "@/Interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BadgeCheck, BookOpenCheck, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 // Props for TestCard
 type ExamCardProps = {
@@ -44,7 +45,7 @@ const TestCard: React.FC<ExamCardProps> = ({
         }}
         className="w-full text-center px-4 py-2 text-white rounded-full hover:bg-primary/80 hover:text-accent-foreground text-sm transition"
       >
-        Explore {name} Tests
+        Explore Tests
       </Link>
     </Button>
   </div>
@@ -123,9 +124,26 @@ export default function TestsPage({
 
       {/* Exam Cards */}
       {isLoading ? (
-        <p className="mt-12 text-center text-muted-foreground">
-          Loading exams...
-        </p>
+        <div
+          className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+          role="status"
+          aria-label="Loading exams"
+        >
+          {Array.from({ length: 4 }, (_, index) => (
+            <div
+              key={index}
+              aria-hidden="true"
+              className="flex h-40 animate-pulse flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm"
+            >
+              <div>
+                <div className="mb-3 h-6 w-3/4 rounded bg-muted" />
+                <div className="h-4 w-full rounded bg-muted" />
+                <div className="mt-2 h-4 w-2/3 rounded bg-muted" />
+              </div>
+              <div className="h-9 w-full rounded-full bg-muted" />
+            </div>
+          ))}
+        </div>
       ) : error ? (
         <p className="mt-12 text-center text-red-600">
           {error instanceof Error ? error.message : "Unable to load exams."}
@@ -176,32 +194,64 @@ export default function TestsPage({
         </div>
       )}
 
-      {/* Optional CTA Section */}
-      <div className="mt-20 text-center max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl max-sm:p-5 p-8 shadow-lg">
-        <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
-          Ready to challenge yourself?
-        </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Start with a free test or explore more paid mock tests for in-depth
-          practice.
-        </p>
-        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-          <Button
-            className="px-6 py-3 font-semibold shadow"
-            variant="secondary"
-            onClick={() => router.push("/tests")}
-          >
-            Start Free Test
-          </Button>
-          <Button
-            className="px-6 py-3 font-semibold shadow"
-            variant="outline"
-            onClick={() => router.push("/tests")}
-          >
-            Explore More Tests
-          </Button>
-        </div>
-      </div>
+      {examTypes.length > 0 && (
+        <section className="relative mx-auto mt-20 max-w-6xl overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] via-background to-secondary/40 px-6 pt-10 sm:px-10 lg:px-14">
+          <div className="grid items-center gap-8 md:grid-cols-2 lg:gap-12">
+            <div className="relative z-10">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background/80 px-3 py-1.5 text-sm font-medium text-primary">
+                <BadgeCheck size={16} aria-hidden="true" />
+                Your preparation starts here
+              </span>
+              <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                Make your next{" "}
+                <span className="text-primary">{decodedCategory}</span> exam
+                count.
+              </h2>
+              <p className="mt-4 max-w-lg leading-7 text-muted-foreground">
+                Choose a test, challenge yourself, and turn every attempt into
+                progress toward your goals.
+              </p>
+
+              <ul className="mt-6 space-y-3 text-sm text-foreground sm:text-base">
+                <li className="flex items-center gap-3">
+                  <BookOpenCheck
+                    size={19}
+                    className="shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  Practice with focused mock tests
+                </li>
+                <li className="flex items-center gap-3">
+                  <TrendingUp
+                    size={19}
+                    className="shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  Build confidence with every attempt
+                </li>
+              </ul>
+            </div>
+
+            <div className="relative mx-auto flex min-h-64 w-full max-w-md items-end justify-center sm:min-h-80">
+              {/* <div
+                aria-hidden="true"
+                className="absolute h-56 w-56 rounded-full border border-primary/15 sm:h-72 sm:w-72"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute h-44 w-44 rounded-full border border-primary/10 sm:h-56 sm:w-56"
+              /> */}
+              <Image
+                src="/boy.png"
+                alt="Students preparing for exams together"
+                width={520}
+                height={420}
+                className="relative z-10 w-full max-w-sm object-contain"
+              />
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
