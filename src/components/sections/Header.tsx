@@ -21,6 +21,10 @@ import { usePathname } from "next/navigation";
 const Header = () => {
   const [toggle, setToggle] = useState(false);
   const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
   const token = useAppSelector((state) => state.auth.token) || "";
   const user = useAppSelector((state) => state.auth.user) || null;
   const isAdmin = user?.role === "admin";
@@ -60,17 +64,26 @@ const Header = () => {
         </Link>
       </div>
       <nav className="space-x-6 max-sm:hidden text-black dark:text-white flex items-center justify-start px-4">
-        <Link href="/" className="hover:text-primary">
+        <Link
+          href="/"
+          aria-current={isActive("/") ? "page" : undefined}
+          className={`border-b-2 py-1 transition-colors hover:text-primary ${isActive("/") ? "border-primary text-primary" : "border-transparent"}`}
+        >
           Home
         </Link>
 
-        <Link href="/tests" className="hover:text-primary">
+        <Link
+          href="/tests"
+          aria-current={isActive("/tests") ? "page" : undefined}
+          className={`border-b-2 py-1 transition-colors hover:text-primary ${isActive("/tests") ? "border-primary text-primary" : "border-transparent"}`}
+        >
           Tests
         </Link>
         {isAdmin && (
           <Link
             href="/admin"
-            className={`flex items-center gap-2 rounded px-2 py-1 font-medium ${pathname.startsWith("/admin") ? "bg-primary text-white" : "text-primary hover:bg-cyan-50 dark:hover:bg-slate-600"}`}
+            aria-current={isActive("/admin") ? "page" : undefined}
+            className={`flex items-center gap-2 border-b-2 px-2 py-1 font-medium transition-colors ${isActive("/admin") ? "border-primary text-primary" : "border-transparent text-primary hover:bg-cyan-50 dark:hover:bg-slate-600"}`}
           >
             <ShieldCheck size={16} /> Admin panel
           </Link>
@@ -78,7 +91,8 @@ const Header = () => {
         {token && (
           <Link
             href="/dashboard"
-            className="hover:text-primary bg-muted py-1 px-2 rounded"
+            aria-current={isActive("/dashboard") ? "page" : undefined}
+            className={`rounded border-b-2 bg-muted px-2 py-1 transition-colors hover:text-primary ${isActive("/dashboard") ? "border-primary text-primary" : "border-transparent"}`}
           >
             Dashboard
           </Link>

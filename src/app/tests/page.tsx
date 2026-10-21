@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Category, CategoryResponse } from "@/Interfaces";
 import { apiClient } from "@/lib/API/apiClient";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 const CategoryCard: React.FC<Category> = ({
   name,
@@ -83,6 +84,44 @@ export default function TestsPage() {
         </p>
       </div>
 
+      {/* Categories */}
+      <section className="w-full mx-auto mt-16">
+        <h2 className="text-2xl font-semibold text-foreground ">
+          Explore by Category
+        </h2>
+        <div className="bg-primary h-[2px] mt-1 mb-6 w-12"></div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.isArray(categoriesss) && categoriesss.length > 0 ? (
+            categoriesss.map((cat) => (
+              <CategoryCard
+                key={cat.categoryID}
+                name={cat.name}
+                slug={cat.slug}
+                categoryID={cat.categoryID}
+                categoryDetails={
+                  cat?.categoryDetails
+                    ? { details: cat?.categoryDetails?.details }
+                    : undefined
+                }
+              />
+            ))
+          ) : (
+            <p className="text-black dark:text-red-500">No categories found</p>
+          )}
+        </div>
+      </section>
+
+      {/* Preparation Banner */}
+      <section className=" mx-auto mt-16 grid w-full items-center overflow-hidden rounded-xl border border-primary/15 bg-secondary/40 ">
+        <Image
+          src="/banner2.png"
+          alt="TestPro — Practice Mock Tests. Improve Every Day."
+          width={520}
+          height={420}
+          className="h-full w-full object-contain object-bottom"
+        />
+      </section>
+
       {/* Popular Tests */}
       <section className="w-full mx-auto mt-12">
         <h2 className="text-2xl font-semibold text-foreground  ">
@@ -111,35 +150,8 @@ export default function TestsPage() {
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="w-full mx-auto mt-16">
-        <h2 className="text-2xl font-semibold text-foreground ">
-          Explore by Category
-        </h2>
-        <div className="bg-primary h-[2px] mt-1 mb-6 w-12"></div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.isArray(categoriesss) && categoriesss.length > 0 ? (
-            categoriesss.map((cat) => (
-              <CategoryCard
-                key={cat.categoryID}
-                name={cat.name}
-                slug={cat.slug}
-                categoryID={cat.categoryID}
-                categoryDetails={
-                  cat?.categoryDetails
-                    ? { details: cat?.categoryDetails?.details }
-                    : undefined
-                }
-              />
-            ))
-          ) : (
-            <p className="text-black dark:text-red-500">No categories found</p>
-          )}
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="mt-20 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-5 sm:p-10 max-w-5xl mx-auto shadow-lg">
+      <section className="mt-12 text-center bg-gradient-to-r from-primary to-accent rounded-2xl p-5 sm:p-10 max-w-5xl mx-auto shadow-lg">
         <h2 className="text-3xl font-bold text-white">
           Ready to challenge yourself?
         </h2>
