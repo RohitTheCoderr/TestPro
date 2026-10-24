@@ -21,6 +21,9 @@ const geistMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: "TestPro",
   description: "Mock test platform",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -35,7 +38,7 @@ export default function RootLayout({
       >
         <TooltipProvider>
           <Providers>
-            <Toaster position="top-right" richColors />
+            <Toaster position="top-right" richColors closeButton />
             <LayoutClient header={<Header />} footer={<Footer />}>
               <section className=" min-h-screen bg-background ">
                 {children}

@@ -1,9 +1,9 @@
 "use client";
 import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/redux/hooks";
-import { Button } from "../ui/button";
+import { Button } from "../../../components/ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { apiClient } from "@/lib/API/apiClient";
@@ -23,12 +23,10 @@ interface ResetPasswordResponse {
     token?: string;
   };
 }
-interface PropsForget {
-  setForgetpass: (value: boolean) => void;
-}
-export default function ResetPassword({ setForgetpass }: PropsForget) {
+export default function ResetPassword() {
   const [contact, setContact] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -37,6 +35,17 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
   const [showConPassword, setShowConPassword] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!otpSent || resendCountdown <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setResendCountdown((countdown) => Math.max(0, countdown - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [otpSent, resendCountdown]);
+
   const sendOtpMutation = useMutation({
     mutationFn: async (email: string) => {
       const response = await apiClient.post<ResetPasswordResponse>(
@@ -51,6 +60,8 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
     onSuccess: (response) => {
       setOtpSent(true);
       setOtpID(response.data?.otpID ?? "");
+      setResendCountdown(60);
+      toast.success(response.message || "OTP sent to your email address.");
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Server error"),
@@ -78,9 +89,12 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
       router.push(user.role === "admin" ? "/admin" : "/");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "Something went wrong!"),
+      toast.error(
+        error instanceof Error ? error.message : "Something went wrong!",
+      ),
   });
-  const isLoading = sendOtpMutation.isPending || resetPasswordMutation.isPending;
+  const isLoading =
+    sendOtpMutation.isPending || resetPasswordMutation.isPending;
 
   const validateContact = (value: string) => {
     const isEmail = /^\S+@\S+\.\S+$/.test(value);
@@ -109,7 +123,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
 
   return (
     <div className="flex w-full items-center justify-center">
-      {!otpSent ? (
+      {otpSent ? (
         <form onSubmit={handleSendOtp} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">
             Reset Password
@@ -126,7 +140,7 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
           </Button>
           <div
             className="text-primary text-sm text-right mt-2 px-4 cursor-pointer hover:text-accent"
-            onClick={() => setForgetpass(false)}
+            onClick={() => router.push("/auth/login")}
           >
             Login
           </div>
@@ -143,6 +157,26 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             placeholder={contact ? contact : "Your email"}
             className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100"
           />
+          <div className="mb-4 text-center text-sm">
+            {resendCountdown > 0 ? (
+              <p
+                className="text-gray-600 dark:text-gray-300"
+                aria-live="polite"
+              >
+                Resend OTP in {Math.floor(resendCountdown / 60)}:
+                {String(resendCountdown % 60).padStart(2, "0")}
+              </p>
+            ) : (
+              <button
+                type="button"
+                disabled={sendOtpMutation.isPending}
+                onClick={() => sendOtpMutation.mutate(contact)}
+                className="font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sendOtpMutation.isPending ? "Sending OTP..." : "Resend OTP"}
+              </button>
+            )}
+          </div>
           <input
             type="text"
             placeholder="OTP"
@@ -191,11 +225,11 @@ export default function ResetPassword({ setForgetpass }: PropsForget) {
             size="xl"
             className="w-full rounded-xl py-3"
           >
-            {isLoading ? "Registering..." : "Register"}
+            {isLoading ? "Resetting Password..." : "Reset Password"}
           </Button>
           <div
             className="text-primary text-sm text-right mt-2 px-4 cursor-pointer hover:text-accent"
-            onClick={() => setForgetpass(false)}
+            onClick={() => router.push("/auth/login")}
           >
             Login
           </div>
