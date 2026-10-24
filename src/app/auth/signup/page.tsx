@@ -1,15 +1,13 @@
 "use client";
 import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
-// import { AppDispatch } from "@/lib/redux/store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-// import { useDispatch } from "react-redux";
 import { useAppDispatch } from "@/lib/redux/hooks";
-import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Info } from "lucide-react";
 import { apiClient } from "@/lib/API/apiClient";
 import { useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 interface SignupResponse {
   success: boolean;
@@ -29,6 +27,7 @@ interface SignupResponse {
 export default function SignUp() {
   const [contact, setContact] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -49,12 +48,24 @@ export default function SignUp() {
   const dispatch = useAppDispatch();
   //  const navigate=useNavigate()
   const router = useRouter();
+
+  useEffect(() => {
+    if (!otpSent || resendCountdown <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setResendCountdown((countdown) => Math.max(0, countdown - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [otpSent, resendCountdown]);
+
   const sendOtpMutation = useMutation({
     mutationFn: async (email: string) => {
       const response = await apiClient.post<SignupResponse>(
         "/user/auth/send_opt",
         { email },
       );
+
       if (!response.success) {
         throw new Error(response.message || "Error sending OTP.");
       }
@@ -63,12 +74,15 @@ export default function SignUp() {
     onSuccess: (response) => {
       setOtpSent(true);
       setOtpID(response.data?.otpID ?? "");
+      setResendCountdown(60);
+      toast.success(response.message || "OTP sent to your email address.");
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Server error"),
   });
   const registerMutation = useMutation({
     mutationFn: async (bodyData: {
+      name: string;
       email: string;
       otp: string;
       otpID: string;
@@ -157,7 +171,7 @@ export default function SignUp() {
       return;
     }
 
-    registerMutation.mutate({ email: contact, otp, otpID, password });
+    registerMutation.mutate({ email: contact, name, otp, otpID, password });
   };
 
   return (
@@ -193,10 +207,29 @@ ${
           </Button>
         </form>
       ) : (
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleRegister} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">
             Verify OTP & Set Password
           </h2>
+          <div className="mb-2">
+            <input
+              type="email"
+              readOnly
+              value={contact}
+              placeholder={contact ? contact : "Your email"}
+              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
+dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+${
+  errors.contact
+    ? "border-red-500 focus:ring-red-500"
+    : "border-gray-300 focus:ring-primary"
+}`}
+            />
+
+            {errors.contact && (
+              <p className="text-red-500 text-sm ml-2">{errors.contact}</p>
+            )}
+          </div>
           <div className="mb-2 ">
             <input
               type="text"
@@ -219,25 +252,6 @@ ${
           <div className="mb-2">
             <input
               type="text"
-              readOnly
-              value={contact}
-              placeholder={contact ? contact : "Your email"}
-              className={`w-full p-3 border rounded-full focus:outline-none focus:ring-2 transition
-dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
-${
-  errors.contact
-    ? "border-red-500 focus:ring-red-500"
-    : "border-gray-300 focus:ring-primary"
-}`}
-            />
-
-            {errors.contact && (
-              <p className="text-red-500 text-sm ml-2">{errors.contact}</p>
-            )}
-          </div>
-          <div className="mb-2">
-            <input
-              type="text"
               placeholder="OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
@@ -252,6 +266,26 @@ ${
 
             {errors.otp && (
               <p className="text-red-500 text-sm mb-2">{errors.otp}</p>
+            )}
+          </div>
+          <div className="mb-4 text-center text-sm">
+            {resendCountdown > 0 ? (
+              <p
+                className="text-gray-600 dark:text-gray-300"
+                aria-live="polite"
+              >
+                Resend OTP in {Math.floor(resendCountdown / 60)}:
+                {String(resendCountdown % 60).padStart(2, "0")}
+              </p>
+            ) : (
+              <button
+                type="button"
+                disabled={sendOtpMutation.isPending}
+                onClick={() => sendOtpMutation.mutate(contact)}
+                className="font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sendOtpMutation.isPending ? "Sending OTP..." : "Resend OTP"}
+              </button>
             )}
           </div>
           <div className="mb-2">
@@ -321,6 +355,16 @@ ${
           >
             {isLoading ? "Registering..." : "Register"}
           </Button>
+          <p
+            role="status"
+            className="mt-4 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
+          >
+            <Info size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <span>
+              We sent an OTP to your email. If you don&apos;t see it in your
+              inbox, please check your spam or junk folder.
+            </span>
+          </p>
         </form>
       )}
     </div>

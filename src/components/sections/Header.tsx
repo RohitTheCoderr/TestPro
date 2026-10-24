@@ -127,7 +127,7 @@ const Header = () => {
 
             {!token ? (
               <Link
-                href="/auth"
+                href="/auth/login"
                 className="w-full flex items-center gap-3 text-left px-4 py-2 text-green-600 hover:bg-green-50 dark:hover:bg-slate-700"
               >
                 <LogIn className="text-[12px]" /> Log In
@@ -175,7 +175,7 @@ const Header = () => {
             )}
             {!token ? (
               <Link
-                href="/auth"
+                href="/auth/login"
                 className="bg-primary text-white px-2 py-[5px] rounded-[3px] hover:bg-accent transition"
               >
                 Log In
