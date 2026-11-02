@@ -1,6 +1,6 @@
 "use client";
 import { setAuthToken, setUser } from "@/lib/redux/slices/authSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { Button } from "../../../components/ui/button";
@@ -33,6 +33,7 @@ export default function ResetPassword() {
   const [otpID, setOtpID] = useState(""); // from backend after send_otp
   const [showPassword, setShowPassword] = useState(false);
   const [showConPassword, setShowConPassword] = useState(false);
+  const sendOtpInFlight = useRef(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -101,14 +102,27 @@ export default function ResetPassword() {
     return isEmail;
   };
 
+  const requestOtp = (email: string) => {
+    if (sendOtpInFlight.current) return;
+
+    sendOtpInFlight.current = true;
+    sendOtpMutation.mutate(email, {
+      onSettled: () => {
+        sendOtpInFlight.current = false;
+      },
+    });
+  };
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sendOtpInFlight.current) return;
+
     if (!validateContact(contact)) {
       toast.warning("Enter a valid email address.");
       return;
     }
 
-    sendOtpMutation.mutate(contact);
+    requestOtp(contact);
   };
 
   const handleSetpassword = async (e: React.FormEvent) => {
@@ -132,10 +146,16 @@ export default function ResetPassword() {
             type="email"
             placeholder="Email address"
             value={contact}
+            disabled={sendOtpMutation.isPending}
             onChange={(e) => setContact(e.target.value)}
             className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:ring-cyan-950"
           />
-          <Button type="submit" size="xl" className="w-full !py-3 rounded-xl">
+          <Button
+            type="submit"
+            disabled={sendOtpMutation.isPending}
+            size="xl"
+            className="w-full !py-3 rounded-xl"
+          >
             {isLoading ? "Sending OTP..." : "Send OTP"}
           </Button>
           <div
@@ -157,6 +177,19 @@ export default function ResetPassword() {
             placeholder={contact ? contact : "Your email"}
             className="mb-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-sm outline-none transition dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100"
           />
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={() => {
+              setOtpSent(false);
+              setOtp("");
+              setOtpID("");
+              setResendCountdown(0);
+            }}
+            className="mb-4 text-sm font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Change email
+          </button>
           <div className="mb-4 text-center text-sm">
             {resendCountdown > 0 ? (
               <p
@@ -170,7 +203,7 @@ export default function ResetPassword() {
               <button
                 type="button"
                 disabled={sendOtpMutation.isPending}
-                onClick={() => sendOtpMutation.mutate(contact)}
+                onClick={() => requestOtp(contact)}
                 className="font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {sendOtpMutation.isPending ? "Sending OTP..." : "Resend OTP"}
