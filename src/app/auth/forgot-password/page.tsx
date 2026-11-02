@@ -123,7 +123,7 @@ export default function ResetPassword() {
 
   return (
     <div className="flex w-full items-center justify-center">
-      {otpSent ? (
+      {!otpSent ? (
         <form onSubmit={handleSendOtp} className="w-full">
           <h2 className="text-2xl font-bold mb-6 text-center">
             Reset Password
